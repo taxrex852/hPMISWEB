@@ -1,124 +1,279 @@
-<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3406.aspx.vb" Inherits="hPMISWEB.HBM_Production" %>
+ï»¿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3406.aspx.vb" Inherits="hPMISWEB.HBM_Production" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>HBM_Production</title>
-    <link rel="stylesheet" type="text/css" href="css\diagram.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HBM ç”Ÿç”¢é€²åº¦</title>
+    <link rel="stylesheet" href="libs/bootstrap.min.css" />
+
     <style type="text/css">
-        .auto-fit-table { width: auto !important; }
-        .auto-fit-table th, .auto-fit-table td { white-space: nowrap; padding: 8px 15px; }
+        body { background-color: #f8f9fc; padding-bottom: 20px; }
+
+        .main-content {
+            clear: both !important;
+            display: block !important;
+            position: relative;
+            padding-top: 20px;
+        }
+
+        .card-custom {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e3e6f0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: block !important;
+        }
+
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-card-body {
+            padding: 20px;
+            background-color: #ffffff;
+            display: block !important;
+            min-height: 420px;
+            width: 100%;
+        }
+
+        td.gvhs_data {
+            background-color: #34495e !important;
+            color: white !important;
+            font-weight: 600;
+            padding: 12px 18px;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 2px solid #233140 !important;
+            white-space: nowrap;
+        }
+
+        td.data {
+            background-color: #eaecf4 !important;
+            color: #2d3748 !important;
+            font-weight: bold;
+            padding: 12px 18px;
+            text-align: center;
+            vertical-align: middle;
+            border-top: 2px solid #cbd5e1;
+            white-space: nowrap;
+        }
+
+        .gv {
+            width: auto !important;
+            white-space: nowrap;
+            border-collapse: collapse;
+        }
+
+        tr.gvrs td {
+            padding: 10px 18px;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+            white-space: nowrap;
+            background-color: #ffffff;
+        }
+
+        .gv tbody tr:nth-child(even) td { background-color: #f8f9fc !important; }
+        .gv tbody tr:hover td { background-color: #e9ecef !important; }
+
+        .gv tbody tr td:first-child {
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #f8f9fa !important;
+        }
+
+        .auto-fit-table {
+            width: auto !important;
+            border-collapse: collapse;
+        }
+
+        .auto-fit-table td { white-space: nowrap; }
+
+        .pmisdata { font-weight: bold; }
+
+        /* åˆä½µæ²è»¸å®¹å™¨ï¼šheader/footer stickyï¼Œè³‡æ–™åˆ—å…±ç”¨ä¸€å€‹ scrollbar */
+        .combined-tbl-scroll {
+            max-height: 340px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .ctbl-hdr-row {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            background-color: #34495e;
+        }
+
+        .ctbl-data-row {
+            display: flex;
+            gap: 20px;
+            background-color: #ffffff;
+        }
+
+        .ctbl-ftr-row {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            background-color: #eaecf4;
+        }
     </style>
+
     <script type="text/javascript" src="libs/echarts.min.js"></script>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
-            function syncTableWidths() {
-                var dataTable = document.getElementById('<%= gvMonth1.ClientID %>');
-                var headerTable = document.getElementById('tblMonthHeader');
-                var footerTable = document.getElementById('tblMonthFooter');
+
+            // ==========================================
+            // A. è¡¨æ ¼æ¬„ä½è‡ªå‹•å¯¬åº¦åŒæ­¥
+            // ==========================================
+            function syncTables(dataId, headId, footId) {
+                var dataTable = document.getElementById(dataId);
+                var headerTable = document.getElementById(headId);
+                var footerTable = document.getElementById(footId);
+
                 if (dataTable && dataTable.rows.length > 0 && headerTable && footerTable) {
                     var dataCells = dataTable.rows[0].cells;
                     var headerCells = headerTable.rows[0].cells;
                     var footerCells = footerTable.rows[0].cells;
+
                     for (var i = 0; i < headerCells.length; i++) {
-                        if(headerCells[i]) headerCells[i].style.width = 'auto';
-                        if(dataCells[i]) dataCells[i].style.width = 'auto';
-                        if(footerCells[i]) footerCells[i].style.width = 'auto';
+                        if (headerCells[i]) headerCells[i].style.width = 'auto';
+                        if (dataCells[i]) dataCells[i].style.width = 'auto';
+                        if (footerCells[i]) footerCells[i].style.width = 'auto';
                     }
-                    setTimeout(function() {
+
+                    setTimeout(function () {
                         for (var i = 0; i < headerCells.length; i++) {
                             var hw = headerCells[i] ? headerCells[i].offsetWidth : 0;
                             var dw = dataCells[i] ? dataCells[i].offsetWidth : 0;
                             var fw = footerCells[i] ? footerCells[i].offsetWidth : 0;
                             var maxWidth = Math.max(hw, dw, fw);
-                            if(headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
-                            if(dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
-                            if(footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
                         }
                     }, 50);
                 }
             }
-            window.addEventListener('load', syncTableWidths);
-            window.addEventListener('resize', syncTableWidths);
 
+            function syncAllTables() {
+                syncTables('<%= gvMonth1.ClientID %>', 'tblHeader1', 'tblFooter1');
+            }
+
+            window.addEventListener('load', syncAllTables);
+            window.addEventListener('resize', syncAllTables);
+
+            // ==========================================
+            // B. ECharts åœ–è¡¨ç¹ªè£½
+            // ==========================================
             if (typeof chartData === 'undefined') return;
 
-            var prodChart = echarts.init(document.getElementById('echartProd'));
-            prodChart.setOption({
-                backgroundColor: '#ffffff',
-                title: { text: '«¬¿û¥Í²£¤ÀªRÁÍ¶Õ (MT)', left: 'center', textStyle: { fontSize: 16 } },
+            var prodDom = document.getElementById('echartProd');
+            var prodChart = echarts.init(prodDom);
+            var optionProd = {
+                backgroundColor: 'transparent',
+                title: { text: 'HBM ç”Ÿç”¢è¶¨å‹¢ (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                legend: { data: ['«¬¿û (Hxx)', '¯¶ªO (Fxx)', '¯x§Î­F (Lxx)'], bottom: 0 },
-                grid: { left: '8%', right: '5%', bottom: '15%', containLabel: true },
-                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis }],
-                yAxis: [{ type: 'value', name: '­«¶q (MT)', scale: true }],
+                legend: { data: ['Hå‹é‹¼ (Hxx)', 'Få‹é‹¼ (Fxx)', 'è¼•é‡å‹ (Lxx)'], bottom: 0, icon: 'circle' },
+                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
+                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                yAxis: [{ type: 'value', name: 'ç”¢é‡ (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
                 series: [
-                    { name: '«¬¿û (Hxx)', type: 'line', smooth: true, data: chartData.hxx },
-                    { name: '¯¶ªO (Fxx)', type: 'line', smooth: true, data: chartData.fxx },
-                    { name: '¯x§Î­F (Lxx)', type: 'line', smooth: true, data: chartData.lxx }
+                    { name: 'Hå‹é‹¼ (Hxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hxx },
+                    { name: 'Få‹é‹¼ (Fxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.fxx },
+                    { name: 'è¼•é‡å‹ (Lxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.lxx }
                 ]
+            };
+            prodChart.setOption(optionProd);
+
+            window.addEventListener('resize', function () {
+                prodChart.resize();
             });
-            window.addEventListener('resize', function () { prodChart.resize(); });
         });
     </script>
 </head>
+
 <body>
     <form id="form1" runat="server">
         <hPMISWEB:PageHeader ID="ph" runat="server" />
-        <div style="max-width: 1200px; width: 95%; margin: 20px auto; font-family: sans-serif;">
-               <div>
-                <div style="margin-bottom: 15px; font-weight: bold; color: #333;">
-                    ¸ê®Æ°Ï¶¡¡G<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label>
+        <a name="#Home"></a>
+
+        <div class="container-fluid main-content px-4">
+
+            <!-- ========== ç¬¬ä¸€å±¤ Cardï¼šHBM ç”Ÿç”¢è¶¨å‹¢åœ– ========== -->
+            <div class="card-custom mb-4 mt-2">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">ğŸ“Š HBM ç”Ÿç”¢è¶¨å‹¢</span>
+                    <span class="badge bg-warning text-dark fs-6 shadow-sm">è³‡æ–™å€é–“ï¼š<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
                 </div>
-                <div id="echartProd" style="width: 100%; height: 400px;"></div>
-                <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:HBMPMISConnectionString %>" SelectCommand="SELECT 
-    DATEADD(m, DATEDIFF(m, 0, boundle_date), 0) AS boundle_date,
-    
-
-    CAST(ROUND(SUM(CASE WHEN Product_Size_Code LIKE 'H%' THEN bound_weight ELSE 0 END) / 1000.0, 2) AS FLOAT) AS prod_H,
-    CAST(ROUND(SUM(CASE WHEN Product_Size_Code LIKE 'F%' THEN bound_weight ELSE 0 END) / 1000.0, 2) AS FLOAT) AS prod_F,
-    CAST(ROUND(SUM(CASE WHEN Product_Size_Code LIKE 'L%' THEN bound_weight ELSE 0 END) / 1000.0, 2) AS FLOAT) AS prod_L
-
-FROM h_pmis_hbm_info WITH(NOLOCK)
-WHERE boundle_date BETWEEN DATEADD(year, -1, GETDATE()) AND GETDATE()
-
-  AND (Product_Size_Code LIKE 'H%' OR Product_Size_Code LIKE 'F%' OR Product_Size_Code LIKE 'L%')
-GROUP BY DATEADD(m, DATEDIFF(m, 0, boundle_date), 0)
-ORDER BY boundle_date;"></asp:SqlDataSource>
-            </div>
-            <div style="margin-bottom: 40px;">
-                <div style="margin-bottom: 10px;">
-                    <strong style="font-size: 16px;">«¬¿û¥Í²£¤ÀªR¼i¾ú</strong><br />
-                    <span style="font-size: 13px; color: #555;">¸ê®Æ©ó¨C¤é2300¶i¦æ§ó·s¡A¨Ã©ó·í¤ë²Ä¤@¤Ñ2300±N¸ê®Æ­«·s½s±Æ</span>
-                </div>
-                
-                <div style="overflow-x: auto; max-width: 100%; display: inline-block;">
-                    <table id="tblMonthHeader" border="0" cellpadding="0" cellspacing="0" class="auto-fit-table" style="border-collapse: collapse;">
-                        <tr>
-                            <td class="gvhs_data">¤é´Á</td>
-                            <td class="gvhs_data" style="text-align: center">«¬¿û (Hxx)</td>
-                            <td class="gvhs_data" style="text-align: center">¯¶ªO (Fxx)</td>
-                            <td class="gvhs_data" style="text-align: center">¯x§Î­F (Lxx)</td>
-                        </tr>
-                    </table>
-                    <asp:Panel ID="Panel1" runat="server" Height="200px" ScrollBars="Vertical">
-                        <asp:GridView ID="gvMonth1" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None" ShowHeader="False">
-                            <RowStyle CssClass="gvrs" /><SelectedRowStyle CssClass="gvsrs" />
-                        </asp:GridView>
-                    </asp:Panel>
-                    <table id="tblMonthFooter" border="0" cellpadding="0" cellspacing="0" class="auto-fit-table" style="border-collapse: collapse;">
-                        <tr>
-                            <td class="data"><asp:Label ID="lblMonth1" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label>¤ë²Î­p</td>
-                            <td class="data"><asp:Label ID="lblHxx" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                            <td class="data"><asp:Label ID="lblFxx" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                            <td class="data"><asp:Label ID="lblLxx" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                        </tr>
-                    </table>
+                <div class="chart-card-body">
+                    <div id="echartProd" style="width: 100%; height: 380px;"></div>
                 </div>
             </div>
 
-         
+            <!-- ========== ç¬¬äºŒå±¤ Cardï¼šHBM æœ¬æœˆç”Ÿç”¢é€²åº¦ ========== -->
+            <div class="card-custom mb-5">
+                <div class="card-header-custom">
+                    <div>
+                        <span class="fs-4" style="color: white !important;">ğŸ“‹ HBM æœ¬æœˆç”Ÿç”¢é€²åº¦</span>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    <!-- ç½®ä¸­å®¹å™¨ -->
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; text-align: left;">
+                            <!-- åˆä½µæ²è»¸ï¼šheader sticky-topã€GridView å…±ç”¨ä¸€å€‹ scrollbarã€footer sticky-bottom -->
+                            <div class="combined-tbl-scroll">
+                                <div class="ctbl-hdr-row">
+                                    <table id="tblHeader1" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="gvhs_data">æ—¥æœŸ</td>
+                                            <td class="gvhs_data">Hå‹é‹¼ (Hxx)</td>
+                                            <td class="gvhs_data">Få‹é‹¼ (Fxx)</td>
+                                            <td class="gvhs_data">è¼•é‡å‹ (Lxx)</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="ctbl-data-row">
+                                    <asp:GridView ID="gvMonth1" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None" ShowHeader="False">
+                                        <RowStyle CssClass="gvrs" /><SelectedRowStyle CssClass="gvsrs" />
+                                    </asp:GridView>
+                                </div>
+                                <div class="ctbl-ftr-row">
+                                    <table id="tblFooter1" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="data"><asp:Label ID="lblMonth1" runat="server" CssClass="pmisdata"></asp:Label>æœˆçµ±è¨ˆ</td>
+                                            <td class="data"><asp:Label ID="lblHxx" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblFxx" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblLxx" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </form>
+    <script src="libs/bootstrap.bundle.min.js"></script>
 </body>
 </html>

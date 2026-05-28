@@ -1,632 +1,404 @@
-<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3403.aspx.vb" Inherits="hPMISWEB._2TNRL_Production" %>
+Ôªø<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3403.aspx.vb" Inherits="hPMISWEB._2TNRL_Production" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
-<%@ Register Assembly="TeeChart" Namespace="Steema.TeeChart.Web" TagPrefix="tchart" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" >
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-<title>2TNRL_Production</title>
-    <link rel="stylesheet" type="text/css" href="css\diagram.css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>#2TNRL ÁîüÁî¢ÈÄ≤Â∫¶</title>
+    <link rel="stylesheet" href="libs/bootstrap.min.css" />
+
+    <style type="text/css">
+        body { background-color: #f8f9fc; padding-bottom: 20px; }
+
+        .main-content {
+            clear: both !important;
+            display: block !important;
+            position: relative;
+            padding-top: 20px;
+        }
+
+        .card-custom {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e3e6f0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: block !important;
+        }
+
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-card-body {
+            padding: 20px;
+            background-color: #ffffff;
+            display: block !important;
+            min-height: 420px;
+            width: 100%;
+        }
+
+        td.gvhs_data {
+            background-color: #34495e !important;
+            color: white !important;
+            font-weight: 600;
+            padding: 12px 18px;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 2px solid #233140 !important;
+            white-space: nowrap;
+        }
+
+        td.data {
+            background-color: #eaecf4 !important;
+            color: #2d3748 !important;
+            font-weight: bold;
+            padding: 12px 18px;
+            text-align: center;
+            vertical-align: middle;
+            border-top: 2px solid #cbd5e1;
+            white-space: nowrap;
+        }
+
+        .gv {
+            width: auto !important;
+            white-space: nowrap;
+            border-collapse: collapse;
+        }
+
+        tr.gvrs td {
+            padding: 10px 18px;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+            white-space: nowrap;
+            background-color: #ffffff;
+        }
+
+        .gv tbody tr:nth-child(even) td { background-color: #f8f9fc !important; }
+        .gv tbody tr:hover td { background-color: #e9ecef !important; }
+
+        .gv tbody tr td:first-child {
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #f8f9fa !important;
+        }
+
+        .auto-fit-table {
+            width: auto !important;
+            border-collapse: collapse;
+        }
+
+        .auto-fit-table td { white-space: nowrap; }
+
+        .pmisdata { font-weight: bold; }
+
+        /* Âêà‰ΩµÊç≤Ëª∏ÂÆπÂô®Ôºöheader/footer stickyÔºåË≥áÊñôÂàóÂÖ±Áî®‰∏ÄÂÄã scrollbar */
+        .combined-tbl-scroll {
+            max-height: 340px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .ctbl-hdr-row {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            background-color: #34495e;
+        }
+
+        .ctbl-data-row {
+            display: flex;
+            gap: 20px;
+            background-color: #ffffff;
+        }
+
+        .ctbl-ftr-row {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            background-color: #eaecf4;
+        }
+    </style>
+
+    <script type="text/javascript" src="libs/echarts.min.js"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // ==========================================
+            // A. Ë°®Ê†ºÊ¨Ñ‰ΩçËá™ÂãïÂØ¨Â∫¶ÂêåÊ≠•
+            // ==========================================
+            function syncTables(dataId, headId, footId) {
+                var dataTable = document.getElementById(dataId);
+                var headerTable = document.getElementById(headId);
+                var footerTable = document.getElementById(footId);
+
+                if (dataTable && dataTable.rows.length > 0 && headerTable && footerTable) {
+                    var dataCells = dataTable.rows[0].cells;
+                    var headerCells = headerTable.rows[0].cells;
+                    var footerCells = footerTable.rows[0].cells;
+
+                    for (var i = 0; i < headerCells.length; i++) {
+                        if (headerCells[i]) headerCells[i].style.width = 'auto';
+                        if (dataCells[i]) dataCells[i].style.width = 'auto';
+                        if (footerCells[i]) footerCells[i].style.width = 'auto';
+                    }
+
+                    setTimeout(function () {
+                        for (var i = 0; i < headerCells.length; i++) {
+                            var hw = headerCells[i] ? headerCells[i].offsetWidth : 0;
+                            var dw = dataCells[i] ? dataCells[i].offsetWidth : 0;
+                            var fw = footerCells[i] ? footerCells[i].offsetWidth : 0;
+                            var maxWidth = Math.max(hw, dw, fw);
+                            if (headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
+                        }
+                    }, 50);
+                }
+            }
+
+            function syncAllTables() {
+                syncTables('<%= gvMonth1.ClientID %>', 'tblHeader1', 'tblFooter1');
+                syncTables('<%= gvMonth3.ClientID %>', 'tblHeader3', 'tblFooter3');
+                syncTables('<%= gvMonth2.ClientID %>', 'tblHeader2', 'tblFooter2');
+                syncTables('<%= gvMonth4.ClientID %>', 'tblHeader4', 'tblFooter4');
+            }
+
+            window.addEventListener('load', syncAllTables);
+            window.addEventListener('resize', syncAllTables);
+
+            // ==========================================
+            // B. ECharts ÂúñË°®Áπ™Ë£Ω
+            // ==========================================
+            if (typeof chartData === 'undefined') return;
+
+            var dimDom = document.getElementById('echartDim');
+            var dimChart = echarts.init(dimDom);
+            var optionDim = {
+                backgroundColor: 'transparent',
+                title: { text: '#2TNRL ÂéöÂ∫¶ËàáÂâçÊÆµË£ΩÁ®ãÁîüÁî¢Ë∂®Âã¢ (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                legend: { data: ['ETNG', 'WTNG', 'NTNG', 'NTCG', 'ETCG', 'MDSZ', 'NRWD', 'MDWD', 'WIWD'], bottom: 0, icon: 'circle' },
+                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
+                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                yAxis: [{ type: 'value', name: 'Áî¢Èáè (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                series: [
+                    { name: 'ETNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.etng },
+                    { name: 'WTNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.wtng },
+                    { name: 'NTNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.ntng },
+                    { name: 'NTCG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.ntcg },
+                    { name: 'ETCG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.etcg },
+                    { name: 'MDSZ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mdsz },
+                    { name: 'NRWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.nrwd },
+                    { name: 'MDWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mdwd },
+                    { name: 'WIWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.wiwd }
+                ]
+            };
+            dimChart.setOption(optionDim);
+
+            var strDom = document.getElementById('echartStrength');
+            var strChart = echarts.init(strDom);
+            var optionStr = {
+                backgroundColor: 'transparent',
+                title: { text: '#2TNRL Âº∑Â∫¶ËàáË°®Èù¢Ë£ΩÁ®ãÁîüÁî¢Ë∂®Âã¢ (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                legend: { data: ['EXLC', 'LSCS', 'MSCS', 'HICS', 'VHIS', 'SUS', 'NRCQ', 'HICQ', 'VHCQ'], bottom: 0, icon: 'circle' },
+                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
+                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                yAxis: [{ type: 'value', name: 'Áî¢Èáè (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                series: [
+                    { name: 'EXLC', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.exlc },
+                    { name: 'LSCS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.lscs },
+                    { name: 'MSCS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mscs },
+                    { name: 'HICS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hics },
+                    { name: 'VHIS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.vhis },
+                    { name: 'SUS',  type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.sus  },
+                    { name: 'NRCQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.nrcq },
+                    { name: 'HICQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hicq },
+                    { name: 'VHCQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.vhcq }
+                ]
+            };
+            strChart.setOption(optionStr);
+
+            window.addEventListener('resize', function () {
+                dimChart.resize();
+                strChart.resize();
+            });
+        });
+    </script>
 </head>
 
 <body>
     <form id="form1" runat="server">
-    <hPMISWEB:PageHeader ID="ph" runat="server" />
-    <div>
-        <table border="0" cellpadding="0" cellspacing="0" style="left: 25px; position: absolute;
-            top: 150px; border-collapse: collapse">
-            <tr>
-                <td>
-                    <strong>∫Îæ„#2•Õ≤£§¿™R</strong></td>
-            </tr>
-            <tr>
-                <td style="height: 45px">
-                    <br />
-                    <br />
-                    <table border="0" cellpadding="0" cellspacing="0" style="left: 0px; position: absolute;
-                        top: 27px; border-collapse: collapse">
-                        <colgroup>
-                            <col width="115" />
-                            <col span="10" width="80" />
-                        </colgroup>
-                        <tr>
-                            <td class="gvhs_data" style="text-align: center">
-                                §ÿ§o</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ∑•¡°™O<br />
-                                (ETNG)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ºe¡°™O<br />
-                                (WTNG)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ¡°™O<br />
-                                (NTNG)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ºe´p™O<br />
-                                (NTCG)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ∑•´p™O<br />
-                                (ETCG)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                §§´p™O<br />
-                                (MDSZ)</td>
-                            <td style="text-align: center">
-                                <strong><span style="color: white; background-color: #507cd1"></span></strong>
-                            </td>
-                            <td class="gvhs_data" style="text-align: center">
-                                Ø∂™O<br />
-                                (NRWD)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                §§ºe™O<br />
-                                (MDWD)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ºe™O<br />
-                                (WIWD)</td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <asp:Panel ID="Panel1" runat="server" BackColor="Transparent" Height="190px" ScrollBars="Vertical">
-                        <table style="border-collapse: collapse" border="0" cellpadding="0" cellspacing="0">
-                        <tr>
-                        <td style="vertical-align: top">
-                        <asp:GridView ID="gvMonth1" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
-                            <FooterStyle CssClass="gvfs" />
-                            <RowStyle CssClass="gvrs2" />
-                            <EditRowStyle CssClass="gvers" />
-                            <SelectedRowStyle CssClass="gvsrs" />
-                            <PagerStyle CssClass="gvps" />
-                            <HeaderStyle CssClass="gvhs" />
-                            <EmptyDataRowStyle CssClass="gvemrs" />
-                        </asp:GridView>
-                        </td>
-                        <td style="width: 80px">
-                        </td>
-                        <td style="vertical-align: top">
-                        <asp:GridView ID="gvMonth3" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
-                                <FooterStyle CssClass="gvfs" />
-                                <RowStyle CssClass="gvrs2" />
-                                <EditRowStyle CssClass="gvers" />
-                                <SelectedRowStyle CssClass="gvsrs" />
-                                <PagerStyle CssClass="gvps" />
-                                <HeaderStyle CssClass="gvhs" />
-                                <EmptyDataRowStyle CssClass="gvemrs" />
-                        </asp:GridView>
-                        </td>
-                        </tr>
-                        </table>                     
-                    </asp:Panel>
-                    <table border="0" cellpadding="0" cellspacing="0" style="left: 0px; position: absolute;
-                        top: 250px; border-collapse: collapse">
-                        <colgroup>
-                            <col width="115" />
-                            <col span="10" width="80" />
-                        </colgroup>
-                        <tr>
-                            <td class="data">
-                                <asp:Label ID="lblMonth1" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>§Î≤Œ≠p
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblETNG" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblWTNG" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblNTNG" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblNTCG" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblETCG" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblMDSZ" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td></td>
-                            <td class="data">
-                                <asp:Label ID="lblNRWD" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblMDWD" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblWIWD" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
-        <table border="0" cellpadding="0" cellspacing="0" style="left: 25px; position: absolute;
-            top: 430px; border-collapse: collapse">
-            <tr>
-                <td>
-                    <strong></strong>
-                </td>
-            </tr>
-            <tr>
-                <td style="height: 35px;">
-                    <br />
-                    <br />
-                    <table border="0" cellpadding="0" cellspacing="0" style="left: 0px; position: absolute;
-                        top: 0px; border-collapse: collapse">
-                        <colgroup>
-                            <col width="115" />
-                            <col span="10" width="80" />
-                        </colgroup>
-                        <tr>
-                            <td class="gvhs_data" style="text-align: center">
-                                ±j´◊ªP´~ΩË</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ∑•ßC∫“ø˚(EXLC)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ßC±j´◊ø˚(LSCS)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                §§±j´◊ø˚(MSCS)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ∞™±j´◊ø˚(HICS)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ∂W∞™±j´◊ø˚(VHIS)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                §£ƒ√ø˚(SUS)</td>
-                            <td style="text-align: center"></td>
-                            <td class="gvhs_data" style="text-align: center">
-                                §@ØÎ´~Ø≈(NRCQ)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ∞™´~Ø≈(HICQ)</td>
-                            <td class="gvhs_data" style="text-align: center">
-                                ∂W∞™´~Ø≈(VHCQ)</td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <asp:Panel ID="Panel2" runat="server" BackColor="Transparent" Height="200px" ScrollBars="Vertical">
-                        <table style="border-collapse: collapse" border="0" cellpadding="0" cellspacing="0">
-                        <tr>
-                        <td style="vertical-align: top">
-                            <asp:GridView ID="gvMonth2" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
-                                <FooterStyle CssClass="gvfs" />
-                                <RowStyle CssClass="gvrs2" />
-                                <EditRowStyle CssClass="gvers" />
-                                <SelectedRowStyle CssClass="gvsrs" />
-                                <PagerStyle CssClass="gvps" />
-                                <HeaderStyle CssClass="gvhs" />
-                            </asp:GridView>
-                        </td>
-                        <td style="width: 80px">
-                        </td>
-                        <td style="vertical-align: top">
-                            <asp:GridView ID="gvMonth4" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
-                                <FooterStyle CssClass="gvfs" />
-                                <RowStyle CssClass="gvrs2" />
-                                <EditRowStyle CssClass="gvers" />
-                                <SelectedRowStyle CssClass="gvsrs" />
-                                <PagerStyle CssClass="gvps" />
-                                <HeaderStyle CssClass="gvhs" />
-                            </asp:GridView>
-                        </td>
-                        </tr>
-                        </table>
-                    </asp:Panel>
-                    <table border="0" cellpadding="0" cellspacing="0" style="left: 0px; position: absolute;
-                        top: 240px; border-collapse: collapse">
-                        <colgroup>
-                            <col width="115" />
-                            <col span="10" width="80" />
-                        </colgroup>
-                        <tr>
-                            <td class="data">
-                                <asp:Label ID="lblMonth2" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>§Î≤Œ≠p
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblEXLC" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblLSCS" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblMSCS" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblHICS" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data" style="width: 80px">
-                                <asp:Label ID="lblVHIS" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblSUS" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblNRCQ" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblHICQ" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                            <td class="data">
-                                <asp:Label ID="lblVHCQ" runat="server" CssClass="pmisdata" Text="N/A"></asp:Label>
-                            </td>
-                        </tr>
-                    </table>
-                   </table>
-                   
-                    <table  border="0" cellpadding="0" cellspacing="0" style="left: 0px; position: absolute;
-                        top: 700px; border-collapse: collapse" >
-                   
-                        <tr>
-                          
-                            <td>
-                                   ∏ÍÆ∆∞œ∂°<asp:Label ID="LabelStartdate" runat="server"></asp:Label>
-                        ~<asp:Label ID="LabelEnddate" runat="server"></asp:Label>
-                                  <tchart:WebChart ID="WebChart1" runat="server" UseLock="False" TempChart="Session"  Config="AAEAAAD/////AQAAAAAAAAAMAgAAAFFUZWVDaGFydCwgVmVyc2lvbj00LjEuMjAxOC41MDQyLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTljODEyNjI3NmM3N2JkYjcMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTdGVlbWEuVGVlQ2hhcnQuQ2hhcnSkAAAADC5DYW5jZWxNb3VzZQ0uQ3VycmVudFRoZW1lEC5DdXN0b21DaGFydFJlY3QVLkxlZ2VuZC5UZXh0U3ltYm9sR2FwEy5MZWdlbmQuVmVydFNwYWNpbmcNLkhlYWRlci5MaW5lcxkuQXNwZWN0LkNvbG9yUGFsZXR0ZUluZGV4Di5Bc3BlY3QuVmlldzNECFNlcmllcy4wFS5TZXJpZXMuMC5CcnVzaC5Db2xvchkuU2VyaWVzLjAuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4wLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMC5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMC5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4wLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4wLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4wLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4wLllWYWx1ZXMuQ291bnQcLlNlcmllcy4wLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjAuQ29sb3JFYWNoDy5TZXJpZXMuMC5Db2xvcg8uU2VyaWVzLjAuVGl0bGUdLlNlcmllcy4wLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4xFS5TZXJpZXMuMS5CcnVzaC5Db2xvchkuU2VyaWVzLjEuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMS5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4xLlBvaW50ZXIuU2l6ZVVuaXRzFy5TZXJpZXMuMS5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMS5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMS5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMS5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4xLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4xLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4xLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4xLllWYWx1ZXMuQ291bnQcLlNlcmllcy4xLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjEuQ29sb3JFYWNoFC5TZXJpZXMuMS5EYXRhU291cmNlDy5TZXJpZXMuMS5Db2xvcg8uU2VyaWVzLjEuVGl0bGUdLlNlcmllcy4xLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4yFS5TZXJpZXMuMi5CcnVzaC5Db2xvchkuU2VyaWVzLjIuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMi5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4yLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMi5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMi5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMi5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMi5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMi5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4yLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4yLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4yLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4yLllWYWx1ZXMuQ291bnQcLlNlcmllcy4yLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjIuQ29sb3JFYWNoFC5TZXJpZXMuMi5EYXRhU291cmNlDy5TZXJpZXMuMi5Db2xvcg8uU2VyaWVzLjIuVGl0bGUdLlNlcmllcy4yLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4zFS5TZXJpZXMuMy5CcnVzaC5Db2xvchkuU2VyaWVzLjMuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMy5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4zLlBvaW50ZXIuU2l6ZVVuaXRzFy5TZXJpZXMuMy5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMy5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMy5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMy5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4zLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4zLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4zLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4zLllWYWx1ZXMuQ291bnQcLlNlcmllcy4zLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjMuQ29sb3JFYWNoFC5TZXJpZXMuMy5EYXRhU291cmNlDy5TZXJpZXMuMy5Db2xvcg8uU2VyaWVzLjMuVGl0bGUdLlNlcmllcy4zLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4zLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMy5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4zLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMy5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMy5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy40FS5TZXJpZXMuNC5CcnVzaC5Db2xvchkuU2VyaWVzLjQuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuNC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy40LlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuNC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuNC5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuNC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuNC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuNC5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy40LlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy40LlhWYWx1ZXMuT3JkZXIXLlNlcmllcy40LllWYWx1ZXMuVmFsdWUXLlNlcmllcy40LllWYWx1ZXMuQ291bnQcLlNlcmllcy40LllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjQuQ29sb3JFYWNoFC5TZXJpZXMuNC5EYXRhU291cmNlDy5TZXJpZXMuNC5Db2xvcg8uU2VyaWVzLjQuVGl0bGUdLlNlcmllcy40LlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy40Lk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuNC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy40Lk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuNC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuNC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy41FS5TZXJpZXMuNS5CcnVzaC5Db2xvchkuU2VyaWVzLjUuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuNS5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy41LlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuNS5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuNS5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuNS5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuNS5YVmFsdWVzLkNvdW50HC5TZXJpZXMuNS5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy41LlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy41LlhWYWx1ZXMuT3JkZXIXLlNlcmllcy41LllWYWx1ZXMuVmFsdWUXLlNlcmllcy41LllWYWx1ZXMuQ291bnQcLlNlcmllcy41LllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjUuQ29sb3JFYWNoFC5TZXJpZXMuNS5EYXRhU291cmNlDy5TZXJpZXMuNS5Db2xvcg8uU2VyaWVzLjUuVGl0bGUdLlNlcmllcy41LlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy41Lk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuNS5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy41Lk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuNS5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuNS5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zGC5BeGVzLkxlZnQuVGl0bGUuQ2FwdGlvbhYuQXhlcy5MZWZ0LlRpdGxlLkxpbmVzIy5BeGVzLkJvdHRvbS5MYWJlbHMuUm91bmRGaXJzdExhYmVsIi5BeGVzLkJvdHRvbS5MYWJlbHMuRGF0ZVRpbWVGb3JtYXQfLkF4ZXMuQm90dG9tLkxhYmVscy5WYWx1ZUZvcm1hdBYuQXhlcy5Cb3R0b20uSW5jcmVtZW50Gi5BeGVzLkJvdHRvbS5UaXRsZS5DYXB0aW9uGC5BeGVzLkJvdHRvbS5UaXRsZS5MaW5lcw8uQXhlcy5BdXRvbWF0aWMABAAAAAYAAAEEAAAEBAQHAAEABAcAAQAEAQAAAAAEBAEEAAAEBAcAAQAEBwABAAEEAQAAAAAEBAEEAAAEBAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQEBwABAAQHAAEAAQQBAAAAAAQEAQQAAAQEBAcAAQAEBwABAAEEAQAAAAAEBAEGAAEBAAEGAAEZU3RlZW1hLlRlZUNoYXJ0LlRoZW1lVHlwZQIAAAABCAgIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAGCAElU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQYnU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5Qb2ludGVyU2l6ZVVuaXRzAgAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAGCAElU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQYnU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5Qb2ludGVyU2l6ZVVuaXRzAgAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAABggBJVN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVmFsdWVMaXN0T3JkZXICAAAABggBFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAELBgYkU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5UYWlsQWxpZ25tZW50AgAAABVTeXN0ZW0uRHJhd2luZy5Qb2ludEYDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAEGJ1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuUG9pbnRlclNpemVVbml0cwIAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAABggBJVN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVmFsdWVMaXN0T3JkZXICAAAABggBFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAELBgYkU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5UYWlsQWxpZ25tZW50AgAAABVTeXN0ZW0uRHJhd2luZy5Qb2ludEYDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAEGJ1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuUG9pbnRlclNpemVVbml0cwIAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAYIASVTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlZhbHVlTGlzdE9yZGVyAgAAAAYIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABCwYGJFN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVGFpbEFsaWdubWVudAIAAAAVU3lzdGVtLkRyYXdpbmcuUG9pbnRGAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAGCAElU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAABBgECAAAAAAX8////GVN0ZWVtYS5UZWVDaGFydC5UaGVtZVR5cGUBAAAAB3ZhbHVlX18ACAIAAAAAAAAAAAcAAAACAAAACQUAAAAAAAAAAAYGAAAAG1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuTGluZQX5////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAP//AAAAAAAAAgABAAAAAAAAAAAF+P///ydTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMBAAAAB3ZhbHVlX18ACAIAAAAAAAAAAff////5////CgAA//8AAAAAAAACAAH2////+f///woAAJn/AAAAAAAAAgAJCwAAAAUAAAAGDAAAAAxwcm9jZXNzX2RhdGUBBfP///8lU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgEAAAAHdmFsdWVfXwAIAgAAAAEAAAAJDgAAAAUAAAAGDwAAAARFVE5HAAHw////+f///woAAP//AAAAAAAAAgAGEQAAAARFVE5HAAAAAAAAAAAAAAAgQAAAAAAAACBABe7///8kU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5UYWlsQWxpZ25tZW50AQAAAAd2YWx1ZV9fAAgCAAAAAAAAAAXt////FVN5c3RlbS5EcmF3aW5nLlBvaW50RgIAAAABeAF5AAALCwMAAAAAAAAAAAAAAAkGAAAAAev////5////CgCAAP8AAAAAAAACAAEAAAAAAAAAAAHq////+P///wAAAAAB6f////n///8KAE0A/wAAAAAAAAIACRgAAAAFAAAACQwAAAABAeb////z////AQAAAAkbAAAABQAAAAYcAAAABFdUTkcABh0AAAAOU3FsRGF0YVNvdXJjZTEB4v////n///8KAIAA/wAAAAAAAAIABh8AAAAEV1RORwAAAAAAAAAAAAAAFEAAAAAAAAAgQAHg////7v///wAAAAAB3////+3///8AAAAAAAAAAAkGAAAAAd3////5////CgBAwP8AAAAAAAACAAEAAAAAAAAAAAHc////+P///wAAAAAB2/////n///8KAEDA/wAAAAAAAAIAAdr////5////CgCZmf8AAAAAAAACAAknAAAABQAAAAkMAAAAAQHX////8////wEAAAAJKgAAAAUAAAAGKwAAAAROVE5HAAkdAAAAAdP////5////CgBAwP8AAAAAAAACAAYuAAAABE5UTkcAAAAAAAAAAAAAABRAAAAAAAAAIEAB0f///+7///8AAAAAAdD////t////AAAAAAAAAAAJBgAAAAHO////+f///wr/AAD/AAAAAAAAAgABAAAAAAAAAAABzf////j///8AAAAAAcz////5////CpkAAP8AAAAAAAACAAk1AAAABQAAAAkMAAAAAQHJ////8////wEAAAAJOAAAAAUAAAAGOQAAAAROVENHAAkdAAAAAcX////5////Cv8AAP8AAAAAAAACAAY8AAAABE5UQ0cAAAAAAAAAAAAAABRAAAAAAAAAIEABw////+7///8AAAAAAcL////t////AAAAAAAAAAAJBgAAAAHA////+f///wr//wD/AAAAAAAAAgABAAAAAAAAAAABv/////j///8AAAAAAb7////5////Cv//AP8AAAAAAAACAAG9////+f///wqZmZn/AAAAAAAAAgAJRAAAAAUAAAAJDAAAAAEBuv////P///8BAAAACUcAAAAFAAAABkgAAAAERVRDRwAJHQAAAAG2////+f///wr//wD/AAAAAAAAAgAGSwAAAARFVENHAAAAAAAAAAAAAAAUQAAAAAAAACBAAbT////u////AAAAAAGz////7f///wAAAAAAAAAACQYAAAABsf////n///8KAAAA/wAAAAAAAAIAAQAAAAAAAAAAAbD////4////AAAAAAGv////+f///woAAAD/AAAAAAAAAgABrv////n///8KmZmZ/wAAAAAAAAIACVMAAAAFAAAABlQAAAAMcHJvY2Vzc19kYXRlAQGr////8////wEAAAAJVgAAAAUAAAAGVwAAAARNRFNaAAZYAAAADlNxbERhdGFTb3VyY2UxAaf////5////CgAAAP8AAAAAAAACAAZaAAAABE1EU1oAAAAAAAAAAAAAACBAAAAAAAAAIEABpf///+7///8AAAAAAaT////t////AAAAAAAAAAAGXQAAAAbph43ph48JXgAAAAAGXwAAAANNTU0GYAAAAAMjIyMAAAAAAAA+QAZhAAAABuaZgumWkwliAAAAAREFAAAAAQAAAAZjAAAACVRoaWNrbmVzcw8LAAAABQAAAAYAAAAAQMLlQAAAAAAgxuVAAAAAAKDJ5UAAAAAAgM3lQAAAAABA0eVADw4AAAAFAAAABsP1KFyPJL1AexSuRwmq5UC4HoXraTrsQB+F61Gom+9ACtejcJ1l7UAPGAAAAAUAAAAGAAAAAEDC5UAAAAAAIMblQAAAAACgyeVAAAAAAIDN5UAAAAAAQNHlQA8bAAAABQAAAAbhehSuR8lkQOxRuB4FBq1AZmZmZiZatkD2KFyPwpCwQEjhehSuG69ADycAAAAFAAAABgAAAABAwuVAAAAAACDG5UAAAAAAoMnlQAAAAACAzeVAAAAAAEDR5UAPKgAAAAUAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA81AAAABQAAAAYAAAAAQMLlQAAAAAAgxuVAAAAAAKDJ5UAAAAAAgM3lQAAAAABA0eVADzgAAAAFAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPRAAAAAUAAAAGAAAAAEDC5UAAAAAAIMblQAAAAACgyeVAAAAAAIDN5UAAAAAAQNHlQA9HAAAABQAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD1MAAAAFAAAABgAAAABAwuVAAAAAACDG5UAAAAAAoMnlQAAAAACAzeVAAAAAAEDR5UAPVgAAAAUAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABFeAAAAAQAAAAZkAAAABumHjemHjxFiAAAAAQAAAAZlAAAABuaZgumWkws=" CssClass="auto-style1"  GetChartFile="GetChart.aspx" Height="300px" LastFileName="" Width="900px" AutoPostback="False" EnableTheming="False"  ViewStateMode="Disabled" DataSourceID="SqlDataSource1"  />
-                            </td>
-                                <td>
-                                <tchart:WebChart ID="WebChart2" runat="server" UseLock="False" TempChart="Session"  Config="AAEAAAD/////AQAAAAAAAAAMAgAAAFFUZWVDaGFydCwgVmVyc2lvbj00LjEuMjAxOC41MDQyLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTljODEyNjI3NmM3N2JkYjcMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTdGVlbWEuVGVlQ2hhcnQuQ2hhcnRbAAAADC5DYW5jZWxNb3VzZQ0uQ3VycmVudFRoZW1lEC5DdXN0b21DaGFydFJlY3QVLkxlZ2VuZC5UZXh0U3ltYm9sR2FwEy5MZWdlbmQuVmVydFNwYWNpbmcNLkhlYWRlci5MaW5lcxkuQXNwZWN0LkNvbG9yUGFsZXR0ZUluZGV4Di5Bc3BlY3QuVmlldzNECFNlcmllcy4wFS5TZXJpZXMuMC5CcnVzaC5Db2xvchkuU2VyaWVzLjAuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4wLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMC5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMC5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4wLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4wLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4wLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4wLllWYWx1ZXMuQ291bnQcLlNlcmllcy4wLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjAuQ29sb3JFYWNoFC5TZXJpZXMuMC5EYXRhU291cmNlDy5TZXJpZXMuMC5Db2xvcg8uU2VyaWVzLjAuVGl0bGUdLlNlcmllcy4wLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4xFS5TZXJpZXMuMS5CcnVzaC5Db2xvchkuU2VyaWVzLjEuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMS5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4xLlBvaW50ZXIuU2l6ZVVuaXRzFy5TZXJpZXMuMS5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMS5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMS5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMS5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4xLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4xLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4xLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4xLllWYWx1ZXMuQ291bnQcLlNlcmllcy4xLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjEuQ29sb3JFYWNoFC5TZXJpZXMuMS5EYXRhU291cmNlDy5TZXJpZXMuMS5Db2xvcg8uU2VyaWVzLjEuVGl0bGUdLlNlcmllcy4xLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4yFS5TZXJpZXMuMi5CcnVzaC5Db2xvchkuU2VyaWVzLjIuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMi5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4yLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMi5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMi5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMi5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMi5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMi5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4yLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4yLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4yLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4yLllWYWx1ZXMuQ291bnQcLlNlcmllcy4yLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjIuQ29sb3JFYWNoFC5TZXJpZXMuMi5EYXRhU291cmNlDy5TZXJpZXMuMi5Db2xvcg8uU2VyaWVzLjIuVGl0bGUdLlNlcmllcy4yLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zGC5BeGVzLkxlZnQuVGl0bGUuQ2FwdGlvbhYuQXhlcy5MZWZ0LlRpdGxlLkxpbmVzIy5BeGVzLkJvdHRvbS5MYWJlbHMuUm91bmRGaXJzdExhYmVsIi5BeGVzLkJvdHRvbS5MYWJlbHMuRGF0ZVRpbWVGb3JtYXQfLkF4ZXMuQm90dG9tLkxhYmVscy5WYWx1ZUZvcm1hdBYuQXhlcy5Cb3R0b20uSW5jcmVtZW50Gi5BeGVzLkJvdHRvbS5UaXRsZS5DYXB0aW9uGC5BeGVzLkJvdHRvbS5UaXRsZS5MaW5lcw8uQXhlcy5BdXRvbWF0aWMABAAAAAYAAAEEAAAEBAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQEBwABAAQHAAEAAQQBAAAAAAQEAQYAAQEAAQYAARlTdGVlbWEuVGVlQ2hhcnQuVGhlbWVUeXBlAgAAAAEICAgBFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAEGJ1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuUG9pbnRlclNpemVVbml0cwIAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAYIASVTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlZhbHVlTGlzdE9yZGVyAgAAAAYIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABCwYGJFN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVGFpbEFsaWdubWVudAIAAAAVU3lzdGVtLkRyYXdpbmcuUG9pbnRGAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAYIASVTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlZhbHVlTGlzdE9yZGVyAgAAAAYIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABCwYGJFN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVGFpbEFsaWdubWVudAIAAAAVU3lzdGVtLkRyYXdpbmcuUG9pbnRGAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAGCAElU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAABBgECAAAAAAX8////GVN0ZWVtYS5UZWVDaGFydC5UaGVtZVR5cGUBAAAAB3ZhbHVlX18ACAIAAAAAAAAAAAcAAAACAAAACQUAAAAAAAAAAAYGAAAAG1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuTGluZQX5////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAP//AAAAAAAAAgABAAAAAAAAAAAF+P///ydTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMBAAAAB3ZhbHVlX18ACAIAAAAAAAAAAff////5////CgAA//8AAAAAAAACAAH2////+f///woAAJn/AAAAAAAAAgAJCwAAAAUAAAAGDAAAAAxwcm9jZXNzX2RhdGUBBfP///8lU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgEAAAAHdmFsdWVfXwAIAgAAAAEAAAAJDgAAAAUAAAAGDwAAAAROUldEAAYQAAAADlNxbERhdGFTb3VyY2UxAe/////5////CgAA//8AAAAAAAACAAYSAAAABE5SV0QAAAAAAAAAAAAAACBAAAAAAAAAIEAF7f///yRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQBAAAAB3ZhbHVlX18ACAIAAAAAAAAABez///8VU3lzdGVtLkRyYXdpbmcuUG9pbnRGAgAAAAF4AXkAAAsLAwAAAAAAAAAAAAAACQYAAAAB6v////n///8KAIAA/wAAAAAAAAIAAQAAAAAAAAAAAen////4////AAAAAAHo////+f///woATQD/AAAAAAAAAgAJGQAAAAUAAAAJDAAAAAEB5f////P///8BAAAACRwAAAAFAAAABh0AAAAETURXRAAJEAAAAAHh////+f///woAgAD/AAAAAAAAAgAGIAAAAARNRFdEAAAAAAAAAAAAAAAUQAAAAAAAACBAAd/////t////AAAAAAHe////7P///wAAAAAAAAAACQYAAAAB3P////n///8KAEDA/wAAAAAAAAIAAQAAAAAAAAAAAdv////4////AAAAAAHa////+f///woAQMD/AAAAAAAAAgAB2f////n///8KAJmZ/wAAAAAAAAIACSgAAAAFAAAACQwAAAABAdb////z////AQAAAAkrAAAABQAAAAYsAAAABFdJV0QACRAAAAAB0v////n///8KAEDA/wAAAAAAAAIABi8AAAAEV0lXRAAAAAAAAAAAAAAAFEAAAAAAAAAgQAHQ////7f///wAAAAABz////+z///8AAAAAAAAAAAYyAAAABumHjemHjwkzAAAAAAY0AAAAA01NTQY1AAAAAyMjIwAAAAAAAD5ABjYAAAAG5pmC6ZaTCTcAAAABEQUAAAABAAAABjgAAAAFV2lkdGgPCwAAAAUAAAAGAAAAAEDC5UAAAAAAIMblQAAAAACgyeVAAAAAAIDN5UAAAAAAQNHlQA8OAAAABQAAAAZcj8L1KGCeQClcj8L15r9A9ihcj4KjzUCkcD0KN77ZQBSuR+GaA9VADxkAAAAFAAAABgAAAABAwuVAAAAAACDG5UAAAAAAoMnlQAAAAACAzeVAAAAAAEDR5UAPHAAAAAUAAAAGCtejcP3ct0BmZmZmzoroQAAAAADQQu1AmpmZmTFG50AfhetR4JfnQA8oAAAABQAAAAYAAAAAQMLlQAAAAAAgxuVAAAAAAKDJ5UAAAAAAgM3lQAAAAABA0eVADysAAAAFAAAABgAAAAAAAAAAFK5H4XpYe0C4HoXrUV2UQB+F61G4hIZAPQrXo3D2lEARMwAAAAEAAAAGOQAAAAbph43ph48RNwAAAAEAAAAGOgAAAAbmmYLplpML" CssClass="auto-style1"  GetChartFile="GetChart.aspx" Height="300px" LastFileName="" Width="900px" AutoPostback="False" EnableTheming="False"  ViewStateMode="Disabled" DataSourceID="SqlDataSource1"  />
-                 
-                                </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                       <tchart:WebChart ID="WebChart3" runat="server" UseLock="False" TempChart="Session"  Config="AAEAAAD/////AQAAAAAAAAAMAgAAAFFUZWVDaGFydCwgVmVyc2lvbj00LjEuMjAxOC41MDQyLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTljODEyNjI3NmM3N2JkYjcMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTdGVlbWEuVGVlQ2hhcnQuQ2hhcnSlAAAADC5DYW5jZWxNb3VzZQ0uQ3VycmVudFRoZW1lEC5DdXN0b21DaGFydFJlY3QVLkxlZ2VuZC5UZXh0U3ltYm9sR2FwEy5MZWdlbmQuVmVydFNwYWNpbmcNLkhlYWRlci5MaW5lcxkuQXNwZWN0LkNvbG9yUGFsZXR0ZUluZGV4Di5Bc3BlY3QuVmlldzNECFNlcmllcy4wFS5TZXJpZXMuMC5CcnVzaC5Db2xvchkuU2VyaWVzLjAuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4wLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMC5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMC5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4wLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4wLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4wLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4wLllWYWx1ZXMuQ291bnQcLlNlcmllcy4wLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjAuQ29sb3JFYWNoFC5TZXJpZXMuMC5EYXRhU291cmNlDy5TZXJpZXMuMC5Db2xvcg8uU2VyaWVzLjAuVGl0bGUdLlNlcmllcy4wLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4xFS5TZXJpZXMuMS5CcnVzaC5Db2xvchkuU2VyaWVzLjEuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMS5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4xLlBvaW50ZXIuU2l6ZVVuaXRzFy5TZXJpZXMuMS5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMS5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMS5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMS5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4xLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4xLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4xLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4xLllWYWx1ZXMuQ291bnQcLlNlcmllcy4xLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjEuQ29sb3JFYWNoFC5TZXJpZXMuMS5EYXRhU291cmNlDy5TZXJpZXMuMS5Db2xvcg8uU2VyaWVzLjEuVGl0bGUdLlNlcmllcy4xLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4yFS5TZXJpZXMuMi5CcnVzaC5Db2xvchkuU2VyaWVzLjIuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMi5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4yLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMi5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMi5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMi5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMi5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMi5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4yLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4yLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4yLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4yLllWYWx1ZXMuQ291bnQcLlNlcmllcy4yLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjIuQ29sb3JFYWNoFC5TZXJpZXMuMi5EYXRhU291cmNlDy5TZXJpZXMuMi5Db2xvcg8uU2VyaWVzLjIuVGl0bGUdLlNlcmllcy4yLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4zFS5TZXJpZXMuMy5CcnVzaC5Db2xvchkuU2VyaWVzLjMuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMy5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4zLlBvaW50ZXIuU2l6ZVVuaXRzFy5TZXJpZXMuMy5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMy5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMy5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMy5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4zLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4zLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4zLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4zLllWYWx1ZXMuQ291bnQcLlNlcmllcy4zLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjMuQ29sb3JFYWNoFC5TZXJpZXMuMy5EYXRhU291cmNlDy5TZXJpZXMuMy5Db2xvcg8uU2VyaWVzLjMuVGl0bGUdLlNlcmllcy4zLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4zLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMy5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4zLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMy5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMy5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy40FS5TZXJpZXMuNC5CcnVzaC5Db2xvchkuU2VyaWVzLjQuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuNC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy40LlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuNC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuNC5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuNC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuNC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuNC5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy40LlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy40LlhWYWx1ZXMuT3JkZXIXLlNlcmllcy40LllWYWx1ZXMuVmFsdWUXLlNlcmllcy40LllWYWx1ZXMuQ291bnQcLlNlcmllcy40LllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjQuQ29sb3JFYWNoFC5TZXJpZXMuNC5EYXRhU291cmNlDy5TZXJpZXMuNC5Db2xvcg8uU2VyaWVzLjQuVGl0bGUdLlNlcmllcy40LlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy40Lk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuNC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy40Lk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuNC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuNC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy41FS5TZXJpZXMuNS5CcnVzaC5Db2xvchkuU2VyaWVzLjUuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuNS5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy41LlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuNS5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuNS5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuNS5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuNS5YVmFsdWVzLkNvdW50HC5TZXJpZXMuNS5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy41LlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy41LlhWYWx1ZXMuT3JkZXIXLlNlcmllcy41LllWYWx1ZXMuVmFsdWUXLlNlcmllcy41LllWYWx1ZXMuQ291bnQcLlNlcmllcy41LllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjUuQ29sb3JFYWNoFC5TZXJpZXMuNS5EYXRhU291cmNlDy5TZXJpZXMuNS5Db2xvcg8uU2VyaWVzLjUuVGl0bGUdLlNlcmllcy41LlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy41Lk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuNS5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy41Lk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuNS5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuNS5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zGC5BeGVzLkxlZnQuVGl0bGUuQ2FwdGlvbhYuQXhlcy5MZWZ0LlRpdGxlLkxpbmVzIy5BeGVzLkJvdHRvbS5MYWJlbHMuUm91bmRGaXJzdExhYmVsIi5BeGVzLkJvdHRvbS5MYWJlbHMuRGF0ZVRpbWVGb3JtYXQfLkF4ZXMuQm90dG9tLkxhYmVscy5WYWx1ZUZvcm1hdBYuQXhlcy5Cb3R0b20uSW5jcmVtZW50Gi5BeGVzLkJvdHRvbS5UaXRsZS5DYXB0aW9uGC5BeGVzLkJvdHRvbS5UaXRsZS5MaW5lcw8uQXhlcy5BdXRvbWF0aWMABAAAAAYAAAEEAAAEBAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQEBwABAAQHAAEAAQQBAAAAAAQEAQQAAAQEBwABAAQHAAEAAQQBAAAAAAQEAQQAAAQEBAcAAQAEBwABAAEEAQAAAAAEBAEEAAAEBAQHAAEABAcAAQABBAEAAAAABAQBBgABAQABBgABGVN0ZWVtYS5UZWVDaGFydC5UaGVtZVR5cGUCAAAAAQgICAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQYnU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5Qb2ludGVyU2l6ZVVuaXRzAgAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAABggBJVN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVmFsdWVMaXN0T3JkZXICAAAABggBFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAELBgYkU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5UYWlsQWxpZ25tZW50AgAAABVTeXN0ZW0uRHJhd2luZy5Qb2ludEYDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAEGJ1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuUG9pbnRlclNpemVVbml0cwIAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAABggBJVN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVmFsdWVMaXN0T3JkZXICAAAABggBFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAELBgYkU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5UYWlsQWxpZ25tZW50AgAAABVTeXN0ZW0uRHJhd2luZy5Qb2ludEYDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAEGJ1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuUG9pbnRlclNpemVVbml0cwIAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAYIASVTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlZhbHVlTGlzdE9yZGVyAgAAAAYIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABCwYGJFN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVGFpbEFsaWdubWVudAIAAAAVU3lzdGVtLkRyYXdpbmcuUG9pbnRGAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAYIASVTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlZhbHVlTGlzdE9yZGVyAgAAAAYIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABCwYGJFN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVGFpbEFsaWdubWVudAIAAAAVU3lzdGVtLkRyYXdpbmcuUG9pbnRGAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAGCAElU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQYnU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5Qb2ludGVyU2l6ZVVuaXRzAgAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAABggBJVN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVmFsdWVMaXN0T3JkZXICAAAABggBFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAELBgYkU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5UYWlsQWxpZ25tZW50AgAAABVTeXN0ZW0uRHJhd2luZy5Qb2ludEYDAAAAAQYBAgAAAAAF/P///xlTdGVlbWEuVGVlQ2hhcnQuVGhlbWVUeXBlAQAAAAd2YWx1ZV9fAAgCAAAAAAAAAAAHAAAAAgAAAAkFAAAAAAAAAAAGBgAAABtTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLkxpbmUF+f///xRTeXN0ZW0uRHJhd2luZy5Db2xvcgQAAAAEbmFtZQV2YWx1ZQprbm93bkNvbG9yBXN0YXRlAQAAAAkHBwMAAAAKAAD//wAAAAAAAAIAAQAAAAAAAAAABfj///8nU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5Qb2ludGVyU2l6ZVVuaXRzAQAAAAd2YWx1ZV9fAAgCAAAAAAAAAAH3////+f///woAAP//AAAAAAAAAgAB9v////n///8KAACZ/wAAAAAAAAIACQsAAAAFAAAABgwAAAAMcHJvY2Vzc19kYXRlAQXz////JVN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVmFsdWVMaXN0T3JkZXIBAAAAB3ZhbHVlX18ACAIAAAABAAAACQ4AAAAFAAAABg8AAAAERVhMQwAGEAAAAA5TcWxEYXRhU291cmNlMQHv////+f///woAAP//AAAAAAAAAgAGEgAAAARFWExDAAAAAAAAAAAAAAAgQAAAAAAAACBABe3///8kU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5UYWlsQWxpZ25tZW50AQAAAAd2YWx1ZV9fAAgCAAAAAAAAAAXs////FVN5c3RlbS5EcmF3aW5nLlBvaW50RgIAAAABeAF5AAALCwMAAAAAAAAAAAAAAAkGAAAAAer////5////CgCAAP8AAAAAAAACAAEAAAAAAAAAAAHp////+P///wAAAAAB6P////n///8KAE0A/wAAAAAAAAIACRkAAAAFAAAACQwAAAABAeX////z////AQAAAAkcAAAABQAAAAYdAAAABExTQ1MACRAAAAAB4f////n///8KAIAA/wAAAAAAAAIABiAAAAAETFNDUwAAAAAAAAAAAAAAFEAAAAAAAAAgQAHf////7f///wAAAAAB3v///+z///8AAAAAAAAAAAkGAAAAAdz////5////CgBAwP8AAAAAAAACAAEAAAAAAAAAAAHb////+P///wAAAAAB2v////n///8KAEDA/wAAAAAAAAIAAdn////5////CgCZmf8AAAAAAAACAAkoAAAABQAAAAkMAAAAAQHW////8////wEAAAAJKwAAAAUAAAAGLAAAAARNU0NTAAkQAAAAAdL////5////CgBAwP8AAAAAAAACAAYvAAAABE1TQ1MAAAAAAAAAAAAAABRAAAAAAAAAIEAB0P///+3///8AAAAAAc/////s////AAAAAAAAAAAJBgAAAAHN////+f///wr/AAD/AAAAAAAAAgABAAAAAAAAAAABzP////j///8AAAAAAcv////5////CpkAAP8AAAAAAAACAAk2AAAABQAAAAkMAAAAAQHI////8////wEAAAAJOQAAAAUAAAAGOgAAAARISUNTAAkQAAAAAcT////5////Cv8AAP8AAAAAAAACAAY9AAAABEhJQ1MAAAAAAAAAAAAAABRAAAAAAAAAIEABwv///+3///8AAAAAAcH////s////AAAAAAAAAAAJBgAAAAG/////+f///wr//wD/AAAAAAAAAgABAAAAAAAAAAABvv////j///8AAAAAAb3////5////Cv//AP8AAAAAAAACAAG8////+f///wqZmZn/AAAAAAAAAgAJRQAAAAUAAAAJDAAAAAEBuf////P///8BAAAACUgAAAAFAAAABkkAAAAEVkhJUwAJEAAAAAG1////+f///wr//wD/AAAAAAAAAgAGTAAAAARWSElTAAAAAAAAAAAAAAAUQAAAAAAAACBAAbP////t////AAAAAAGy////7P///wAAAAAAAAAACQYAAAABsP////n///8KAAAA/wAAAAAAAAIAAQAAAAAAAAAAAa/////4////AAAAAAGu////+f///woAAAD/AAAAAAAAAgABrf////n///8KmZmZ/wAAAAAAAAIACVQAAAAFAAAACQwAAAABAar////z////AQAAAAlXAAAABQAAAAZYAAAAA1NVUwAJEAAAAAGm////+f///woAAAD/AAAAAAAAAgAGWwAAAANTVVMAAAAAAAAAAAAAACBAAAAAAAAAIEABpP///+3///8AAAAAAaP////s////AAAAAAAAAAAGXgAAAAbph43ph48JXwAAAAAGYAAAAANNTU0GYQAAAAMjIyMAAAAAAAA+QAZiAAAABuaZgumWkwljAAAAAREFAAAAAQAAAAZkAAAACFN0cmVuZ3RoDwsAAAAFAAAABgAAAABAwuVAAAAAACDG5UAAAAAAoMnlQAAAAACAzeVAAAAAAEDR5UAPDgAAAAUAAAAGUrgehet9gUBmZmZmpum0QOxRuB4lBMVA7FG4HuVPwUDD9ShcDynJQA8ZAAAABQAAAAYAAAAAQMLlQAAAAAAgxuVAAAAAAKDJ5UAAAAAAgM3lQAAAAABA0eVADxwAAAAFAAAABj0K16PwpaFA7FG4HoUt1UCkcD0KV+/cQM3MzMwMrt1AXI/C9Thd2kAPKAAAAAUAAAAGAAAAAEDC5UAAAAAAIMblQAAAAACgyeVAAAAAAIDN5UAAAAAAQNHlQA8rAAAABQAAAAZcj8L1KAKKQD0K16OQb8xAUrgehbs40kCF61G4/g7ZQJqZmZlZ5dJADzYAAAAFAAAABgAAAABAwuVAAAAAACDG5UAAAAAAoMnlQAAAAACAzeVAAAAAAEDR5UAPOQAAAAUAAAAG16NwPQpVjkDNzMzMzCbNQEjhehQeL9BAAAAAAADpwEC4HoXrEbPFQA9FAAAABQAAAAYAAAAAQMLlQAAAAAAgxuVAAAAAAKDJ5UAAAAAAgM3lQAAAAABA0eVAD0gAAAAFAAAABgAAAAAAAAAAuB6F61EMjkAzMzMzM+GAQDMzMzMzS4dAH4XrUbh6hUAPVAAAAAUAAAAGAAAAAEDC5UAAAAAAIMblQAAAAACgyeVAAAAAAIDN5UAAAAAAQNHlQA9XAAAABQAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJqZmZmZmVdAEV8AAAABAAAABmUAAAAG6YeN6YePEWMAAAABAAAABmYAAAAG5pmC6ZaTCw==" CssClass="auto-style1"  GetChartFile="GetChart.aspx" Height="300px" LastFileName="" Width="900px" AutoPostback="False" EnableTheming="False"  ViewStateMode="Disabled" DataSourceID="SqlDataSource1"  />
-                             </td>
-                                <td>
-                                <tchart:WebChart ID="WebChart4" runat="server" UseLock="False" TempChart="Session"  Config="AAEAAAD/////AQAAAAAAAAAMAgAAAFFUZWVDaGFydCwgVmVyc2lvbj00LjEuMjAxOC41MDQyLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTljODEyNjI3NmM3N2JkYjcMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTdGVlbWEuVGVlQ2hhcnQuQ2hhcnRbAAAADC5DYW5jZWxNb3VzZQ0uQ3VycmVudFRoZW1lEC5DdXN0b21DaGFydFJlY3QVLkxlZ2VuZC5UZXh0U3ltYm9sR2FwEy5MZWdlbmQuVmVydFNwYWNpbmcNLkhlYWRlci5MaW5lcxkuQXNwZWN0LkNvbG9yUGFsZXR0ZUluZGV4Di5Bc3BlY3QuVmlldzNECFNlcmllcy4wFS5TZXJpZXMuMC5CcnVzaC5Db2xvchkuU2VyaWVzLjAuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4wLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMC5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMC5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4wLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4wLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4wLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4wLllWYWx1ZXMuQ291bnQcLlNlcmllcy4wLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjAuQ29sb3JFYWNoFC5TZXJpZXMuMC5EYXRhU291cmNlDy5TZXJpZXMuMC5Db2xvcg8uU2VyaWVzLjAuVGl0bGUdLlNlcmllcy4wLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4xFS5TZXJpZXMuMS5CcnVzaC5Db2xvchkuU2VyaWVzLjEuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMS5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4xLlBvaW50ZXIuU2l6ZVVuaXRzFy5TZXJpZXMuMS5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMS5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMS5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMS5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4xLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4xLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4xLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4xLllWYWx1ZXMuQ291bnQcLlNlcmllcy4xLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjEuQ29sb3JFYWNoFC5TZXJpZXMuMS5EYXRhU291cmNlDy5TZXJpZXMuMS5Db2xvcg8uU2VyaWVzLjEuVGl0bGUdLlNlcmllcy4xLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4xLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMS5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zCFNlcmllcy4yFS5TZXJpZXMuMi5CcnVzaC5Db2xvchkuU2VyaWVzLjIuUG9pbnRlci5WaXNpYmxlHC5TZXJpZXMuMi5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4yLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMi5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMi5MaW5lUGVuLkNvbG9yFy5TZXJpZXMuMi5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMi5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMi5YVmFsdWVzLkRhdGFNZW1iZXIaLlNlcmllcy4yLlhWYWx1ZXMuRGF0ZVRpbWUXLlNlcmllcy4yLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4yLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4yLllWYWx1ZXMuQ291bnQcLlNlcmllcy4yLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjIuQ29sb3JFYWNoFC5TZXJpZXMuMi5EYXRhU291cmNlDy5TZXJpZXMuMi5Db2xvcg8uU2VyaWVzLjIuVGl0bGUdLlNlcmllcy4yLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4yLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMi5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zGC5BeGVzLkxlZnQuVGl0bGUuQ2FwdGlvbhYuQXhlcy5MZWZ0LlRpdGxlLkxpbmVzIy5BeGVzLkJvdHRvbS5MYWJlbHMuUm91bmRGaXJzdExhYmVsIi5BeGVzLkJvdHRvbS5MYWJlbHMuRGF0ZVRpbWVGb3JtYXQfLkF4ZXMuQm90dG9tLkxhYmVscy5WYWx1ZUZvcm1hdBYuQXhlcy5Cb3R0b20uSW5jcmVtZW50Gi5BeGVzLkJvdHRvbS5UaXRsZS5DYXB0aW9uGC5BeGVzLkJvdHRvbS5UaXRsZS5MaW5lcw8uQXhlcy5BdXRvbWF0aWMABAAAAAYAAAEEAAAEBAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQHAAEABAcAAQABBAEAAAAABAQBBAAABAQEBwABAAQHAAEAAQQBAAAAAAQEAQYAAQEAAQYAARlTdGVlbWEuVGVlQ2hhcnQuVGhlbWVUeXBlAgAAAAEICAgBFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAEGJ1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuUG9pbnRlclNpemVVbml0cwIAAAAUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAYIASVTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlZhbHVlTGlzdE9yZGVyAgAAAAYIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABCwYGJFN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVGFpbEFsaWdubWVudAIAAAAVU3lzdGVtLkRyYXdpbmcuUG9pbnRGAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAYIASVTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlZhbHVlTGlzdE9yZGVyAgAAAAYIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABCwYGJFN0ZWVtYS5UZWVDaGFydC5TdHlsZXMuVGFpbEFsaWdubWVudAIAAAAVU3lzdGVtLkRyYXdpbmcuUG9pbnRGAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAABRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAAGCAElU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAABBgECAAAAAAX8////GVN0ZWVtYS5UZWVDaGFydC5UaGVtZVR5cGUBAAAAB3ZhbHVlX18ACAIAAAAAAAAAAAcAAAACAAAACQUAAAAAAAAAAAYGAAAAG1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuTGluZQX5////FFN5c3RlbS5EcmF3aW5nLkNvbG9yBAAAAARuYW1lBXZhbHVlCmtub3duQ29sb3IFc3RhdGUBAAAACQcHAwAAAAoAAP//AAAAAAAAAgABAAAAAAAAAAAF+P///ydTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMBAAAAB3ZhbHVlX18ACAIAAAAAAAAAAff////5////CgAA//8AAAAAAAACAAH2////+f///woAAJn/AAAAAAAAAgAJCwAAAAUAAAAGDAAAAAxwcm9jZXNzX2RhdGUBBfP///8lU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgEAAAAHdmFsdWVfXwAIAgAAAAEAAAAJDgAAAAUAAAAGDwAAAAROUkNRAAYQAAAADlNxbERhdGFTb3VyY2UxAe/////5////CgAA//8AAAAAAAACAAYSAAAABE5SQ1EAAAAAAAAAAAAAACBAAAAAAAAAIEAF7f///yRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQBAAAAB3ZhbHVlX18ACAIAAAAAAAAABez///8VU3lzdGVtLkRyYXdpbmcuUG9pbnRGAgAAAAF4AXkAAAsLAwAAAAAAAAAAAAAACQYAAAAB6v////n///8KAIAA/wAAAAAAAAIAAQAAAAAAAAAAAen////4////AAAAAAHo////+f///woATQD/AAAAAAAAAgAJGQAAAAUAAAAJDAAAAAEB5f////P///8BAAAACRwAAAAFAAAABh0AAAAESElDUQAJEAAAAAHh////+f///woAgAD/AAAAAAAAAgAGIAAAAARISUNRAAAAAAAAAAAAAAAUQAAAAAAAACBAAd/////t////AAAAAAHe////7P///wAAAAAAAAAACQYAAAAB3P////n///8KAEDA/wAAAAAAAAIAAQAAAAAAAAAAAdv////4////AAAAAAHa////+f///woAQMD/AAAAAAAAAgAB2f////n///8KAJmZ/wAAAAAAAAIACSgAAAAFAAAACQwAAAABAdb////z////AQAAAAkrAAAABQAAAAYsAAAABFZIQ1EACRAAAAAB0v////n///8KAEDA/wAAAAAAAAIABi8AAAAEVkhDUQAAAAAAAAAAAAAAFEAAAAAAAAAgQAHQ////7f///wAAAAABz////+z///8AAAAAAAAAAAYyAAAABumHjemHjwkzAAAAAAY0AAAAA01NTQY1AAAAAyMjIwAAAAAAAD5ABjYAAAAG5pmC6ZaTCTcAAAABEQUAAAABAAAABjgAAAAEQ29kZQ8LAAAABQAAAAYAAAAAQMLlQAAAAAAgxuVAAAAAAKDJ5UAAAAAAgM3lQAAAAABA0eVADw4AAAAFAAAABlK4HoXrRYVACtejcF2k20CF61G4hnHgQM3MzMwcDddAPQrXo+Dw2kAPGQAAAAUAAAAGAAAAAEDC5UAAAAAAIMblQAAAAACgyeVAAAAAAIDN5UAAAAAAQNHlQA8cAAAABQAAAAYK16NwvcmuQHsUrkchf9xAw/UoXJ++5EDNzMzMXMPoQFK4HoXLNeVADygAAAAFAAAABgAAAABAwuVAAAAAACDG5UAAAAAAoMnlQAAAAACAzeVAAAAAAEDR5UAPKwAAAAUAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEzAAAAAQAAAAY5AAAABumHjemHjxE3AAAAAQAAAAY6AAAABuaZgumWkws=" CssClass="auto-style1"  GetChartFile="GetChart.aspx" Height="300px" LastFileName="" Width="900px" AutoPostback="False" EnableTheming="False"  ViewStateMode="Disabled" DataSourceID="SqlDataSource1"  />
-             
-                                </td>
-                            </tr>
-                    </table>                                     
-          
-          <%--  <tr>
-                <td>
-                    <asp:Button ID="btnUp" runat="server" OnClick="btnUp_Click" Text="´e§@§Î" />
-                    <asp:Button ID="btnDown" runat="server" OnClick="btnDown_Click" Text="´·§@§Î" />
-                    <input id="Radio1" onclick="create_data(1)" type="radio" />thickness&nbsp;
-                    <input id="Radio2" onclick="create_data(2)" type="radio" />width&nbsp;
-                    <input id="Radio3" onclick="create_data(3)" type="radio" />strength&nbsp;
-                    <input id="Radio4" onclick="create_data(4)" type="radio" />code</td>
-            </tr>--%>
-            <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="select
-ETNG.process_date,
-isnull(ETNG.total_prod,0) as ETNG,
-isnull(WTNG.total_prod,0) as WTNG,
-isnull(NTNG.total_prod,0) as NTNG,
-isnull(NTCG.total_prod,0) as NTCG,
-isnull(ETCG.total_prod,0) as ETCG,
-round(isnull(PA.total_prod-ETNG.total_prod-WTNG.total_prod-NTNG.total_prod-NTCG.total_prod-ETCG.total_prod,0),2) as MDSZ,
-isnull(NRWD.total_prod,0) as NRWD,
-isnull(MDWD.total_prod,0) as MDWD,
-isnull(WIWD.total_prod,0) as WIWD,
-isnull(EXLC.total_prod,0) as EXLC,
-isnull(LSCS.total_prod,0) as LSCS,
-isnull(MSCS.total_prod,0) as MSCS,
-isnull(HICS.total_prod,0) as HICS,
-isnull(VHIS.total_prod,0) as VHIS,
-isnull(SUS.total_prod,0) as SUS,
-isnull(NRCQ.total_prod,0) as NRCQ,
-isnull(HICQ.total_prod,0) as HICQ,
-isnull(VHCQ.total_prod,0) as VHCQ
-from(
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_width &lt;= 1260 and avg_thickness &lt;= 1500 
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_width &lt;= 1260 and coil_thickness &lt;= 1500 
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date ) 
-as ETNG 
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_width &gt;= 1500 and avg_thickness &lt;= 2300 
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_width &gt;= 1500 and coil_thickness &lt;= 2300 
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date) 
-as WTNG on ETNG.process_date=WTNG.process_date
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_width &gt; 1260 and avg_width &lt; 1500 
-and avg_thickness &gt;= 1500 and avg_thickness &lt;= 1900
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_width &gt; 1260 and coil_width &lt; 1500 
-and coil_thickness &gt;= 1500 and coil_thickness &lt;= 1900
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date )
-as NTNG on ETNG.process_date=NTNG.process_date 
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_thickness &gt;= 6000 and avg_thickness &lt;= 9900 
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_thickness &gt;= 6000 and coil_thickness &lt;= 9900
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date)
-as NTCG on ETNG.process_date=NTCG.process_date 
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_thickness &gt; 9900
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_thickness &gt; 9900 
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date)
-as ETCG on ETNG.process_date=ETCG.process_date 
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date )
-as PA on ETNG.process_date=PA.process_date
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_width &lt;= 950 
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_width &lt;= 950 
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date )
-as NRWD on ETNG.process_date=NRWD.process_date 
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_width &gt;= 950 and avg_width &lt;1550
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_width &gt;= 950 and coil_width &lt; 1550 
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date )
-as MDWD on ETNG.process_date=MDWD.process_date 
-left join (
-select 
-dateadd(m, datediff(m,0,A.process_date),0) as process_date, 
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97 with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and avg_width &gt;= 1550
-group by  dateadd(m, datediff(m,0,process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,process_date),0) as process_date,
-cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c with(nolock)
-where process_date between DATEADD(year,-1,getdate()) and getdate() 
-and coil_width &gt;= 1550
-group by  dateadd(m, datediff(m,0,process_date),0) ) as B ON A.process_date = B.process_date and A.process_date = B.process_date)
-as WIWD on ETNG.process_date=WIWD.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.carbon &lt;= 100 
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.carbon &lt;= 100
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
-)
-as EXLC on ETNG.process_date=EXLC.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &lt;= 40
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &lt;= 40
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
- )
-as LSCS on ETNG.process_date=LSCS.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &lt;= 50 and wh95.tensile &gt; 40 
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &lt;= 50 and wh95.tensile &gt; 40 
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
- )
-as MSCS on ETNG.process_date=MSCS.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &lt;= 60 and wh95.tensile &gt; 50 
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &lt;= 60 and wh95.tensile &gt; 50 
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
- )
-as HICS on ETNG.process_date=HICS.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &gt; 60
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.carbon &gt; 100 and wh95.tensile &gt; 60
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
- )
-as VHIS on ETNG.process_date=VHIS.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.carbon &gt; 100 and wh95.steel_grade_code like '6%'
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.carbon &gt; 100 and wh95.steel_grade_code like '6%'
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
- )
-as SUS on ETNG.process_date=SUS.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.inspection_code &lt; '6000' and wh95.inspection_code &gt;= '5000'
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.inspection_code &lt; '6000' and wh95.inspection_code &gt;= '5000'
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
-)
-as NRCQ on ETNG.process_date=NRCQ.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.inspection_code &lt; '5000' and wh95.inspection_code &gt;= '4000'
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.inspection_code &lt; '5000' and wh95.inspection_code &gt;= '4000'
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
- )
-as HICQ on ETNG.process_date=HICQ.process_date 
-left join (
-select dateadd(m, datediff(m,0,A.process_date),0) as process_date,
-round(ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0),2) as total_prod 
-from (
-select dateadd(m, datediff(m,0,wh97.process_date),0) as process_date,
-cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh97  as wh97 with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh97.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and SUBSTRING(wh97.product_no,1, 7) = wh95.coil_no and wh95.inspection_code &lt; '4000' and wh95.inspection_code &gt;= '2000' 
-group by  dateadd(m, datediff(m,0,wh97.process_date),0)) as A 
-FULL OUTER JOIN (
-select dateadd(m, datediff(m,0,wh9c.process_date),0) as process_date, 
-cast(round(SUM(wh9c.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9c  as wh9c with(nolock), h_pmis_wh95  as wh95 with(nolock)
-where wh9c.process_date between DATEADD(year,-1,getdate()) and getdate() 
-and wh9c.coil_no = wh95.coil_no and wh95.inspection_code &lt; '4000' and wh95.inspection_code &gt;= '2000' 
-group by  dateadd(m, datediff(m,0,wh9c.process_date),0)) as B ON A.process_date = B.process_date and A.process_date = B.process_date
-)
-as VHCQ on ETNG.process_date=VHCQ.process_date 
-order by ETNG.process_date  ">
-                        </asp:SqlDataSource>
-        
-     
-    
-    </div>
-   
+        <hPMISWEB:PageHeader ID="ph" runat="server" />
+        <a name="#Home"></a>
+
+        <div class="container-fluid main-content px-4">
+
+            <!-- ========== Á¨¨‰∏ÄÂ±§ CardÔºö#2TNRL ÁîüÁî¢Ë∂®Âã¢Âúñ ========== -->
+            <div class="card-custom mb-4 mt-2">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">üìä #2TNRL ÁîüÁî¢Ë∂®Âã¢</span>
+                    <span class="badge bg-warning text-dark fs-6 shadow-sm">Ë≥áÊñôÂçÄÈñìÔºö<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
+                </div>
+                <div class="chart-card-body">
+                    <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px; width: 100%;">
+                        <div id="echartDim" style="flex: 1 1 48%; min-width: 500px; height: 350px;"></div>
+                        <div id="echartStrength" style="flex: 1 1 48%; min-width: 500px; height: 350px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== Á¨¨‰∫åÂ±§ CardÔºöÂª†ÂçÄÂéöÂ∫¶ËàáÂâçÊÆµË£ΩÁ®ãÈÄ≤Â∫¶ ========== -->
+            <div class="card-custom mb-4">
+                <div class="card-header-custom">
+                    <div>
+                        <span class="fs-4" style="color: white !important;">üìã #2TNRL ÂéöÂ∫¶ËàáÂâçÊÆµË£ΩÁ®ãÈÄ≤Â∫¶</span>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    <!-- ÁΩÆ‰∏≠ÂÆπÂô® -->
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; text-align: left;">
+                            <!-- Âêà‰ΩµÊç≤Ëª∏Ôºöheader sticky-top„ÄÅÂÖ©ÂÄã GridView ÂÖ±Áî®‰∏ÄÂÄã scrollbar„ÄÅfooter sticky-bottom -->
+                            <div class="combined-tbl-scroll">
+                                <div class="ctbl-hdr-row">
+                                    <table id="tblHeader1" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="gvhs_data">Êúà‰ªΩ</td>
+                                            <td class="gvhs_data">Êù±Á™ÑËñÑÊñô<br />(ETNG)</td>
+                                            <td class="gvhs_data">Ë•øÂØ¨ËñÑÊñô<br />(WTNG)</td>
+                                            <td class="gvhs_data">‰∏≠ÂØ¨Êñô<br />(NTNG)</td>
+                                            <td class="gvhs_data">ÂåóËñÑ‰∏≠Âéö<br />(NTCG)</td>
+                                            <td class="gvhs_data">Êù±‰∏≠ÂéöÊñô<br />(ETCG)</td>
+                                            <td class="gvhs_data">‰∏≠Â∞∫ÂØ∏<br />(MDSZ)</td>
+                                        </tr>
+                                    </table>
+                                    <table id="tblHeader3" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="gvhs_data">Á™ÑÂØ¨<br />(NRWD)</td>
+                                            <td class="gvhs_data">‰∏≠Á≠âÂØ¨<br />(MDWD)</td>
+                                            <td class="gvhs_data">ÂØ¨ÂØ¨<br />(WIWD)</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="ctbl-data-row">
+                                    <asp:GridView ID="gvMonth1" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None" ShowHeader="False">
+                                        <RowStyle CssClass="gvrs" /><SelectedRowStyle CssClass="gvsrs" />
+                                    </asp:GridView>
+                                    <asp:GridView ID="gvMonth3" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None" ShowHeader="False">
+                                        <RowStyle CssClass="gvrs" /><SelectedRowStyle CssClass="gvsrs" />
+                                    </asp:GridView>
+                                </div>
+                                <div class="ctbl-ftr-row">
+                                    <table id="tblFooter1" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="data"><asp:Label ID="lblMonth1" runat="server" CssClass="pmisdata"></asp:Label>ÊúàÁµ±Ë®à</td>
+                                            <td class="data"><asp:Label ID="lblETNG" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblWTNG" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblNTNG" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblNTCG" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblETCG" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblMDSZ" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                        </tr>
+                                    </table>
+                                    <table id="tblFooter3" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="data"><asp:Label ID="lblNRWD" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblMDWD" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblWIWD" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== Á¨¨‰∏âÂ±§ CardÔºöÂª†ÂçÄÂº∑Â∫¶ËàáË°®Èù¢Ë£ΩÁ®ãÈÄ≤Â∫¶ ========== -->
+            <div class="card-custom mb-5">
+                <div class="card-header-custom">
+                    <div>
+                        <span class="fs-4" style="color: white !important;">üìã #2TNRL Âº∑Â∫¶ËàáË°®Èù¢Ë£ΩÁ®ãÈÄ≤Â∫¶</span>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    <div style="text-align: center;">
+                        <div style="display: inline-block; text-align: left;">
+                            <div class="combined-tbl-scroll">
+                                <div class="ctbl-hdr-row">
+                                    <table id="tblHeader2" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="gvhs_data">Êúà‰ªΩ</td>
+                                            <td class="gvhs_data">EXLC</td>
+                                            <td class="gvhs_data">LSCS</td>
+                                            <td class="gvhs_data">MSCS</td>
+                                            <td class="gvhs_data">HICS</td>
+                                            <td class="gvhs_data">VHIS</td>
+                                            <td class="gvhs_data">SUS</td>
+                                        </tr>
+                                    </table>
+                                    <table id="tblHeader4" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="gvhs_data">NRCQ</td>
+                                            <td class="gvhs_data">HICQ</td>
+                                            <td class="gvhs_data">VHCQ</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="ctbl-data-row">
+                                    <asp:GridView ID="gvMonth2" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None" ShowHeader="False">
+                                        <RowStyle CssClass="gvrs" /><SelectedRowStyle CssClass="gvsrs" />
+                                    </asp:GridView>
+                                    <asp:GridView ID="gvMonth4" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None" ShowHeader="False">
+                                        <RowStyle CssClass="gvrs" /><SelectedRowStyle CssClass="gvsrs" />
+                                    </asp:GridView>
+                                </div>
+                                <div class="ctbl-ftr-row">
+                                    <table id="tblFooter2" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="data"><asp:Label ID="lblMonth2" runat="server" CssClass="pmisdata"></asp:Label>ÊúàÁµ±Ë®à</td>
+                                            <td class="data"><asp:Label ID="lblEXLC" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblLSCS" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblMSCS" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblHICS" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblVHIS" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblSUS"  runat="server" CssClass="pmisdata"></asp:Label></td>
+                                        </tr>
+                                    </table>
+                                    <table id="tblFooter4" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="data"><asp:Label ID="lblNRCQ" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblHICQ" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                            <td class="data"><asp:Label ID="lblVHCQ" runat="server" CssClass="pmisdata"></asp:Label></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </form>
+    <script src="libs/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

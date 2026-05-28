@@ -1,62 +1,229 @@
 ﻿Imports System.Data.SqlClient
+Imports System.Collections.Generic
 
 Partial Public Class _3TNRL_Production
     Inherits System.Web.UI.Page
     Private Const PAGE_ID = "3404"
     Private Conn As SqlConnection
-    Private strACCESS As String
-    Private chartDate As Date
-    Dim adapter1 As SqlDataAdapter = Nothing
     Private Const EXLC_C As Integer = 100
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        Dim count1 As Integer = WebChart1.Chart.Series.Count
-        For i As Integer = 0 To count1 - 1
-            WebChart1.Chart.Series(i).CheckDataSource()
-            WebChart1.Chart.Series(i).RefreshSeries()
-        Next
         If Page.IsPostBack = False Then
-            '設定Title
+            ' 設定 Title
             setTitle(Me, PAGE_ID)
-            Dim args1 As New DataSourceSelectArguments
-            Dim DR1 As DataView = SqlDataSource1.Select(args1)
-            Dim count As Integer = DR1.Count
-            LabelStartdate.Text = Format(CDate(DR1(0)(0).ToString), "yyyy/MM")
-            LabelEnddate.Text = Format(CDate(DR1(count - 1)(0).ToString), "yyyy/MM")
+
+            ' 設定資料區間標題
+            LabelStartdate.Text = Date.Today.AddMonths(-11).ToString("yyyy/MM")
+            LabelEnddate.Text = Date.Today.ToString("yyyy/MM")
+
             Mainprocess()
         End If
     End Sub
 
-    Private Sub TNRL3_Table1()
+    Private Sub Mainprocess()
+        Conn = New SqlConnection(getConnStr(Application("ConnStr")))
+        ' 本月日報表
+        TNRL_Table1()
+        TNRL_Table2()
+        ' ECharts 趨勢圖資料
+        BuildChartData()
+    End Sub
+
+    ''' <summary>
+    ''' 建立 ECharts 趨勢圖 JSON 資料（近 12 個月）
+    ''' </summary>
+    Private Sub BuildChartData()
+        Dim startYYYYMM As String = Date.Today.AddMonths(-11).ToString("yyyyMM")
+        Dim endYYYYMM As String = Date.Today.ToString("yyyyMM")
+
+        ' SQL1：厚度與前段製程（12個月）
+        Dim sql1 As String =
+            "SELECT SUBSTRING(CONVERT(char, product_date, 112), 1, 6) AS yyyymm, " &
+            "SUM(CASE WHEN target_width <= 1260 AND target_thickness <= 1500 THEN coil_weight ELSE 0 END)/1000.0 AS ETNG, " &
+            "SUM(CASE WHEN target_width >= 1500 AND target_thickness <= 2300 THEN coil_weight ELSE 0 END)/1000.0 AS WTNG, " &
+            "SUM(CASE WHEN target_width > 1260 AND target_width < 1500 AND target_thickness >= 1500 AND target_thickness <= 1900 THEN coil_weight ELSE 0 END)/1000.0 AS NTNG, " &
+            "SUM(CASE WHEN target_thickness >= 6000 AND target_thickness <= 9900 THEN coil_weight ELSE 0 END)/1000.0 AS NTCG, " &
+            "SUM(CASE WHEN target_thickness > 9900 THEN coil_weight ELSE 0 END)/1000.0 AS ETCG, " &
+            "SUM(coil_weight)/1000.0 AS PA, " &
+            "SUM(CASE WHEN target_width <= 950 THEN coil_weight ELSE 0 END)/1000.0 AS NRWD, " &
+            "SUM(CASE WHEN target_width > 950 AND target_width < 1550 THEN coil_weight ELSE 0 END)/1000.0 AS MDWD, " &
+            "SUM(CASE WHEN target_width >= 1550 THEN coil_weight ELSE 0 END)/1000.0 AS WIWD " &
+            "FROM h_pmis_coil_info " &
+            "WHERE SUBSTRING(CONVERT(char, product_date, 112), 1, 6) BETWEEN '" & startYYYYMM & "' AND '" & endYYYYMM & "' AND reject_reason = '00' " &
+            "GROUP BY SUBSTRING(CONVERT(char, product_date, 112), 1, 6) ORDER BY yyyymm"
+
+        ' SQL2：強度與表面製程（12個月）
+        Dim sql2 As String =
+            "SELECT SUBSTRING(CONVERT(char, product_date, 112), 1, 6) AS yyyymm, " &
+            "SUM(CASE WHEN c <= " & EXLC_C & " THEN coil_weight ELSE 0 END)/1000.0 AS EXLC, " &
+            "SUM(CASE WHEN tensile_s <= 40 AND c > " & EXLC_C & " THEN coil_weight ELSE 0 END)/1000.0 AS LSCS, " &
+            "SUM(CASE WHEN tensile_s > 40 AND tensile_s <= 50 THEN coil_weight ELSE 0 END)/1000.0 AS MSCS, " &
+            "SUM(CASE WHEN tensile_s > 50 AND tensile_s <= 60 THEN coil_weight ELSE 0 END)/1000.0 AS HICS, " &
+            "SUM(CASE WHEN tensile_s > 60 THEN coil_weight ELSE 0 END)/1000.0 AS VHIS, " &
+            "SUM(CASE WHEN steel_gcode like '6%' THEN coil_weight ELSE 0 END)/1000.0 AS SUS, " &
+            "SUM(CASE WHEN inspection_code >= '5000' AND inspection_code < '6000' THEN coil_weight ELSE 0 END)/1000.0 AS NRCQ, " &
+            "SUM(CASE WHEN inspection_code >= '4000' AND inspection_code < '5000' THEN coil_weight ELSE 0 END)/1000.0 AS HICQ, " &
+            "SUM(CASE WHEN inspection_code >= '2000' AND inspection_code < '4000' THEN coil_weight ELSE 0 END)/1000.0 AS VHCQ " &
+            "FROM h_pmis_coil_info " &
+            "WHERE SUBSTRING(CONVERT(char, product_date, 112), 1, 6) BETWEEN '" & startYYYYMM & "' AND '" & endYYYYMM & "' AND reject_reason = '00' " &
+            "GROUP BY SUBSTRING(CONVERT(char, product_date, 112), 1, 6) ORDER BY yyyymm"
+
+        Conn.Open()
+        Dim dt1 As DataTable = execQuery(sql1, "", Conn)
+        Dim dt2 As DataTable = execQuery(sql2, "", Conn)
+        Conn.Close()
+
+        ' 確保近 12 個月皆有預設值，避免缺月
+        Dim dictDim As New Dictionary(Of String, Double())
+        Dim dictStr As New Dictionary(Of String, Double())
+        Dim xAxis As New List(Of String)()
+
+        For i As Integer = -11 To 0
+            Dim m As String = Date.Today.AddMonths(i).ToString("yyyyMM")
+            xAxis.Add("'" & Date.Today.AddMonths(i).ToString("yyyy/MM") & "'")
+            dictDim(m) = New Double() {0, 0, 0, 0, 0, 0, 0, 0, 0}
+            dictStr(m) = New Double() {0, 0, 0, 0, 0, 0, 0, 0, 0}
+        Next
+
+        If dt1 IsNot Nothing Then
+            For i As Integer = 0 To dt1.Rows.Count - 1
+                Dim m As String = dt1.Rows(i)("yyyymm").ToString()
+                If dictDim.ContainsKey(m) Then
+                    Dim p_etng = If(IsDBNull(dt1.Rows(i)("ETNG")), 0, Convert.ToDouble(dt1.Rows(i)("ETNG")))
+                    Dim p_wtng = If(IsDBNull(dt1.Rows(i)("WTNG")), 0, Convert.ToDouble(dt1.Rows(i)("WTNG")))
+                    Dim p_ntng = If(IsDBNull(dt1.Rows(i)("NTNG")), 0, Convert.ToDouble(dt1.Rows(i)("NTNG")))
+                    Dim p_ntcg = If(IsDBNull(dt1.Rows(i)("NTCG")), 0, Convert.ToDouble(dt1.Rows(i)("NTCG")))
+                    Dim p_etcg = If(IsDBNull(dt1.Rows(i)("ETCG")), 0, Convert.ToDouble(dt1.Rows(i)("ETCG")))
+                    Dim p_pa   = If(IsDBNull(dt1.Rows(i)("PA")),   0, Convert.ToDouble(dt1.Rows(i)("PA")))
+                    Dim p_mdsz = p_pa - p_etng - p_wtng - p_ntng - p_ntcg - p_etcg
+                    Dim p_nrwd = If(IsDBNull(dt1.Rows(i)("NRWD")), 0, Convert.ToDouble(dt1.Rows(i)("NRWD")))
+                    Dim p_mdwd = If(IsDBNull(dt1.Rows(i)("MDWD")), 0, Convert.ToDouble(dt1.Rows(i)("MDWD")))
+                    Dim p_wiwd = If(IsDBNull(dt1.Rows(i)("WIWD")), 0, Convert.ToDouble(dt1.Rows(i)("WIWD")))
+                    dictDim(m) = New Double() {p_etng, p_wtng, p_ntng, p_ntcg, p_etcg, p_mdsz, p_nrwd, p_mdwd, p_wiwd}
+                End If
+            Next
+        End If
+
+        If dt2 IsNot Nothing Then
+            For i As Integer = 0 To dt2.Rows.Count - 1
+                Dim m As String = dt2.Rows(i)("yyyymm").ToString()
+                If dictStr.ContainsKey(m) Then
+                    Dim p_exlc = If(IsDBNull(dt2.Rows(i)("EXLC")), 0, Convert.ToDouble(dt2.Rows(i)("EXLC")))
+                    Dim p_lscs = If(IsDBNull(dt2.Rows(i)("LSCS")), 0, Convert.ToDouble(dt2.Rows(i)("LSCS")))
+                    Dim p_mscs = If(IsDBNull(dt2.Rows(i)("MSCS")), 0, Convert.ToDouble(dt2.Rows(i)("MSCS")))
+                    Dim p_hics = If(IsDBNull(dt2.Rows(i)("HICS")), 0, Convert.ToDouble(dt2.Rows(i)("HICS")))
+                    Dim p_vhis = If(IsDBNull(dt2.Rows(i)("VHIS")), 0, Convert.ToDouble(dt2.Rows(i)("VHIS")))
+                    Dim p_sus  = If(IsDBNull(dt2.Rows(i)("SUS")),  0, Convert.ToDouble(dt2.Rows(i)("SUS")))
+                    Dim p_nrcq = If(IsDBNull(dt2.Rows(i)("NRCQ")), 0, Convert.ToDouble(dt2.Rows(i)("NRCQ")))
+                    Dim p_hicq = If(IsDBNull(dt2.Rows(i)("HICQ")), 0, Convert.ToDouble(dt2.Rows(i)("HICQ")))
+                    Dim p_vhcq = If(IsDBNull(dt2.Rows(i)("VHCQ")), 0, Convert.ToDouble(dt2.Rows(i)("VHCQ")))
+                    dictStr(m) = New Double() {p_exlc, p_lscs, p_mscs, p_hics, p_vhis, p_sus, p_nrcq, p_hicq, p_vhcq}
+                End If
+            Next
+        End If
+
+        ' 組合 ECharts JSON 字串
+        Dim months As New List(Of String)(dictDim.Keys)
+        months.Sort()
+
+        Dim etng As New List(Of String)()
+        Dim wtng As New List(Of String)()
+        Dim ntng As New List(Of String)()
+        Dim ntcg As New List(Of String)()
+        Dim etcg As New List(Of String)()
+        Dim mdsz As New List(Of String)()
+        Dim nrwd As New List(Of String)()
+        Dim mdwd As New List(Of String)()
+        Dim wiwd As New List(Of String)()
+        Dim exlc As New List(Of String)()
+        Dim lscs As New List(Of String)()
+        Dim mscs As New List(Of String)()
+        Dim hics As New List(Of String)()
+        Dim vhis As New List(Of String)()
+        Dim sus  As New List(Of String)()
+        Dim nrcq As New List(Of String)()
+        Dim hicq As New List(Of String)()
+        Dim vhcq As New List(Of String)()
+
+        For Each m As String In months
+            Dim d() As Double = dictDim(m)
+            Dim s() As Double = dictStr(m)
+            etng.Add(d(0).ToString("0.00"))
+            wtng.Add(d(1).ToString("0.00"))
+            ntng.Add(d(2).ToString("0.00"))
+            ntcg.Add(d(3).ToString("0.00"))
+            etcg.Add(d(4).ToString("0.00"))
+            mdsz.Add(d(5).ToString("0.00"))
+            nrwd.Add(d(6).ToString("0.00"))
+            mdwd.Add(d(7).ToString("0.00"))
+            wiwd.Add(d(8).ToString("0.00"))
+            exlc.Add(s(0).ToString("0.00"))
+            lscs.Add(s(1).ToString("0.00"))
+            mscs.Add(s(2).ToString("0.00"))
+            hics.Add(s(3).ToString("0.00"))
+            vhis.Add(s(4).ToString("0.00"))
+            sus.Add(s(5).ToString("0.00"))
+            nrcq.Add(s(6).ToString("0.00"))
+            hicq.Add(s(7).ToString("0.00"))
+            vhcq.Add(s(8).ToString("0.00"))
+        Next
+
+        Dim script As String =
+            "var chartData = {" &
+            "xAxis: [" & String.Join(",", xAxis) & "]," &
+            "etng:[" & String.Join(",", etng) & "]," &
+            "wtng:[" & String.Join(",", wtng) & "]," &
+            "ntng:[" & String.Join(",", ntng) & "]," &
+            "ntcg:[" & String.Join(",", ntcg) & "]," &
+            "etcg:[" & String.Join(",", etcg) & "]," &
+            "mdsz:[" & String.Join(",", mdsz) & "]," &
+            "nrwd:[" & String.Join(",", nrwd) & "]," &
+            "mdwd:[" & String.Join(",", mdwd) & "]," &
+            "wiwd:[" & String.Join(",", wiwd) & "]," &
+            "exlc:[" & String.Join(",", exlc) & "]," &
+            "lscs:[" & String.Join(",", lscs) & "]," &
+            "mscs:[" & String.Join(",", mscs) & "]," &
+            "hics:[" & String.Join(",", hics) & "]," &
+            "vhis:[" & String.Join(",", vhis) & "]," &
+            "sus:[" & String.Join(",", sus) & "]," &
+            "nrcq:[" & String.Join(",", nrcq) & "]," &
+            "hicq:[" & String.Join(",", hicq) & "]," &
+            "vhcq:[" & String.Join(",", vhcq) & "]" &
+            "};"
+
+        ClientScript.RegisterStartupScript(Me.GetType(), "EChartsData", script, True)
+    End Sub
+
+    ''' <summary>
+    ''' 厚度/前段製程：本月日報表 (gvMonth1 + gvMonth3)
+    ''' </summary>
+    Private Sub TNRL_Table1()
         Dim dtDataTable As New DataTable
         Dim dtdatatable1 As New DataTable
         Dim dtTmp As DataTable = Nothing
         Dim dr As DataRow
         Dim strMonthTitle() As String = {"dimension", "ETNG", "WTNG", "NTNG", "NTCG", "ETCG", "MDSZ"}
         Dim strMonthTitle1() As String = {"NRWD", "MDWD", "WIWD"}
-        Dim strACCESS As String = Nothing
         Dim tmpValue As Double = 0
-
         Dim calTmp As Double
 
         For i As Integer = 0 To strMonthTitle.Length - 1
             dtDataTable.Columns.Add(New DataColumn(strMonthTitle(i)))
         Next
-
         For i As Integer = 0 To strMonthTitle1.Length - 1
             dtdatatable1.Columns.Add(New DataColumn(strMonthTitle1(i)))
         Next
 
-        For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
+        Dim daysInMonth As Integer = Date.DaysInMonth(Year(Today), Month(Today))
+        For i As Integer = 0 To daysInMonth - 1
             dr = dtDataTable.NewRow
             dtDataTable.Rows.Add(dr)
-            dr(0) = Date.Today.ToString("MM") + "月" + (i + 1).ToString("d2") + "日"
+            dr(0) = Date.Today.ToString("MM") & "月" & (i + 1).ToString("d2") & "日"
             For j As Integer = 1 To strMonthTitle.Length - 1
                 dtDataTable.Rows(i).Item(j) = "0.00"
             Next
         Next
-
-        For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
+        For i As Integer = 0 To daysInMonth - 1
             dr = dtdatatable1.NewRow
             dtdatatable1.Rows.Add(dr)
             For j As Integer = 0 To strMonthTitle1.Length - 1
@@ -67,22 +234,20 @@ Partial Public Class _3TNRL_Production
         lblMonth1.Text = Date.Today.ToString("MM")
 
         Conn.Open()
-        'ETNG
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_width <= 1260 and avg_thickness <= 1500 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_width <= 1260 and coil_thickness <= 1500 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
 
-
+        ' ETNG
+        Dim strACCESS As String
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_width <= 1260 and avg_thickness <= 1500 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_width <= 1260 and coil_thickness <= 1500 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -91,20 +256,18 @@ Partial Public Class _3TNRL_Production
         Next
         lblETNG.Text = calTmp.ToString("0.00")
 
-        'WTNG
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_width >= 1500 and avg_thickness <= 2300 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_width >= 1500 and coil_thickness <= 2300 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' WTNG
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_width >= 1500 and avg_thickness <= 2300 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_width >= 1500 and coil_thickness <= 2300 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -113,22 +276,18 @@ Partial Public Class _3TNRL_Production
         Next
         lblWTNG.Text = calTmp.ToString("0.00")
 
-        'NTNG
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_width > 1260 and avg_width < 1500 " & _
-                        "and avg_thickness >= 1500 and avg_thickness <= 1900 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_width > 1260 and coil_width < 1500 " & _
-                        "and coil_thickness >= 1500 and coil_thickness <= 1900 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' NTNG
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_width > 1260 and avg_width < 1500 and avg_thickness >= 1500 and avg_thickness <= 1900 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_width > 1260 and coil_width < 1500 and coil_thickness >= 1500 and coil_thickness <= 1900 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -137,20 +296,18 @@ Partial Public Class _3TNRL_Production
         Next
         lblNTNG.Text = calTmp.ToString("0.00")
 
-        'NTCG
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_thickness >= 6000 and avg_thickness <= 9900 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_thickness >= 6000 and coil_thickness <= 9900 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' NTCG
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_thickness >= 6000 and avg_thickness <= 9900 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_thickness >= 6000 and coil_thickness <= 9900 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -159,20 +316,18 @@ Partial Public Class _3TNRL_Production
         Next
         lblNTCG.Text = calTmp.ToString("0.00")
 
-        'ETCG
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_thickness > 9900 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_thickness > 9900 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' ETCG
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_thickness > 9900 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_thickness > 9900 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -181,30 +336,27 @@ Partial Public Class _3TNRL_Production
         Next
         lblETCG.Text = calTmp.ToString("0.00")
 
-        'MDSZ
-        ' PA - ETNG - WTNG - NTNG - NTCG - ETCG
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' MDSZ = PA - ETNG - WTNG - NTNG - NTCG - ETCG
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-        If dtTmp IsNot Nothing Then
-            If dtTmp.Rows.Count > 0 Then
-                calTmp = 0
-                For i As Integer = 0 To dtTmp.Rows.Count - 1
-                    With dtDataTable.Rows(Val(dtTmp.Rows(i).Item(0)) - 1)
-                        .Item(6) = (Val((Val(dtTmp.Rows(i).Item(1)) / 1000).ToString("0.00")) - Val(.Item(5)) - Val(.Item(4)) - Val(.Item(3)) - Val(.Item(2)) - Val(.Item(1))).ToString("0.00")
-                        .Item(6) = IIf(Val(.Item(6)) < 0, "0.00", .Item(6))
-                        calTmp += Val(.Item(6))
-                    End With
-                Next
-            End If
-            dtTmp.Dispose()
+        If dtTmp IsNot Nothing AndAlso dtTmp.Rows.Count > 0 Then
+            calTmp = 0
+            For i As Integer = 0 To dtTmp.Rows.Count - 1
+                Dim dayIdx As Integer = CInt(dtTmp.Rows(i).Item(0)) - 1
+                With dtDataTable.Rows(dayIdx)
+                    Dim paVal As Double = Val(dtTmp.Rows(i).Item(1)) / 1000
+                    Dim mdszVal As Double = paVal - Val(.Item(1)) - Val(.Item(2)) - Val(.Item(3)) - Val(.Item(4)) - Val(.Item(5))
+                    .Item(6) = IIf(mdszVal < 0, "0.00", mdszVal.ToString("0.00"))
+                    calTmp += Val(.Item(6))
+                End With
+            Next
         End If
         lblMDSZ.Text = calTmp.ToString("0.00")
 
@@ -212,26 +364,18 @@ Partial Public Class _3TNRL_Production
         gvMonth1.DataBind()
         gvMonth1.HeaderRow.Visible = False
 
-        gvMonth1.Rows(0).Cells(0).Width = 100
-
-        For i As Integer = 1 To 6
-            gvMonth1.Rows(0).Cells(i).Width = 80
-        Next
-
-        'NRWD
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_width <= 950 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_width <= 950 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' NRWD
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_width <= 950 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_width <= 950 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -240,20 +384,18 @@ Partial Public Class _3TNRL_Production
         Next
         lblNRWD.Text = calTmp.ToString("0.00")
 
-        'MDWD
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_width > 950 and avg_width < 1550 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_width > 950 and coil_width < 1550 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' MDWD
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_width > 950 and avg_width < 1550 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_width > 950 and coil_width < 1550 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -262,20 +404,18 @@ Partial Public Class _3TNRL_Production
         Next
         lblMDWD.Text = calTmp.ToString("0.00")
 
-        'WIWD
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and avg_width >= 1550 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as A " & _
-                    "FULL OUTER JOIN " & _
-                        "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-                        "where shift_date like '{0}%' " & _
-                        "and coil_width >= 1550 " & _
-                        "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' WIWD
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "where shift_date like '{0}%' and avg_width >= 1550 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "where shift_date like '{0}%' and coil_width >= 1550 " &
+            "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -288,43 +428,39 @@ Partial Public Class _3TNRL_Production
         gvMonth3.DataBind()
         gvMonth3.HeaderRow.Visible = False
 
-        For i As Integer = 0 To 2
-            gvMonth3.Rows(0).Cells(i).Width = 80
-        Next
-
         Conn.Close()
     End Sub
 
-    Private Sub TNRL3_Table2()
+    ''' <summary>
+    ''' 強度/表面製程：本月日報表 (gvMonth2 + gvMonth4)
+    ''' </summary>
+    Private Sub TNRL_Table2()
         Dim dtDataTable As New DataTable
         Dim dtdatatable1 As New DataTable
         Dim dtTmp As DataTable = Nothing
         Dim dr As DataRow
-        Dim strMonthTitle() As String = {"strength and quality", "EXLC", "LSCS", "MSCS", "HICS", "VHIS", "SUS"}
+        Dim strMonthTitle() As String = {"dimension", "EXLC", "LSCS", "MSCS", "HICS", "VHIS", "SUS"}
         Dim strMonthTitle1() As String = {"NRCQ", "HICQ", "VHCQ"}
-        Dim strACCESS As String = Nothing
         Dim tmpValue As Double = 0
-
         Dim calTmp As Double
 
         For i As Integer = 0 To strMonthTitle.Length - 1
             dtDataTable.Columns.Add(New DataColumn(strMonthTitle(i)))
         Next
-
         For i As Integer = 0 To strMonthTitle1.Length - 1
             dtdatatable1.Columns.Add(New DataColumn(strMonthTitle1(i)))
         Next
 
-        For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
+        Dim daysInMonth As Integer = Date.DaysInMonth(Year(Today), Month(Today))
+        For i As Integer = 0 To daysInMonth - 1
             dr = dtDataTable.NewRow
             dtDataTable.Rows.Add(dr)
-            dr(0) = Date.Today.ToString("MM") + "月" + (i + 1).ToString("d2") + "日"
+            dr(0) = Date.Today.ToString("MM") & "月" & (i + 1).ToString("d2") & "日"
             For j As Integer = 1 To strMonthTitle.Length - 1
                 dtDataTable.Rows(i).Item(j) = "0.00"
             Next
         Next
-
-        For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
+        For i As Integer = 0 To daysInMonth - 1
             dr = dtdatatable1.NewRow
             dtdatatable1.Rows.Add(dr)
             For j As Integer = 0 To strMonthTitle1.Length - 1
@@ -335,21 +471,22 @@ Partial Public Class _3TNRL_Production
         lblMonth2.Text = Date.Today.ToString("MM")
 
         Conn.Open()
-        'EXLC
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.carbon <=" + EXLC_C.ToString + _
-                                        " Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.carbon <=" + EXLC_C.ToString + _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
-        dtTmp = execQuery(strACCESS, "", Conn)
+        Dim strACCESS As String
 
+        ' EXLC（碳含量 <= 100）
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.carbon <= " & EXLC_C.ToString() &
+            " Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.carbon <= " & EXLC_C.ToString() &
+            " Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
+        dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -358,21 +495,20 @@ Partial Public Class _3TNRL_Production
         Next
         lblEXLC.Text = calTmp.ToString("0.00")
 
-        'LSCS
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + " and wh81.tensile <= 40 " & _
-                                        " Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + " and wh81.tensile <= 40 " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' LSCS（tensile <= 40, carbon > 100）
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile <= 40 " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile <= 40 " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -381,23 +517,20 @@ Partial Public Class _3TNRL_Production
         Next
         lblLSCS.Text = calTmp.ToString("0.00")
 
-        'MSCS
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.tensile > 40 and wh81.tensile <= 50 " & _
-                                        "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.tensile > 40 and wh81.tensile <= 50 " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' MSCS（tensile 40~50）
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 40 and wh91.tensile <= 50 " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 40 and wh91.tensile <= 50 " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -406,23 +539,20 @@ Partial Public Class _3TNRL_Production
         Next
         lblMSCS.Text = calTmp.ToString("0.00")
 
-        'HICS
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.tensile > 50 and wh81.tensile <= 60 " & _
-                                        "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.tensile > 50 and wh81.tensile <= 60 " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' HICS（tensile 50~60）
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 50 and wh91.tensile <= 60 " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 50 and wh91.tensile <= 60 " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -431,23 +561,20 @@ Partial Public Class _3TNRL_Production
         Next
         lblHICS.Text = calTmp.ToString("0.00")
 
-        'VHIS
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.tensile > 60 " & _
-                                        "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.tensile > 60 " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' VHIS（tensile > 60）
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 60 " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 60 " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -456,23 +583,20 @@ Partial Public Class _3TNRL_Production
         Next
         lblVHIS.Text = calTmp.ToString("0.00")
 
-        'SUS
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.steel_grade_code like '6%' " & _
-                                        "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.carbon > " + EXLC_C.ToString + _
-                                        " and wh81.steel_grade_code like '6%' " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' SUS（鋼種代碼 6%）
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.steel_grade_code like '6%' " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.steel_grade_code like '6%' " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -485,27 +609,20 @@ Partial Public Class _3TNRL_Production
         gvMonth2.DataBind()
         gvMonth2.HeaderRow.Visible = False
 
-        gvMonth2.Rows(0).Cells(0).Width = 100
-
-        For i As Integer = 1 To 6
-            gvMonth2.Rows(0).Cells(i).Width = 80
-        Next
-
-        'NRCQ
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " & _
-                                        "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' NRCQ
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.inspection_code < '6000' and wh91.inspection_code >= '5000' " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.inspection_code < '6000' and wh91.inspection_code >= '5000' " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -514,21 +631,20 @@ Partial Public Class _3TNRL_Production
         Next
         lblNRCQ.Text = calTmp.ToString("0.00")
 
-        'HICQ
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " & _
-                                        "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' HICQ
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.inspection_code < '5000' and wh91.inspection_code >= '4000' " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.inspection_code < '5000' and wh91.inspection_code >= '4000' " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -537,21 +653,20 @@ Partial Public Class _3TNRL_Production
         Next
         lblHICQ.Text = calTmp.ToString("0.00")
 
-        'VHCQ
-        strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-                                        "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " & _
-                                        "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-                                        "and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " & _
-                                        "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " & _
-                                  "FULL OUTER JOIN " & _
-                                        "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " & _
-                                        "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " & _
-                                        "and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " & _
-                                        "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B " & _
-                                  "ON A.product_day = B.product_day", _
-                        Now.ToString("yyyyMM"))
+        ' VHCQ
+        strACCESS = String.Format(
+            "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
+            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
+            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
+            "and wh91.inspection_code < '4000' and wh91.inspection_code >= '2000' " &
+            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "FULL OUTER JOIN " &
+            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
+            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
+            "and wh91.inspection_code < '4000' and wh91.inspection_code >= '2000' " &
+            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
-
         calTmp = 0
         For i As Integer = 0 To dtTmp.Rows.Count - 1
             tmpValue = Val(dtTmp.Rows(i).Item(1)) / 1000
@@ -564,617 +679,7 @@ Partial Public Class _3TNRL_Production
         gvMonth4.DataBind()
         gvMonth4.HeaderRow.Visible = False
 
-        For i As Integer = 0 To 2
-            gvMonth4.Rows(0).Cells(i).Width = 80
-        Next
-
         Conn.Close()
     End Sub
 
-    'Private Sub TeeChartData1()
-    '    Dim strDate As New StringBuilder
-    '    Dim strETNG As New StringBuilder
-    '    Dim strWTNG As New StringBuilder
-    '    Dim strNTNG As New StringBuilder
-    '    Dim strNTCG As New StringBuilder
-    '    Dim strETCG As New StringBuilder
-    '    Dim strMDSZ As New StringBuilder
-
-    '    Dim strNRWD As New StringBuilder
-    '    Dim strMDWD As New StringBuilder
-    '    Dim strWIWD As New StringBuilder
-
-    '    Dim dtTmp As DataTable = Nothing
-    '    Dim tmpDate As Date
-    '    Dim dtOverall As New DataTable
-    '    Dim strTitle() As String = {"Year", "Month", "ETNG", "WTNG", "NTNG", "NTCG", "ETCG", "MDSZ", "NRWD", "MDWD", "WTWD"}
-    '    Dim dr As DataRow
-    '    Dim rowNum As Integer
-
-    '    For i As Integer = 0 To strTitle.Length - 1
-    '        dtOverall.Columns.Add(New DataColumn())
-    '    Next
-
-    '    'layout
-    '    For i As Integer = 0 To 12
-    '        dr = dtOverall.NewRow
-    '        dtOverall.Rows.Add(dr)
-    '    Next
-
-    '    tmpDate = chartDate
-    '    For i As Integer = 0 To 12
-    '        dtOverall.Rows(i).Item(0) = tmpDate.AddMonths(i).Year.ToString
-    '        dtOverall.Rows(i).Item(1) = tmpDate.AddMonths(i).Month.ToString
-    '        For j As Integer = 2 To strTitle.Length - 1
-    '            dtOverall.Rows(i).Item(j) = "0"
-    '        Next
-    '    Next
-
-    '    Conn.Open()
-    '    'ETNG
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_width <= 1260 and avg_thickness <= 1500 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_width <= 1260 and coil_thickness <= 1500 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(2) = (Val(dtTmp.Rows(i).Item(2)) / 1000).ToString("0.00")
-    '    Next
-
-    '    'WTNG
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_width >= 1500 and avg_thickness <= 2300 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_width >= 1500 and coil_thickness <= 2300 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(3) = (Val(dtTmp.Rows(i).Item(2)) / 1000).ToString("0.00")
-    '    Next
-
-    '    'NTNG
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_width > 1260 and avg_width < 1500 " & _
-    '                                "and avg_thickness >= 1500 and avg_thickness <= 1900 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_width > 1260 and coil_width < 1500 " & _
-    '                                "and coil_thickness >= 1500 and coil_thickness <= 1900 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(4) = (Val(dtTmp.Rows(i).Item(2)) / 1000).ToString("0.00")
-    '    Next
-
-    '    'NTCG
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_thickness >= 6000 and avg_thickness <= 9900 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_thickness >= 6000 and coil_thickness <= 9900 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(5) = (Val(dtTmp.Rows(i).Item(2)) / 1000).ToString("0.00")
-    '    Next
-
-    '    'ETCG
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_thickness > 9900 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_thickness > 9900 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(6) = (Val(dtTmp.Rows(i).Item(2)) / 1000).ToString("0.00")
-    '    Next
-
-    '    ' MDSZ
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        With dtOverall.Rows(rowNum)
-    '            .Item(7) = ((Val(Val(dtTmp.Rows(i).Item(2)) / 1000).ToString("0.00")) - Val(.Item(6)) - Val(.Item(5)) - Val(.Item(4)) - Val(.Item(3)) - Val(.Item(2))).ToString("0.00")
-    '        End With
-    '    Next
-
-    '    'NRWD
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_width <= 950 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_width <= 950 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(8) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'MDWD
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_width >= 950 and avg_width <1550 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_width >= 950 and coil_width < 1550 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(9) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'WIWD
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(g_weight) as product_weight from h_pmis_wh83 where " & _
-    '                                "shift_date between '{0}' and '{1}' " & _
-    '                                "and avg_width >= 1550 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(shift_date, 1, 4) as PYear, SUBSTRING(shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(gross_weight) as product_weight from h_pmis_wh86 " & _
-    '                                "where shift_date between '{0}' and '{1}' " & _
-    '                                "and coil_width >= 1550 " & _
-    '                                "Group by SUBSTRING(shift_date, 1, 4), SUBSTRING(shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(10) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    Conn.Close()
-
-    '    '傳入前台控制項
-
-    '    For i As Integer = 0 To dtOverall.Rows.Count - 1
-    '        strDate.Append(tmpDate.AddMonths(i).ToString("MM") + "月,")
-    '        strETNG.Append(dtOverall.Rows(i).Item(2).ToString + ",")
-    '        strWTNG.Append(dtOverall.Rows(i).Item(3).ToString + ",")
-    '        strNTNG.Append(dtOverall.Rows(i).Item(4).ToString + ",")
-    '        strNTCG.Append(dtOverall.Rows(i).Item(5).ToString + ",")
-    '        strETCG.Append(dtOverall.Rows(i).Item(6).ToString + ",")
-    '        strMDSZ.Append(dtOverall.Rows(i).Item(7).ToString + ",")
-    '        strNRWD.Append(dtOverall.Rows(i).Item(8).ToString + ",")
-    '        strMDWD.Append(dtOverall.Rows(i).Item(9).ToString + ",")
-    '        strWIWD.Append(dtOverall.Rows(i).Item(10).ToString + ",")
-    '    Next
-
-    '    hDate.Value = strDate.ToString
-    '    hETNG.Value = strETNG.ToString
-    '    hWTNG.Value = strWTNG.ToString
-    '    hNTNG.Value = strNTNG.ToString
-    '    hNTCG.Value = strNTCG.ToString
-    '    hETCG.Value = strETCG.ToString
-    '    hMDSZ.Value = strMDSZ.ToString
-    '    hNRWD.Value = strNRWD.ToString
-    '    hMDWD.Value = strMDWD.ToString
-    '    hWIWD.Value = strWIWD.ToString
-
-    'End Sub
-
-    'Private Sub TeeChartData2()
-    '    Dim strEXLC As New StringBuilder
-    '    Dim strLSCS As New StringBuilder
-    '    Dim strMSCS As New StringBuilder
-    '    Dim strHICS As New StringBuilder
-    '    Dim strVHIS As New StringBuilder
-    '    Dim strSUS As New StringBuilder
-
-    '    Dim strNRCQ As New StringBuilder
-    '    Dim strHICQ As New StringBuilder
-    '    Dim strVHCQ As New StringBuilder
-
-    '    Dim dtTmp As DataTable = Nothing
-    '    Dim tmpDate As Date
-    '    Dim dtOverall As New DataTable
-    '    Dim strTitle() As String = {"Year", "Month", "EXLC", "LSCS", "MSCS", "HICS", "VHIS", "SUS", "NRCQ", "HICQ", "VHCQ"}
-    '    Dim dr As DataRow
-    '    Dim rowNum As Integer
-
-    '    For i As Integer = 0 To strTitle.Length - 1
-    '        dtOverall.Columns.Add(New DataColumn())
-    '    Next
-
-    '    'layout
-    '    For i As Integer = 0 To 12
-    '        dr = dtOverall.NewRow
-    '        dtOverall.Rows.Add(dr)
-    '    Next
-
-    '    tmpDate = chartDate
-    '    For i As Integer = 0 To 12
-    '        dtOverall.Rows(i).Item(0) = tmpDate.AddMonths(i).Year.ToString
-    '        dtOverall.Rows(i).Item(1) = tmpDate.AddMonths(i).Month.ToString
-    '        For j As Integer = 2 To strTitle.Length - 1
-    '            dtOverall.Rows(i).Item(j) = "0"
-    '        Next
-    '    Next
-
-    '    Conn.Open()
-    '    'EXLC
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                                "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                                "and wh81.carbon <= " + EXLC_C.ToString & _
-    '                                " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                                "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                                "and wh81.carbon <= " + EXLC_C.ToString & _
-    '                                " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(2) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'LSCS
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                            "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                                "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                                "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                                "and wh81.carbon > " + EXLC_C.ToString & " and wh81.tensile <= 40 " & _
-    '                                " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                            "FULL OUTER JOIN " & _
-    '                                "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                                "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                                "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                                "and wh81.carbon > " + EXLC_C.ToString & " and wh81.tensile <= 40 " & _
-    '                                " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                                "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(3) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'MSCS
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                    "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                        "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                        "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.tensile <= 50 and wh81.tensile > 40 " & _
-    '                        " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                    "FULL OUTER JOIN " & _
-    '                        "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                        "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.tensile <= 50 and wh81.tensile > 40 " & _
-    '                        " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                        "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(4) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'HICS
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                    "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                        "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                        "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.tensile <= 60 and wh81.tensile > 50 " & _
-    '                        " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                    "FULL OUTER JOIN " & _
-    '                        "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                        "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.tensile <= 60 and wh81.tensile > 50 " & _
-    '                        " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                        "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(5) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'VHIS
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                    "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                        "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                        "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.tensile > 60 " & _
-    '                        " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                    "FULL OUTER JOIN " & _
-    '                        "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                        "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.tensile > 60 " & _
-    '                        " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                        "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(6) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'SUS
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                    "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                        "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                        "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.steel_grade_code like '6%' " & _
-    '                        " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                    "FULL OUTER JOIN " & _
-    '                        "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                        "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                        "and wh81.carbon > " + EXLC_C.ToString + " " & _
-    '                        "and wh81.steel_grade_code like '6%' " & _
-    '                        " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                        "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(7) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'NRCQ
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                    "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                        "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                        "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                        "and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " & _
-    '                        " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                    "FULL OUTER JOIN " & _
-    '                        "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                        "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                        "and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " & _
-    '                        " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                        "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(8) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'HICQ
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                    "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                        "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                        "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                        "and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " & _
-    '                        " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                    "FULL OUTER JOIN " & _
-    '                        "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                        "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                        "and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " & _
-    '                        " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                        "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(9) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    'VHCQ
-    '    strACCESS = String.Format("select ISNULL(A.PYear, B.PYear) as PYear, ISNULL(A.PMonth, B.PMonth) as PMonth, " & _
-    '                    "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
-    '                        "(select SUBSTRING(wh83.shift_date, 1, 4) as PYear, SUBSTRING(wh83.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 where " & _
-    '                        "wh83.shift_date between '{0}' and '{1}' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " & _
-    '                        "and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " & _
-    '                        " Group by SUBSTRING(wh83.shift_date, 1, 4), SUBSTRING(wh83.shift_date, 5, 2)) as A " & _
-    '                    "FULL OUTER JOIN " & _
-    '                        "(select SUBSTRING(wh86.shift_date, 1, 4) as PYear, SUBSTRING(wh86.shift_date, 5, 2) as PMonth, " & _
-    '                        "SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 where " & _
-    '                        "shift_date between '{0}' and '{1}' and wh86.coil_no = wh81.coil_no " & _
-    '                        "and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " & _
-    '                        " Group by SUBSTRING(wh86.shift_date, 1, 4), SUBSTRING(wh86.shift_date, 5, 2)) as B " & _
-    '                        "ON A.PMonth = B.PMonth and A.PMonth = B.PMonth", _
-    '                        tmpDate.ToString("yyyyMM") + "01", _
-    '                        tmpDate.AddMonths(12).ToString("yyyyMM") + Date.DaysInMonth(Year(tmpDate.AddMonths(12)), Month(tmpDate.AddMonths(12))).ToString)
-    '    dtTmp = execQuery(strACCESS, "", Conn)
-
-    '    For i As Integer = 0 To dtTmp.Rows.Count - 1
-    '        rowNum = (dtTmp.Rows(i).Item(0) - dtOverall.Rows(0).Item(0)) * 12 + dtTmp.Rows(i).Item(1) - dtOverall.Rows(0).Item(1)
-    '        dtOverall.Rows(rowNum).Item(10) = Val(dtTmp.Rows(i).Item(2)) / 1000
-    '    Next
-
-    '    Conn.Close()
-
-    '    '傳入前台控制項
-
-    '    For i As Integer = 0 To dtOverall.Rows.Count - 1
-    '        strEXLC.Append(dtOverall.Rows(i).Item(2).ToString + ",")
-    '        strLSCS.Append(dtOverall.Rows(i).Item(3).ToString + ",")
-    '        strMSCS.Append(dtOverall.Rows(i).Item(4).ToString + ",")
-    '        strHICS.Append(dtOverall.Rows(i).Item(5).ToString + ",")
-    '        strVHIS.Append(dtOverall.Rows(i).Item(6).ToString + ",")
-    '        strSUS.Append(dtOverall.Rows(i).Item(7).ToString + ",")
-    '        strNRCQ.Append(dtOverall.Rows(i).Item(8).ToString + ",")
-    '        strHICQ.Append(dtOverall.Rows(i).Item(9).ToString + ",")
-    '        strVHCQ.Append(dtOverall.Rows(i).Item(10).ToString + ",")
-    '    Next
-
-    '    hEXLC.Value = strEXLC.ToString
-    '    hLSCS.Value = strLSCS.ToString
-    '    hMSCS.Value = strMSCS.ToString
-    '    hHICS.Value = strHICS.ToString
-    '    hVHIS.Value = strVHIS.ToString
-    '    hSUS.Value = strSUS.ToString
-    '    hNRCQ.Value = strNRCQ.ToString
-    '    hHICQ.Value = strHICQ.ToString
-    '    hVHCQ.Value = strVHCQ.ToString
-
-    'End Sub
-
-    'Protected Sub btnUp_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-    '    chartDate = hStartDate.Value.ToString
-    '    chartDate = chartDate.AddMonths(-1)
-    '    hStartDate.Value = chartDate.ToString("yyyy/MM")
-    '    hEndDate.Value = chartDate.AddMonths(12).ToString("yyyy/MM")
-    '    Mainprocess()
-    '    hAnc.Value = "#Chart"
-    'End Sub
-
-    'Protected Sub btnDown_Click(ByVal sender As Object, ByVal e As System.EventArgs)
-    '    chartDate = hStartDate.Value.ToString
-    '    chartDate = chartDate.AddMonths(1)
-    '    hStartDate.Value = chartDate.ToString("yyyy/MM")
-    '    hEndDate.Value = chartDate.AddMonths(12).ToString("yyyy/MM")
-    '    Mainprocess()
-    '    hAnc.Value = "#Chart"
-    'End Sub
-
-    Private Sub Mainprocess()
-        Conn = New SqlConnection(getConnStr(Application("ConnStr")))
-        TNRL3_Table1()
-        TNRL3_Table2()
-        'TeeChartData1()
-        'TeeChartData2()
-    End Sub
 End Class
