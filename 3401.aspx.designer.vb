@@ -50,15 +50,6 @@ Partial Public Class TPM_Produce
     Protected WithEvents LabelEnddate As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''Panel1 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents Panel1 As Global.System.Web.UI.WebControls.Panel
-    
-    '''<summary>
     '''gvMonth1 控制項。
     '''</summary>
     '''<remarks>
@@ -66,6 +57,15 @@ Partial Public Class TPM_Produce
     '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents gvMonth1 As Global.System.Web.UI.WebControls.GridView
+    
+    '''<summary>
+    '''gvMonth3 控制項。
+    '''</summary>
+    '''<remarks>
+    '''自動產生的欄位。
+    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''</remarks>
+    Protected WithEvents gvMonth3 As Global.System.Web.UI.WebControls.GridView
     
     '''<summary>
     '''lblMonth1 控制項。
@@ -131,24 +131,6 @@ Partial Public Class TPM_Produce
     Protected WithEvents lblMDSZ As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''Panel3 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents Panel3 As Global.System.Web.UI.WebControls.Panel
-    
-    '''<summary>
-    '''gvMonth3 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents gvMonth3 As Global.System.Web.UI.WebControls.GridView
-    
-    '''<summary>
     '''lblNRWD 控制項。
     '''</summary>
     '''<remarks>
@@ -176,15 +158,6 @@ Partial Public Class TPM_Produce
     Protected WithEvents lblWIWD As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''Panel2 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents Panel2 As Global.System.Web.UI.WebControls.Panel
-    
-    '''<summary>
     '''gvMonth2 控制項。
     '''</summary>
     '''<remarks>
@@ -192,6 +165,15 @@ Partial Public Class TPM_Produce
     '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents gvMonth2 As Global.System.Web.UI.WebControls.GridView
+    
+    '''<summary>
+    '''gvMonth4 控制項。
+    '''</summary>
+    '''<remarks>
+    '''自動產生的欄位。
+    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''</remarks>
+    Protected WithEvents gvMonth4 As Global.System.Web.UI.WebControls.GridView
     
     '''<summary>
     '''lblMonth2 控制項。
@@ -255,24 +237,6 @@ Partial Public Class TPM_Produce
     '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents lblSUS As Global.System.Web.UI.WebControls.Label
-    
-    '''<summary>
-    '''Panel4 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents Panel4 As Global.System.Web.UI.WebControls.Panel
-    
-    '''<summary>
-    '''gvMonth4 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents gvMonth4 As Global.System.Web.UI.WebControls.GridView
     
     '''<summary>
     '''lblNRCQ 控制項。

@@ -31,8 +31,8 @@
             display: block !important;
         }
         .card-header-custom {
-            background-color: #2c3e50;
-            color: white;
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
             font-weight: bold;
             padding: 12px 20px;
             display: flex;
@@ -81,7 +81,19 @@
             font-weight: 600;
             border-bottom: 2px solid #233140 !important;
         }
-
+        /* --- 強制 GridView 表頭深色白字 --- */
+.table-header-dark th, .table-header-dark td {
+    background-color: #34495e !important;
+    color: #ffffff !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: center;
+    vertical-align: middle;
+    padding: 12px 18px;
+    font-weight: 600;
+    border-bottom: 2px solid #233140 !important;
+}
         /* --- 凍結表尾 --- */
         .custom-auto-table tfoot td {
             position: sticky;
@@ -238,7 +250,7 @@ ORDER BY product_month;">
             <!-- ========== 第一層 Card：缺陷趨勢圖 ========== -->
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
-                    <span class="fs-4">📊 缺陷月累計趨勢</span>
+                    <span class="fs-4" style="color: white !important;">📊 缺陷月累計趨勢</span>
                     <span class="badge bg-warning text-dark fs-6 shadow-sm">資料區間：<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
                 </div>
                 <div class="chart-card-body">
@@ -250,15 +262,16 @@ ORDER BY product_month;">
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4 text-white">📋 近期每日缺陷重量累計</span>
-                        <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 0700/1500/2300 更新 / 每日 1500 為前一日完整統計</span>
+                        <span class="fs-4" style="color: white !important;">📋 近期每日缺陷重量累計</span>
+                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 0700/1500/2300 更新 / 每日 1500 為前一日完整統計</span>--%>
                     
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive-custom">
                         <asp:GridView ID="gvDaily" runat="server" CssClass="table custom-auto-table" GridLines="None">
-                            <HeaderStyle Wrap="True" />
+
+                            <HeaderStyle  Wrap="True" />
                         </asp:GridView>
                     </div>
                 </div>
@@ -268,8 +281,8 @@ ORDER BY product_month;">
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4 text-white">📋 近期月份缺陷重量累計</span>
-                        <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每晚 23:00 更新 / 月初重新統計</span>
+                        <span class="fs-4" style="color: white !important;">📋 近期月份缺陷重量累計</span>
+                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每晚 23:00 更新 / 月初重新統計</span>--%>
                     </div>
                 </div>
                 <div class="card-body p-0">

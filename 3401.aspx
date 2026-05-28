@@ -29,8 +29,8 @@
         }
 
         .card-header-custom {
-            background-color: #2c3e50;
-            color: white;
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
             font-weight: bold;
             padding: 12px 20px;
             display: flex;
@@ -254,7 +254,7 @@
             <!-- ========== 第一層 Card：廠區生產趨勢圖 ========== -->
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
-                    <span class="fs-4">📊 廠區生產趨勢</span>
+                    <span class="fs-4" style="color: white !important;">📊 廠區生產趨勢</span>
                     <span class="badge bg-warning text-dark fs-6 shadow-sm">資料區間：<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
                 </div>
                 <div class="chart-card-body">
@@ -269,8 +269,8 @@
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4 text-white">📋 廠區厚度與前段製程進度</span>
-                        <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 2300 更新，每月第一天 2300 重新統計</span>
+                        <span class="fs-4" style="color: white !important;">📋 廠區厚度與前段製程進度</span>
+                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 2300 更新，每月第一天 2300 重新統計</span>--%>
                     </div>
                 </div>
                 <div class="card-body p-3">
@@ -337,8 +337,8 @@
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4 text-white">📋 廠區強度與表面製程進度</span>
-                        <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 2300 更新，每月第一天 2300 重新統計</span>
+                        <span class="fs-4" style="color: white !important;">📋 廠區強度與表面製程進度</span>
+                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 2300 更新，每月第一天 2300 重新統計</span>--%>
                     </div>
                 </div>
                 <div class="card-body p-3">

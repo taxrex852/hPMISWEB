@@ -30,14 +30,14 @@
             overflow: hidden; 
             display: block !important;
         }
-        .card-header-custom { 
-            background-color: #2c3e50; 
-            color: white; 
-            font-weight: bold; 
-            padding: 12px 20px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         /* --- 防塌陷圖表區塊 (獨立於 Bootstrap Grid) --- */
@@ -253,9 +253,9 @@
             <div class="card-custom mb-5">
                <div class="card-header-custom">
     <div>
-        <span class="fs-4 text-white">📋 熱軋當月生產履歷</span>
+        <span class="fs-4 text-white" style="color: white !important;">📋 熱軋當月生產履歷</span>
         
-        <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 23:00 更新 / 月初重新編排</span>
+        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 23:00 更新 / 月初重新編排</span>--%>
     </div>
 </div>
                 

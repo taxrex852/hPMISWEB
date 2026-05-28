@@ -261,8 +261,8 @@ ORDER BY product_month">
                         <table id="tempMonthHeader">
                             <tr>
                                 <th rowspan="2">&nbsp;</th>
-                                <th colspan="5">退火</th>
-                                <th colspan="3">切邊</th>
+                                <th colspan="5">剔除</th>
+                                <th colspan="3">切除</th>
                             </tr>
                             <tr>
                                 <th>缺陷 Top (1)</th>

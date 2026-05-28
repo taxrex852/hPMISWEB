@@ -1,1 +1,6 @@
-{}
+{
+  "git.enabled": true,
+  "git.autorefresh": true,
+  "git.autofetch": true,
+  "git.confirmSync": false
+}

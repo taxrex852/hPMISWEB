@@ -140,7 +140,7 @@ ORDER BY process_date">
 
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
-                    <span class="fs-4 text-white">📊 精整#2 生產效益與重量趨勢</span>
+                    <span class="fs-4" style="color: white !important;">📊 精整#2 生產效益與重量趨勢</span>
                     <span class="badge bg-warning text-dark fs-6 shadow-sm">資料區間：<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
                 </div>
                 <div class="chart-card-body">
@@ -154,8 +154,8 @@ ORDER BY process_date">
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4 text-white">📋 精整#2 每日生產履歷</span>
-                        <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 07:00 / 15:00 / 23:00 進行資料更新</span>
+                        <span class="fs-4" style="color: white !important;">📋 精整#2 每日生產履歷</span>
+                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 07:00 / 15:00 / 23:00 進行資料更新</span>--%>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -170,8 +170,8 @@ ORDER BY process_date">
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4 text-white">📋 精整#2 當月生產履歷</span>
-                        <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">資料於每日 23:00 更新，月初重新編排</span>
+                        <span class="fs-4" style="color: white !important;">📋 精整#2 當月生產履歷</span>
+                      <%--  <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">資料於每日 23:00 更新，月初重新編排</span>--%>
                     </div>
                 </div>
                 <div class="card-body p-0">
