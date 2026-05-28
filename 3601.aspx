@@ -1,169 +1,165 @@
-﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3601.aspx.vb" Inherits="hPMISWEB.HSM_Stock1" %>
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3601.aspx.vb" Inherits="hPMISWEB.HSM_Stock1" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <link rel="stylesheet" type="text/css" href="css/diagram.css" />
-    <title>HSM_Stock1 - 生產監控看板</title>
-  <style type="text/css">
-        /* =========================================
-           1. 全域與主版面佈局設定
-           ========================================= */
-        body { 
-            font-family: "Microsoft JhengHei", Arial, sans-serif; /* 優先使用微軟正黑體 */
-            background-color: #fff; 
-            margin: 0; 
-            padding: 0; 
-            text-align: left; 
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3601 扁鋼胚儲區庫存量</title>
+    <link rel="stylesheet" href="libs/bootstrap.min.css" />
+
+    <style type="text/css">
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background-color: #f8f9fc;
+            padding-bottom: 20px;
         }
 
-        /* 頁面主要容器，控制最大寬度並使其水平置中 */
-        .page-wrapper { 
-            padding: 10px; 
-            width: 1650px;     
-            margin: 0 auto;    
-            display: block;
-            box-sizing: border-box;
+        .main-content {
+            clear: both !important;
+            display: block !important;
+            position: relative;
+            padding-top: 20px;
         }
 
-        /* 區塊通用樣式 */
-        .section-box { 
-            margin-bottom: 20px; 
-            width: 100%;
-            text-align: center; 
+        /* ---- Card 樣式 (同 3101) ---- */
+        .card-custom {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e3e6f0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: block !important;
+        }
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* 強制 section-box 內的表格置中對齊 */
-        .section-box table {
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
-
-        /* =========================================
-           2. 頂部圖表與廠區圖的橫向排版 (Flexbox)
-           ========================================= */
-        .top-flex-row {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 40px; /* 左右區塊之間的間距 */
-            margin-bottom: 20px;
-            width: 100%;
-        }
-
-        /* 廠區圖的外部容器，設定 relative 讓內部的絕對定位(absolute)生效 */
+        /* ---- 廠區底圖 ---- */
         .map-container {
             position: relative;
-            width: 650px; 
-            flex-shrink: 0; /* 防止縮放時被擠壓 */
+            width: 100%;
         }
-
-        /* 廠區底圖設定 */
         .map-container img {
             width: 100%;
             display: block;
         }
 
-        /* =========================================
-           3. 廠區圖上的動態互動區塊 (Zone Boxes)
-           ========================================= */
-        /* 所有儲區區塊的共用設定 */
+        /* ---- 儲區 Zone Boxes ---- */
         .zone-box {
-            position: absolute; /* 疊加在圖片上方 */
-            border: 3px solid transparent; /* 預設邊框透明 */
-            opacity: 0.8; /* 預設稍微半透明，顯示底色 */
-            transition: all 0.3s ease; /* 漸變動畫效果 */
+            position: absolute;
+            border: 3px solid transparent;
+            opacity: 0.8;
+            transition: all 0.3s ease;
             cursor: pointer;
             box-sizing: border-box;
             z-index: 10;
         }
-
-        /* 區塊內顯示資料百分比的文字標籤 */
         .map-label {
             position: absolute;
-            top: 50%; 
+            top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%); /* 絕對置中 */
+            transform: translate(-50%, -50%);
             color: #fff;
             font-weight: bold;
             font-size: 14px;
-            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; /* 加入文字黑色陰影，避免與底色糊在一起 */
-            pointer-events: none; /* 讓滑鼠事件穿透文字，直接觸發底下的區塊 */
-            white-space: nowrap; /* 強制不換行 */
+            text-shadow: 1px 1px 2px #000, -1px -1px 2px #000;
+            pointer-events: none;
+            white-space: nowrap;
         }
-        
-        /* 以下為各個實際儲區在圖片上的精確座標與預設顏色 */
-        #box-Y1-part1 { background-color: rgba(255, 0, 0, 0.3); top: 56%; left: 4%; width: 5%; height: 16%; }
-        #box-Y1-part2 { background-color: rgba(255, 0, 0, 0.3); top: 65%; left: 9%; width: 42%; height: 7%; }
-        #box-Y1-part3 { background-color: rgba(255, 0, 0, 0.3); top: 56%; left: 46%; width: 38%; height: 9%; }
-        #box-Y1-part4 { background-color: rgba(255, 0, 0, 0.3); top: 65%; left: 77%; width: 7%; height: 7%; }
-        #box-Y2 { background-color: rgba(0, 255, 0, 0.3); top: 41%; left: 42%; width: 42%; height: 16%; }
-        #box-Y3 { background-color: rgba(255, 255, 0, 0.3); top: 56%; left: 27%; width: 19%; height: 9%; }
-        #box-Y3-part1 { background-color: rgba(255, 255, 0, 0.3); top: 56%; left: 9%; width: 7%; height: 9%; }
-        #box-Y4 { background-color: rgba(0, 0, 255, 0.3); top: 25%; left: 61%; width: 23%; height: 16%; }
-        
-        /* HC 保溫坑疊在上方，z-index 較高 */
-        #box-HC保溫坑 { background-color: rgba(0, 0, 0, 0.5); top: 56%; left: 16%; width: 11%; height: 9%; z-index: 21; }
 
-        /* =========================================
-           4. 下半部三個長條圖排版與資料表樣式
-           ========================================= */
-        .flex-row {
-            display: flex !important;      
-            flex-direction: row !important; 
-            justify-content: center;       
+        #box-Y1-part1  { background-color: rgba(255, 0, 0, 0.3);   top: 56%; left: 4%;  width: 5%;  height: 16%; }
+        #box-Y1-part2  { background-color: rgba(255, 0, 0, 0.3);   top: 65%; left: 9%;  width: 42%; height: 7%;  }
+        #box-Y1-part3  { background-color: rgba(255, 0, 0, 0.3);   top: 56%; left: 46%; width: 38%; height: 9%;  }
+        #box-Y1-part4  { background-color: rgba(255, 0, 0, 0.3);   top: 65%; left: 77%; width: 7%;  height: 7%;  }
+        #box-Y2        { background-color: rgba(0, 255, 0, 0.3);   top: 41%; left: 42%; width: 42%; height: 16%; }
+        #box-Y3        { background-color: rgba(255, 255, 0, 0.3); top: 56%; left: 27%; width: 19%; height: 9%;  }
+        #box-Y3-part1  { background-color: rgba(255, 255, 0, 0.3); top: 56%; left: 9%;  width: 7%;  height: 9%;  }
+        #box-Y4        { background-color: rgba(0, 0, 255, 0.3);   top: 25%; left: 61%; width: 23%; height: 16%; }
+        #box-HC保溫坑  { background-color: rgba(0, 0, 0, 0.5);     top: 56%; left: 16%; width: 11%; height: 9%;  z-index: 21; }
+
+        /* ---- Bootstrap 5 風格資料表格 ---- */
+        .bs5-table {
+            width: 100%;
+            table-layout: auto;
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-size: 9pt;
+        }
+        .bs5-table th {
+            background-color: #34495e !important;
+            color: #ffffff !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            padding: 8px 10px !important;
+            font-weight: 600;
+            border: 1px solid #2c3e50 !important;
+            white-space: nowrap;
+        }
+        .bs5-table td {
+            vertical-align: middle;
+            text-align: center;
+            padding: 7px 10px;
+            border: 1px solid #dee2e6;
+            white-space: nowrap;
+            /* color 不設定，讓 VB RowDataBound 設的 ForeColor 從 <tr> 繼承 */
+        }
+        /* 奇偶列底色交替（設在 tr，讓 VB inline 顏色可正常穿透顯示） */
+        .bs5-table tbody tr:nth-child(odd)  { background-color: #ffffff; }
+        .bs5-table tbody tr:nth-child(even) { background-color: #f8f9fc; }
+        .bs5-table tbody tr:hover           { background-color: #e9ecef; }
+
+        /* ---- 卡片內容 flex 佈局 (避開 diagram.css 覆蓋的 .row/.col) ---- */
+        .card-body-inner { padding: 15px; display: block; }
+        .flex-row-layout {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap;
+            gap: 20px;
             align-items: flex-start;
-            gap: 20px;                     
             width: 100%;
         }
+        .flex-col-left  { flex: 1 1 320px; min-width: 320px; max-width: 42%; }
+        .flex-col-right { flex: 2 1 420px; min-width: 420px; max-width: 100%; }
+        .flex-col-third { flex: 1 1 280px; min-width: 280px; max-width: 100%; overflow: visible; }
 
-        .chart-three-cols {
-            flex: 0 0 auto; 
-            text-align: center;
-        }
-        
-        /* GridView 表格樣式 */
-        .gv { margin: 5px auto !important; border-collapse: collapse; }
-        .red-header { background-color: #ffcccc; color: #333; font-weight: bold; }
+        /* ---- 儲量水位燈號 ---- */
+        .limit-status-container { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 8px 0; flex-wrap: wrap; }
+        .limit-status-title     { font-size: 16px; color: #004b97; font-weight: bold; }
+        .limit-status-item      { display: flex; align-items: center; gap: 8px; }
+        .limit-status-circle    { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #4a76a8; }
+        .limit-status-box       { border: 1px solid #a0a0a0; padding: 4px 10px; background-color: #fff; color: #333; }
 
-        /* 儲量水位燈號標示區塊 */
-        .limit-status-container { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 5px 0; }
-        .limit-status-title { font-size: 16px; color: #004b97; font-weight: bold; }
-        .limit-status-item { display: flex; align-items: center; gap: 8px; }
-        .limit-status-circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #4a76a8; }
-        .limit-status-box { border: 1px solid #a0a0a0; padding: 4px 10px; background-color: #fff; color: #333; }
-
-        /* =========================================
-           5. 彈出視窗 (Modal) 樣式
-           ========================================= */
+        /* ---- Modal ---- */
         .modal-overlay {
-            display: none; /* 預設隱藏 */
+            display: none;
             position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8); /* 黑色半透明遮罩 */
+            background-color: rgba(0,0,0,0.8);
         }
-        
         .modal-content {
             background-color: #fefefe;
-            margin: 3% auto; /* 視窗置中 */
+            margin: 3% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 95%; max-width: 1700px; /* 給予足夠寬度顯示長條圖 */
+            width: 95%; max-width: 1700px;
             border-radius: 10px;
             box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
             position: relative;
         }
-        
-        /* Modal 關閉按鈕 */
         .close-btn {
             color: #aaa; float: right; font-size: 32px; font-weight: bold; cursor: pointer;
             position: absolute; right: 20px; top: 10px; z-index: 10000;
         }
         .close-btn:hover { color: black; }
-        
-        /* 開啟 Modal 的按鈕 */
         .btn-open-detail {
-            background-color: #004b97; color: white; border: none; padding: 8px 15px; 
+            background-color: #004b97; color: white; border: none; padding: 8px 15px;
             border-radius: 5px; font-size: 14px; font-weight: bold; cursor: pointer;
             margin-left: 20px; vertical-align: middle;
         }
@@ -173,7 +169,7 @@
     <script src="libs/echarts.min.js" type="text/javascript"></script>
     <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
-        
+
         // 統一所有圖表的標題樣式
         var commonTitleStyle = { color: '#003399', fontSize: 15, fontWeight: 'bold' };
 
@@ -181,14 +177,14 @@
            圖表一：每週扁鋼胚增減與庫存量 (雙 Y 軸折線圖)
            ========================================================= */
         var chartDom_Weekly = document.getElementById('weeklyChart');
-        if (chartDom_Weekly) { 
+        if (chartDom_Weekly) {
             var myChart_Weekly = echarts.init(chartDom_Weekly);
-            
+
             // 從 ASP.NET 後端綁定資料
             var xData_Weekly = <%= xAxisData_Weekly %>;
             var diffData = <%= seriesData_Diff %>;
             var stockData = <%= seriesData_Stock %>;
-            
+
             var option_Weekly = {
                 title: { text: '每日增減量與庫存量', left: 'center', textStyle: commonTitleStyle },
                 tooltip: { trigger: 'axis' },
@@ -202,13 +198,13 @@
                 series: [
                     { name: '增減量合計', type: 'line', yAxisIndex: 0, data: diffData, itemStyle: { color: '#FF0000' } },
                     { name: '庫存量', type: 'line', yAxisIndex: 1, data: stockData, symbolSize: 8, color: '#000000',
-                      itemStyle: { 
+                      itemStyle: {
                           color: function (params) {
                               // 庫存燈號變色邏輯：大於 85 紅燈，大於 70 黃燈，否則綠燈
                               var val = params.value;
-                              if (val >= 85) return '#FF0000'; 
-                              else if (val >= 70) return '#FFC000'; 
-                              else return '#92D050'; 
+                              if (val >= 85) return '#FF0000';
+                              else if (val >= 70) return '#FFC000';
+                              else return '#92D050';
                           }
                       },
                       lineStyle: { color: '#000000', width: 2 }
@@ -275,10 +271,10 @@
                     itemStyle: {
                         color: function(params) {
                             // 動態長條圖顏色 (紅、橘、綠)
-                            var value = params.value; 
-                            if (value >= 85) return '#FF0000'; 
-                            else if (value >= 70) return '#FFA500'; 
-                            else return '#32CD32'; 
+                            var value = params.value;
+                            if (value >= 85) return '#FF0000';
+                            else if (value >= 70) return '#FFA500';
+                            else return '#32CD32';
                         },
                         borderColor: '#333', borderWidth: 1
                     },
@@ -292,7 +288,7 @@
                 }]
             };
             myChart_Storage.setOption(option_Storage);
-            
+
             /* --- 初始化：替廠區底圖預先上色並填入數字 --- */
             var zoneIndexMap = {}; // 建立儲區名稱對應陣列 index 的字典，供雙向連動使用
             if (xData_Storage && yData_Storage) {
@@ -310,7 +306,7 @@
                 });
             }
 
-            /* --- 互動方向 1：滑鼠移入 ECharts 長條圖 ? 高亮廠區底圖 --- */
+            /* --- 互動方向 1：滑鼠移入 ECharts 長條圖 → 高亮廠區底圖 --- */
             myChart_Storage.on('mouseover', function (params) {
                 var boxes = document.querySelectorAll('.zone-' + params.name);
                 boxes.forEach(function(box) {
@@ -320,7 +316,7 @@
                 });
             });
 
-            /* 滑鼠移出 ECharts 長條圖 ? 復原廠區底圖 */
+            /* 滑鼠移出 ECharts 長條圖 → 復原廠區底圖 */
             myChart_Storage.on('mouseout', function (params) {
                 var boxes = document.querySelectorAll('.zone-' + params.name);
                 boxes.forEach(function(box) {
@@ -331,12 +327,12 @@
                 });
             });
 
-            /* --- 互動方向 2：滑鼠移入廠區底圖 ? 觸發 ECharts 長條圖 Tooltip --- */
+            /* --- 互動方向 2：滑鼠移入廠區底圖 → 觸發 ECharts 長條圖 Tooltip --- */
             document.querySelectorAll('.zone-box').forEach(function(box) {
                 box.addEventListener('mouseenter', function() {
                     var classes = this.className.split(' ');
                     var targetClass = null;
-                    
+
                     // 找出該區塊屬於哪一個儲區 (例如 'zone-Y1')
                     for(var i=0; i<classes.length; i++) {
                         if(classes[i].indexOf('zone-') === 0 && classes[i] !== 'zone-box') {
@@ -344,7 +340,7 @@
                             break;
                         }
                     }
-                    
+
                     // 連動底圖：把同屬該區的其他區塊 (例如 Y1-part1 ~ part4) 一併打光
                     if (targetClass) {
                         var relatedBoxes = document.querySelectorAll('.' + targetClass);
@@ -354,7 +350,7 @@
                             b.style.zIndex = '30';
                         });
                     }
-                    
+
                     // 觸發 ECharts API，顯示對應長條圖的 Tooltip 與高亮效果
                     var idx = zoneIndexMap[targetClass];
                     if(idx !== undefined) {
@@ -362,8 +358,8 @@
                         myChart_Storage.dispatchAction({ type: 'highlight', seriesIndex: 0, dataIndex: idx });
                     }
                 });
-                
-                // 滑鼠移出廠區底圖 ? 取消打光與 ECharts Tooltip
+
+                // 滑鼠移出廠區底圖 → 取消打光與 ECharts Tooltip
                 box.addEventListener('mouseleave', function() {
                     var classes = this.className.split(' ');
                     var targetClass = null;
@@ -400,7 +396,7 @@
     /* =========================================================
        Modal 與 混合比例詳細分佈圖 控制邏輯
        ========================================================= */
-    var detailChart = null; 
+    var detailChart = null;
     var isDetailChartInit = false;
 
     // 開啟彈出視窗
@@ -473,54 +469,54 @@
             series: [
                 // === 以下為堆疊長條圖的各個區塊定義 ===
                 // 加入 emphasis 設定讓滑鼠停靠時凸顯整個系列
-                { 
+                {
                     name: '熱軋軋延', type: 'bar', stack: 'total', barWidth: 32,
                     itemStyle: { color: '#FFFF00', borderColor: '#000', borderWidth: 1 },
                     emphasis: { focus: 'series', itemStyle: { borderWidth: 2, borderColor: '#000', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
                     data: <%= js_Pct_HotRoll %>,
-                    label: { 
+                    label: {
                         show: true, position: 'inside', overflow: 'hidden',
                         formatter: function(p) {
                             var val = rawData.hr[p.dataIndex];
-                            if (val == 0 || p.value < 5) return ''; 
-                            if (p.value < 15) return '{detail|' + val + ' PCS}'; 
-                            return '{title|熱軋軋延}  {detail|' + val + ' PCS}  {desc|(排定軋延)}'; 
+                            if (val == 0 || p.value < 5) return '';
+                            if (p.value < 15) return '{detail|' + val + ' PCS}';
+                            return '{title|熱軋軋延}  {detail|' + val + ' PCS}  {desc|(排定軋延)}';
                         },
-                        rich: { 
-                            title: { color: '#000', fontSize: 13 }, 
+                        rich: {
+                            title: { color: '#000', fontSize: 13 },
                             detail: { color: '#000', fontSize: 14, fontWeight: 'bold' },
                             desc: { color: '#333', fontSize: 12 }
                         }
                     }
                 },
-                { 
+                {
                     name: '已可外搬(售)', type: 'bar', stack: 'total',
                     itemStyle: { color: '#92D050', borderColor: '#000', borderWidth: 1 },
                     emphasis: { focus: 'series', itemStyle: { borderWidth: 2, borderColor: '#000', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
                     data: <%= js_Pct_Ready %>,
-                    label: { 
+                    label: {
                         show: true, position: 'inside', overflow: 'hidden',
                         formatter: function(p) {
                             var val = rawData.rd[p.dataIndex];
                             if (val == 0 || p.value < 5) return '';
                             var remark = (p.dataIndex === 1 || p.dataIndex === 5) ? '天數≧4天, 重量<27t' : '天數≧5天, 重量<27t';
-                            if (p.dataIndex === 0) remark = '天數達標, 重量<27t'; 
-                            if (p.value < 18) return '{detail|' + val + ' PCS}'; 
+                            if (p.dataIndex === 0) remark = '天數達標, 重量<27t';
+                            if (p.value < 18) return '{detail|' + val + ' PCS}';
                             return '{title|已可外搬(售)}  {detail|' + val + ' PCS}  {desc|(' + remark + ')}';
                         },
-                        rich: { 
-                            title: { color: '#000', fontSize: 13 }, 
+                        rich: {
+                            title: { color: '#000', fontSize: 13 },
                             detail: { color: '#000', fontSize: 14, fontWeight: 'bold' },
                             desc: { color: '#333', fontSize: 12 }
                         }
                     }
                 },
-                { 
+                {
                     name: '等候外搬(售)', type: 'bar', stack: 'total',
                     itemStyle: { color: '#FFC000', borderColor: '#000', borderWidth: 1 },
                     emphasis: { focus: 'series', itemStyle: { borderWidth: 2, borderColor: '#000', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
                     data: <%= js_Pct_Wait %>,
-                    label: { 
+                    label: {
                         show: true, position: 'inside', overflow: 'hidden',
                         formatter: function(p) {
                             var val = rawData.wt[p.dataIndex];
@@ -530,19 +526,19 @@
                             if (p.value < 18) return '{detail|' + val + ' PCS}';
                             return '{title|等候外搬(售)}  {detail|' + val + ' PCS}  {desc|(' + remark + ')}';
                         },
-                        rich: { 
-                            title: { color: '#000', fontSize: 13 }, 
+                        rich: {
+                            title: { color: '#000', fontSize: 13 },
                             detail: { color: '#000', fontSize: 14, fontWeight: 'bold' },
                             desc: { color: '#333', fontSize: 12 }
                         }
                     }
                 },
-                { 
+                {
                     name: '不可外搬鋼胚', type: 'bar', stack: 'total',
                     itemStyle: { color: '#FF0000', borderColor: '#000', borderWidth: 1 },
                     emphasis: { focus: 'series', itemStyle: { borderWidth: 2, borderColor: '#000', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
                     data: <%= js_Pct_Heavy %>,
-                    label: { 
+                    label: {
                         show: true, position: 'inside', overflow: 'hidden',
                         formatter: function(p) {
                             var val = rawData.hv[p.dataIndex];
@@ -550,19 +546,19 @@
                             if (p.value < 15) return '{detail|' + val + ' PCS}';
                             return '{title|重胚 / 不可外搬}  {detail|' + val + ' PCS}  {desc|(重量≧27t)}';
                         },
-                        rich: { 
-                            title: { color: '#FFFF00', fontSize: 13 }, 
+                        rich: {
+                            title: { color: '#FFFF00', fontSize: 13 },
                             detail: { color: '#FFFF00', fontSize: 14, fontWeight: 'bold' },
-                            desc: { color: '#FFFF00', fontSize: 12 } 
+                            desc: { color: '#FFFF00', fontSize: 12 }
                         }
                     }
                 },
-                { 
+                {
                     name: '待回線鋼胚', type: 'bar', stack: 'total',
                     itemStyle: { color: '#800080', borderColor: '#000', borderWidth: 1 },
                     emphasis: { focus: 'series', itemStyle: { borderWidth: 2, borderColor: '#000', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
                     data: <%= js_Pct_Return %>,
-                    label: { 
+                    label: {
                         show: true, position: 'inside', overflow: 'hidden',
                         formatter: function(p) {
                             var val = rawData.rt[p.dataIndex];
@@ -570,18 +566,18 @@
                             if (p.value < 15) return '{detail|' + val + ' PCS}';
                             return '{title|待回線}  {detail|' + val + ' PCS}';
                         },
-                        rich: { 
-                            title: { color: '#FFFF00', fontSize: 13 }, 
+                        rich: {
+                            title: { color: '#FFFF00', fontSize: 13 },
                             detail: { color: '#FFFF00', fontSize: 14, fontWeight: 'bold' }
                         }
                     }
                 },
-                { 
+                {
                     name: '試驗/暫留/無主等......', type: 'bar', stack: 'total',
                     itemStyle: { color: '#00BFFF', borderColor: '#000', borderWidth: 1 },
                     emphasis: { focus: 'series', itemStyle: { borderWidth: 2, borderColor: '#000', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
                     data: <%= js_Pct_Test %>,
-                    label: { 
+                    label: {
                         show: true, position: 'inside', overflow: 'hidden',
                         formatter: function(p) {
                             var val = rawData.ts[p.dataIndex];
@@ -589,18 +585,18 @@
                             if (p.value < 15) return '{detail|' + val + ' PCS}';
                             return '{title|試驗 / 暫留 / 無主等......}  {detail|' + val + ' PCS}';
                         },
-                        rich: { 
-                            title: { color: '#000', fontSize: 13 }, 
+                        rich: {
+                            title: { color: '#000', fontSize: 13 },
                             detail: { color: '#000', fontSize: 14, fontWeight: 'bold' }
                         }
                     }
                 },
-                { 
+                {
                     name: '剩餘空間', type: 'bar', stack: 'total',
                     itemStyle: { color: '#FFFFFF', borderColor: '#000', borderWidth: 1 },
                     emphasis: { focus: 'series', itemStyle: { borderWidth: 2, borderColor: '#000', shadowBlur: 10, shadowColor: 'rgba(0,0,0,0.5)' } },
                     data: <%= js_Pct_Empty %>,
-                    label: { 
+                    label: {
                         show: true, position: 'inside', overflow: 'hidden',
                         formatter: function(p) {
                             var val = rawData.em[p.dataIndex];
@@ -608,8 +604,8 @@
                             if (p.value < 15) return '{detail|' + val + ' PCS}';
                             return '{title|剩餘空間}  {detail|' + val + ' PCS}';
                         },
-                        rich: { 
-                            title: { color: '#000', fontSize: 13 }, 
+                        rich: {
+                            title: { color: '#000', fontSize: 13 },
                             detail: { color: '#000', fontSize: 14, fontWeight: 'bold' }
                         }
                     }
@@ -634,121 +630,124 @@
         });
     }
     </script>
-
-
 </head>
 
 <body>
     <form id="form1" runat="server">
     <hPMISWEB:PageHeader ID="ph" runat="server" />
-    
-    <div class="page-wrapper">
-        
-        <div class="top-flex-row">
-            
-       <div class="map-container">
-                <img src="images/SYMClayout_V1.png" alt="儲區配置圖" />
-                <div id="box-Y1-part1" class="zone-box zone-Y1"></div>
-                <div id="box-Y1-part2" class="zone-box zone-Y1"><span class="map-label"></span></div>
-                <div id="box-Y1-part3" class="zone-box zone-Y1"><span class="map-label"></div>
-                <div id="box-Y1-part4" class="zone-box zone-Y1"></div>
-                <div id="box-Y2" class="zone-box zone-Y2"><span class="map-label"></span></div>
-                <div id="box-Y3" class="zone-box zone-Y3"><span class="map-label"></span></div>
-              <div id="box-Y3-part1" class="zone-box zone-Y3"></div>
-                <div id="box-Y4" class="zone-box zone-Y4"><span class="map-label"></span></div>
-                <div id="box-HC保溫坑" class="zone-box zone-HC保溫坑"><span class="map-label"></span></div>
-            </div>
 
-            <div style="flex-grow: 1;">
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr>
-                        <td>
-                            <div id="storageChart" style="width: 900px; height: 250px;"></div>
-                        </td>
-                    </tr>
-                </table>
-       
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr>
-                        <td>
-                            <div class="limit-status-container">
-                                <div class="limit-status-title">儲量水位<button type="button" class="btn-open-detail" onclick="openDetailModal()">🔍 檢視各去向鋼胚明細</button></div>
-                                <div class="limit-status-item"><div class="limit-status-circle" style="background-color: #92D050;"></div><div class="limit-status-box">&le;3900 PCS(70%)</div></div>
-                                <div class="limit-status-item"><div class="limit-status-circle" style="background-color: #FFC000;"></div><div class="limit-status-box">3900-4760 PCS(70-85%)</div></div>
-                                <div class="limit-status-item"><div class="limit-status-circle" style="background-color: #FF0000;"></div><div class="limit-status-box">&ge;4760 PCS(85%)</div></div>
+    <div class="container-fluid main-content px-4">
+
+        <%-- ============================================================
+             Card 1：廠區圖 + 儲區庫存柱狀圖 + 水位燈號 + 詳細資料表
+             ============================================================ --%>
+        <div class="card-custom mb-4 mt-2">
+            <div class="card-header-custom">
+                <span class="fs-4">📦 3601 扁鋼胚儲區庫存量</span>
+                <span class="badge bg-warning text-dark fs-6 shadow-sm" id="headerUpdateTime"></span>
+            </div>
+            <div class="card-body-inner">
+                <div class="flex-row-layout">
+
+                    <%-- 左欄：廠區底圖 --%>
+                    <div class="flex-col-left">
+                        <div class="map-container">
+                            <img src="images/SYMClayout_V1.png" alt="儲區配置圖" />
+                            <div id="box-Y1-part1" class="zone-box zone-Y1"></div>
+                            <div id="box-Y1-part2" class="zone-box zone-Y1"><span class="map-label"></span></div>
+                            <div id="box-Y1-part3" class="zone-box zone-Y1"><span class="map-label"></span></div>
+                            <div id="box-Y1-part4" class="zone-box zone-Y1"></div>
+                            <div id="box-Y2" class="zone-box zone-Y2"><span class="map-label"></span></div>
+                            <div id="box-Y3" class="zone-box zone-Y3"><span class="map-label"></span></div>
+                            <div id="box-Y3-part1" class="zone-box zone-Y3"></div>
+                            <div id="box-Y4" class="zone-box zone-Y4"><span class="map-label"></span></div>
+                            <div id="box-HC保溫坑" class="zone-box zone-HC保溫坑"><span class="map-label"></span></div>
+                        </div>
+                    </div>
+
+                    <%-- 右欄：庫存柱狀圖 + 水位燈號 + 詳細數據表 --%>
+                    <div class="flex-col-right">
+                        <div id="storageChart" style="width: 100%; height: 260px;"></div>
+
+                        <div class="limit-status-container" style="margin: 8px 0;">
+                            <div class="limit-status-title">儲量水位
+                                <button type="button" class="btn-open-detail" onclick="openDetailModal()">&#128269; 檢視各去向鋼胚明細</button>
                             </div>
-                        </td>
-                    </tr>
-                </table>
-            
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr>
-                        <td>
-                            <asp:GridView ID="gvStock" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
-                                <RowStyle CssClass="gvrs" ForeColor="Blue" />
-                                <HeaderStyle CssClass="gvhs" />
+                            <div class="limit-status-item">
+                                <div class="limit-status-circle" style="background-color: #92D050;"></div>
+                                <div class="limit-status-box">&le;3900 PCS(70%)</div>
+                            </div>
+                            <div class="limit-status-item">
+                                <div class="limit-status-circle" style="background-color: #FFC000;"></div>
+                                <div class="limit-status-box">3900-4760 PCS(70-85%)</div>
+                            </div>
+                            <div class="limit-status-item">
+                                <div class="limit-status-circle" style="background-color: #FF0000;"></div>
+                                <div class="limit-status-box">&ge;4760 PCS(85%)</div>
+                            </div>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <asp:GridView ID="gvStock" runat="server" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
-                        </td>
-                    </tr>
-                </table>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
-        <div class="section-box flex-row">
-            <div class="chart-three-cols">
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr><td><div id="todayRcvChart" style="width: 600px; height: 250px;"></div></td></tr>
-                </table>
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr>
-                        <td>
-                            <asp:GridView ID="GridView4" runat="server" DataSourceID="dsImport" CellSpacing="1" CssClass="gv" GridLines="Both" Width="100%">
-                                <HeaderStyle CssClass="gvhs red-header" />
-                                <RowStyle CssClass="gvrs" />
-                            </asp:GridView>
-                        </td>
-                    </tr>
-                </table>
+        <%-- ============================================================
+             Card 2：今日入儲 / 每日增減趨勢 / 今日消耗  (三欄並排)
+             ============================================================ --%>
+        <div class="card-custom mb-5">
+            <div class="card-header-custom">
+                <span class="fs-4">📊 今日入儲 / 每日增減趨勢 / 今日消耗 即時資訊</span>
             </div>
-            
-            <div class="chart-three-cols">
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr><td><div id="weeklyChart" style="width: 600px; height: 250px;"></div></td></tr>
-                </table>
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr>
-                        <td>
-                            <asp:GridView ID="GridView5" runat="server" DataSourceID="dsWeekly" CellSpacing="1" CssClass="gv" GridLines="Both" Width="100%">
-                                <HeaderStyle CssClass="gvhs red-header" />
-                                <RowStyle CssClass="gvrs" HorizontalAlign="Center" />
+            <div class="card-body-inner">
+                <div class="flex-row-layout">
+
+                    <%-- 左欄：今日入儲 --%>
+                    <div class="flex-col-third">
+                        <div id="todayRcvChart" style="width: 100%; height: 260px;"></div>
+                        <div style="margin-top: 8px;">
+                            <asp:GridView ID="GridView4" runat="server" DataSourceID="dsImport" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            
-            <div class="chart-three-cols">
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr><td><div id="todayUsedChart" style="width: 600px; height: 250px;"></div></td></tr>
-                </table>
-                <table style="border-collapse: collapse; margin: 0 auto;">
-                    <tr>
-                        <td>
-                            <asp:GridView ID="GridView6" runat="server" DataSourceID="dsExport" CellSpacing="1" CssClass="gv" GridLines="Both" Width="100%">
-                                <HeaderStyle CssClass="gvhs red-header" />
-                                <RowStyle CssClass="gvrs" />
+                        </div>
+                    </div>
+
+                    <%-- 中欄：每日增減趨勢 --%>
+                    <div class="flex-col-third">
+                        <div id="weeklyChart" style="width: 100%; height: 260px;"></div>
+                        <div style="margin-top: 8px;">
+                            <asp:GridView ID="GridView5" runat="server" DataSourceID="dsWeekly" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
-                        </td>
-                    </tr>
-                </table>
+                        </div>
+                    </div>
+
+                    <%-- 右欄：今日消耗 --%>
+                    <div class="flex-col-third">
+                        <div id="todayUsedChart" style="width: 100%; height: 260px;"></div>
+                        <div style="margin-top: 8px;">
+                            <asp:GridView ID="GridView6" runat="server" DataSourceID="dsExport" GridLines="None" CssClass="bs5-table">
+                            </asp:GridView>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-        </div>            
+        </div>
+
     </div>
+
+    <%-- ============================================================
+         Modal：鋼胚去向詳細分佈圖 (完整保留)
+         ============================================================ --%>
     <div id="detailModal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-btn" onclick="closeDetailModal()">&times;</span>
             <h2 style="text-align: center; color: #003399; margin-top: 0; margin-bottom: 10px;">鋼胚去向詳細分佈圖</h2>
-            
+
             <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; background-color: #f4f7f9; padding: 10px 20px; border: 1px solid #d0d0d0; border-radius: 8px; margin-bottom: 10px; font-size: 14px;">
                 <div style="display: flex; align-items: center; gap: 5px;">
                     <span style="display: inline-block; width: 16px; height: 16px; background-color: #FFFF00; border: 1px solid #000;"></span>
@@ -783,6 +782,7 @@
         </div>
     </div>
 
+    <%-- SqlDataSources (完整保留，不異動) --%>
     <asp:SqlDataSource ID="dsImport" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="GetSlab_rcvCount_today" SelectCommandType="StoredProcedure" />
     <asp:SqlDataSource ID="dsImport_forteechart" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="GetSlab_rcvCount_today_Teechartues" SelectCommandType="StoredProcedure" />
     <asp:SqlDataSource ID="dsWeekly_forteechart" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="GetSlab_TotalCount_weekly_Teechartuse" SelectCommandType="StoredProcedure" />
@@ -790,8 +790,8 @@
     <asp:SqlDataSource ID="dsExport" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="GetSlab_UsedCount_today" SelectCommandType="StoredProcedure" />
     <asp:SqlDataSource ID="dsExport_forteechart" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="GetSlab_UsedCount_today_Teechartues" SelectCommandType="StoredProcedure" />
     <asp:SqlDataSource ID="dsWeekly" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="GetSlab_TotalCount_weekly" SelectCommandType="StoredProcedure" />
-            
-    <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" 
+
+    <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>"
         SelectCommand="SELECT TOP 1
     'Y1' + '_' + CAST(ROUND(CAST(y1_orate / 10.0 AS float), 2) AS varchar) AS Y1,
     ROUND(CAST(y1_orate / 10.0 AS float), 2) AS y1_orate,
@@ -806,8 +806,8 @@
     '庫存量' + CAST(ROUND(CAST(total_stock_num AS float) / 5600.0, 2)*100 AS varchar)+'%' AS total_stock_num,
     ROUND(CAST(total_stock_num AS float) / 5600.0, 2)*100 AS total_stock_num_left
     FROM h_pmis_isyh WITH (NOLOCK) ORDER BY process_date DESC" />
-    
-    <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" 
+
+    <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>"
         SelectCommand="SELECT TOP 1
     ROUND(CAST(y1_orate / 10.0 AS float), 2) AS y1_orate,
     ROUND(CAST(y2_orate / 10.0 AS float), 2) AS y2_orate,
@@ -816,7 +816,22 @@
     ROUND(CAST(hc_orate / 10.0 AS float), 2) AS hc_orate,
     ROUND(CAST(total_stock_num AS float) / 5600.0, 3)*100 AS total_stock_num_left
     FROM h_pmis_isyh WITH (NOLOCK) ORDER BY process_date DESC" />
-        
+
     </form>
+
+    <script src="libs/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+        // 自動填入資料更新時間標籤
+        (function () {
+            var now = new Date();
+            var y = now.getFullYear();
+            var m = ('0' + (now.getMonth() + 1)).slice(-2);
+            var d = ('0' + now.getDate()).slice(-2);
+            var hh = ('0' + now.getHours()).slice(-2);
+            var mm = ('0' + now.getMinutes()).slice(-2);
+            var el = document.getElementById('headerUpdateTime');
+            if (el) el.textContent = '資料更新時間：' + y + '/' + m + '/' + d + ' ' + hh + ':' + mm;
+        })();
+    </script>
 </body>
 </html>
