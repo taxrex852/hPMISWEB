@@ -1,6 +1,31 @@
 ﻿Imports System.Data.SqlClient
 Imports System.Collections.Generic
 
+''' <summary>
+''' 3TNRL 產品分類生產統計頁面 (PAGE_ID=3404)
+''' 資料來源：h_pmis_wh83（g_weight）+ h_pmis_wh86（gross_weight）FULL OUTER JOIN
+'''           h_pmis_wh81（carbon、tensile、steel_grade_code、inspection_code）
+''' EXLC_C = 100：碳含量門檻，≤100 = 超低碳鋼 (EXLC)，>100 = 高碳鋼系列
+''' 尺寸分類（gvMonth1/gvMonth3）：
+'''   ETNG：width≤1260 & thickness≤1500（窄薄）
+'''   WTNG：width≥1500 & thickness≤2300（寬薄）
+'''   NTNG：1260<width<1500 & 1500≤thickness≤1900（中寬薄厚）
+'''   NTCG：6000≤thickness≤9900（中厚）
+'''   ETCG：thickness>9900（超厚）
+'''   MDSZ：PA - ETNG - WTNG - NTNG - NTCG - ETCG（衍生，其餘尺寸）
+'''   NRWD：width<950（窄）；MDWD：950≤width<1550（中寬）；WIWD：width≥1550（寬）
+''' 強度/品質分類（gvMonth2/gvMonth4）：
+'''   EXLC：carbon≤100（超低碳）
+'''   LSCS：carbon>100 & tensile≤40（低強度碳鋼）
+'''   MSCS：carbon>100 & 40<tensile≤50（中強度）
+'''   HICS：carbon>100 & 50<tensile≤60（高強度）
+'''   VHIS：carbon>100 & tensile>60（超高強度）
+'''   SUS：carbon>100 & steel_grade_code like '6%'（不鏽鋼系列）
+'''   NRCQ：inspection_code 5000~5999（普通檢驗）
+'''   HICQ：inspection_code 4000~4999（高精度檢驗）
+'''   VHCQ：inspection_code 2000~3999（超高精度檢驗）
+''' 圖表：近 1 年各分類月產量趨勢（ECharts）
+''' </summary>
 Partial Public Class _3TNRL_Production
     Inherits System.Web.UI.Page
     Private Const PAGE_ID = "3404"

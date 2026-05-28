@@ -1,0 +1,159 @@
+﻿
+
+
+
+
+
+
+
+
+Option Strict On
+Option Explicit On
+
+
+Partial Public Class _1TNRL_Defect
+    
+
+
+
+
+
+
+
+    Protected WithEvents form1 As Global.System.Web.UI.HtmlControls.HtmlForm
+    
+
+
+
+
+
+
+
+    Protected WithEvents ph As Global.hPMISWEB.PageHeader
+    
+
+
+
+
+
+
+
+    Protected WithEvents SqlDataSource1 As Global.System.Web.UI.WebControls.SqlDataSource
+    
+
+
+
+
+
+
+
+    Protected WithEvents LabelStartdate As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents LabelEnddate As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents gvDaily As Global.System.Web.UI.WebControls.GridView
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblMonth As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblR1 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblR2 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblR3 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblR4 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblR5 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblC1 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblC2 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents lblC3 As Global.System.Web.UI.WebControls.Label
+    
+
+
+
+
+
+
+
+    Protected WithEvents gvMonth As Global.System.Web.UI.WebControls.GridView
+End Class

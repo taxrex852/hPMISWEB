@@ -1,6 +1,16 @@
 ﻿Imports System.Data.SqlClient
 Imports System.Collections.Generic
 
+' ============================================================
+' 頁面：3203 — 2TNRL 缺陷分析
+' 功能：顯示 2TNRL 產線各班次及本月缺陷 Top 排行
+'        - 剔退缺陷 Top 5（依 an_weight 降冪排序）
+'        - 其他缺陷 Top 3（依 cd_weight 降冪排序）
+' 資料來源：h_pmis_wh97（全小寫）
+'   剔退：def_code_1~4（缺陷碼）/ an_weight（剔退重量，g）
+'   其他：cd_code_1~4（缺陷碼）/ cd_weight_1~4（缺陷重量，g）
+' 班制：ANM 循環（A=中班15-22, N=夜班0-6/23, M=早班7-14）
+' ============================================================
 Partial Public Class _2TNRL_Defect
     Inherits System.Web.UI.Page
     Private Const PAGE_ID = "3203"
@@ -13,13 +23,16 @@ Partial Public Class _2TNRL_Defect
             setTitle(Me, PAGE_ID)
 
             Dim args1 As New DataSourceSelectArguments
+            ' SqlDataSource1 提供近 13 個月的缺陷月統計（def_top1~5）
             Dim DR1 As DataView = CType(SqlDataSource1.Select(args1), DataView)
 
             If DR1 IsNot Nothing AndAlso DR1.Count > 0 Then
                 Dim count As Integer = DR1.Count
+                ' 顯示資料區間（起迄月份）
                 LabelStartdate.Text = Format(CDate(DR1(0)("product_date").ToString()), "yyyy/MM")
                 LabelEnddate.Text = Format(CDate(DR1(count - 1)("product_date").ToString()), "yyyy/MM")
 
+                ' 準備 ECharts 趨勢圖資料（各月 Top1~5 剔退缺陷重量）
                 Dim xAxis As New List(Of String)()
                 Dim d1 As New List(Of Double)()
                 Dim d2 As New List(Of Double)()
@@ -36,6 +49,7 @@ Partial Public Class _2TNRL_Defect
                     d5.Add(If(IsDBNull(DR1(i)("def_top5")), 0, Convert.ToDouble(DR1(i)("def_top5"))))
                 Next
 
+                ' 組合 JavaScript 物件字串，注入前端 ECharts 圖表
                 Dim script As String = "var chartData = {" &
                     "xAxis: [" & String.Join(",", xAxis) & "]," &
                     "d1: [" & String.Join(",", d1) & "]," &
@@ -52,6 +66,13 @@ Partial Public Class _2TNRL_Defect
         End If
     End Sub
 
+    ' ============================================================
+    ' TNRL1_Table — 當日三班次缺陷表格（gvDaily）
+    ' 表格共 8 行：
+    '   Row 0~4：剔退缺陷 Top 1~5（code/MT）
+    '   Row 5~7：其他缺陷 Top 1~3（code/MT）
+    ' 班次判斷與 3103 相同（ANM/NMA/MAN 循環）
+    ' ============================================================
     Private Sub TNRL1_Table()
         Dim dtDataTable As New DataTable
         Dim dtTmp As DataTable = Nothing
@@ -66,29 +87,30 @@ Partial Public Class _2TNRL_Defect
         Dim shift_date(2) As Date
 
         '1:M 2:A 3:N
+        ' 依目前小時決定班次順序
         Select Case Now.Hour
-            Case 7 To 14 'M
+            Case 7 To 14 'M班（早班）值班 → 顯示順序：A(中)→N(夜)→M(早)
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 15:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_sym = "中夜早"
                 shift_num = "231"
                 shift_sym_c = "ANM"
-            Case 15 To 22 'A
+            Case 15 To 22 'A班（中班）值班 → 顯示順序：N(夜)→M(早)→A(中)
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 15:00:00")
                 shift_sym = "夜早中"
                 shift_num = "312"
                 shift_sym_c = "NMA"
-            Case 0 To 6 'N
+            Case 0 To 6 'N班（夜班）值班 → 顯示順序：M(早)→A(中)→N(夜)
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 07:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 15:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_sym = "早中夜"
                 shift_num = "123"
                 shift_sym_c = "MAN"
-            Case 23 'N
+            Case 23 'N班（夜班起始）→ 同 00-06 邏輯
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 15:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date.AddDays(1) + " 23:00:00")
@@ -97,6 +119,7 @@ Partial Public Class _2TNRL_Defect
                 shift_sym_c = "MAN"
         End Select
 
+        ' 設定欄位標題（含日期與班別）
         strDailyTitle(1) = shift_date(0).ToString("yyyy.MM.dd") + " " + shift_sym(0) + strDailyTitle(1)
         strDailyTitle(2) = shift_date(1).ToString("yyyy.MM.dd") + " " + shift_sym(1) + strDailyTitle(2)
         strDailyTitle(3) = shift_date(2).ToString("yyyy.MM.dd") + " " + shift_sym(2) + strDailyTitle(3)
@@ -116,6 +139,9 @@ Partial Public Class _2TNRL_Defect
         Next
 
         Conn.Open()
+        ' ── 剔退缺陷 Top 5（各班次）──────────────────────────
+        ' 以 UNION 合併 def_code_1~4，依 an_weight 總和降冪取 Top 5
+        ' 顯示格式：缺陷碼/MT（單位換算：g ÷ 1000）
         'reject
         For shift As Integer = 0 To 2
             strACCESS = String.Format("select top 5 code, sum(weight) from (" & _
@@ -135,15 +161,19 @@ Partial Public Class _2TNRL_Defect
             'fill data
             If dtTmp IsNot Nothing Then
                 For i As Integer = 0 To dtTmp.Rows.Count - 1
-                    '單位換算
+                    '單位換算（g → MT）
                     calTmp = Val(dtTmp.Rows(i).Item(1).ToString) / 1000
                     dtDataTable.Rows(i).Item(shift + 1) = dtTmp.Rows(i).Item(0) + "/" + calTmp.ToString("0.00")
                 Next
+                ' 不足 5 筆時補 N/A
                 For i As Integer = dtTmp.Rows.Count To 4
                     dtDataTable.Rows(i).Item(shift + 1) = "N/A"
                 Next
             End If
 
+            ' ── 其他缺陷 Top 3（各班次）──────────────────────
+            ' 以 UNION 合併 cd_code_1~4 / cd_weight_1~4，依重量降冪取 Top 3
+            ' 填入 Row 5~7（剔退 Top5 之後）
             strACCESS = String.Format("select top 3 code, sum(weight) from (" & _
                                         "select cd_code_1 as code,cd_weight_1 as weight from h_pmis_wh97 where shift_date='{0}' and shift_code='{1}'" & _
                                         " union " & _
@@ -161,10 +191,12 @@ Partial Public Class _2TNRL_Defect
             'fill data
             If dtTmp IsNot Nothing Then
                 For i As Integer = 0 To dtTmp.Rows.Count - 1
-                    '單位換算
+                    '單位換算（g → MT）
                     calTmp = Val(dtTmp.Rows(i).Item(1).ToString) / 1000
+                    ' 其他缺陷從 Row 5 開始（Row 0~4 為剔退 Top 5）
                     dtDataTable.Rows(i + 5).Item(shift + 1) = dtTmp.Rows(i).Item(0) + "/" + calTmp.ToString("0.00")
                 Next
+                ' 不足 3 筆時補 N/A
                 For i As Integer = dtTmp.Rows.Count To 2
                     dtDataTable.Rows(i + 5).Item(shift + 1) = "N/A"
                 Next
@@ -180,12 +212,20 @@ Partial Public Class _2TNRL_Defect
         gvDaily.Rows(0).Cells(2).Width = 215
         gvDaily.Rows(0).Cells(3).Width = 215
 
+        ' 最後一班（當班）欄位套用特殊樣式
         For i As Integer = 0 To 7
             gvDaily.Rows(i).Cells(3).CssClass = "irondata0"
         Next
 
     End Sub
 
+    ' ============================================================
+    ' SumTable — 本月逐日缺陷統計（gvMonth）+ 月累計標籤
+    ' 逐日迴圈：每日執行 Top5 剔退 + Top3 其他兩個查詢
+    ' 月累計：
+    '   lblR1~lblR5：剔退缺陷 Top 1~5（月累計，code/MT）
+    '   lblC1~lblC3：其他缺陷 Top 1~3（月累計，code/MT）
+    ' ============================================================
     Private Sub SumTable()
         Dim dtDataTable As New DataTable
         Dim dtDataTable1 As New DataTable
@@ -193,11 +233,13 @@ Partial Public Class _2TNRL_Defect
         Dim dtDataTable3 As New DataTable
         Dim dtTmp As DataTable = Nothing
         Dim dr As DataRow
+        ' 月表欄位：日期 + Top5剔退 + Top3其他（共 9 欄）
         Dim strMonthTitle() As String = {" ", "defect top (1)", "defect top (2)", "defect top (3)", "defect top (4)", "defect top (5)", "defect top (1) ", "defect top (2) ", "defect top (3) "}
         Dim adapter As SqlDataAdapter = Nothing
 
         Dim calTmp As Double
 
+        ' 建立本月逐日空白行
         'Month produce record
         For i As Integer = 0 To strMonthTitle.Length - 1
             dtDataTable.Columns.Add(New DataColumn(strMonthTitle(i)))
@@ -208,6 +250,7 @@ Partial Public Class _2TNRL_Defect
             dr = dtDataTable.NewRow
             dtDataTable.Rows.Add(dr)
         Next
+        ' 初始化日期標籤
         For idate As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
             dtDataTable.Rows(idate).Item(0) = Date.Today.ToString("MM") + "月" + (idate + 1).ToString("d2") + "日"
             'For j As Integer = 0 To strMonthTitle.Length - 2
@@ -217,7 +260,10 @@ Partial Public Class _2TNRL_Defect
 
         Conn.Open()
 
+        ' 逐日查詢本月每天的缺陷排行
         For idate As Integer = 1 To Date.DaysInMonth(Year([Today]), Month([Today]))
+            ' ── 每日剔退缺陷 Top 5 ─────────────────────────
+            ' 合併 def_code_1~4，依 an_weight 降冪取 Top 5
             strACCESS = "select top 5 code, sum(weight) from (" & _
                         "select def_code_1 as code,an_weight as weight " & _
                         "from h_pmis_wh97 where shift_date = '" + Date.Today.ToString("yyyyMM") + idate.ToString("d2") + "'" + _
@@ -235,16 +281,20 @@ Partial Public Class _2TNRL_Defect
 
             If dtTmp IsNot Nothing Then
                 For i As Integer = 0 To dtTmp.Rows.Count - 1
-                    '單位換算
+                    '單位換算（g → MT）
                     calTmp = Val(dtTmp.Rows(i).Item(1).ToString) / 1000
 
                     dtDataTable.Rows(idate - 1).Item(i + 1) = dtTmp.Rows(i).Item(0) + "/" + calTmp.ToString("0.00")
                 Next
+                ' 不足 5 筆時補 N/A（欄位 i+1，i=dtTmp.Rows.Count~4）
                 For i As Integer = dtTmp.Rows.Count To 4
                     dtDataTable.Rows(idate - 1).Item(i + 1) = "N/A"
                 Next
             End If
 
+            ' ── 每日其他缺陷 Top 3 ─────────────────────────
+            ' 合併 cd_code_1~4 / cd_weight_1~4，依重量降冪取 Top 3
+            ' 填入欄位 6~8（欄位 1~5 為剔退 Top5）
             strACCESS = "select top 3 code, sum(weight) from (" & _
                         "select cd_code_1 as code,cd_weight_1 as weight " & _
                         "from h_pmis_wh97 where shift_date = '" + Date.Today.ToString("yyyyMM") + idate.ToString("d2") + "'" + _
@@ -262,11 +312,13 @@ Partial Public Class _2TNRL_Defect
 
             If dtTmp IsNot Nothing Then
                 For i As Integer = 0 To dtTmp.Rows.Count - 1
-                    '單位換算
+                    '單位換算（g → MT）
                     calTmp = Val(dtTmp.Rows(i).Item(1).ToString) / 1000
 
+                    ' 其他缺陷從第 6 欄（Index=6）開始填入
                     dtDataTable.Rows(idate - 1).Item(i + 6) = dtTmp.Rows(i).Item(0) + "/" + calTmp.ToString("0.00")
                 Next
+                ' 不足 3 筆時補 N/A
                 For i As Integer = dtTmp.Rows.Count To 2
                     dtDataTable.Rows(idate - 1).Item(i + 6) = "N/A"
                 Next
@@ -284,6 +336,9 @@ Partial Public Class _2TNRL_Defect
         Next
 
         lblMonth.Text = Date.Today.ToString("MM")
+
+        ' ── 月累計剔退缺陷 Top 5（lblR1~lblR5）───────────────
+        ' 查詢本月所有日期的 def_code_1~4 合併，依 an_weight 降冪取 Top 5
         strACCESS = "select top 5 code, sum(weight) from (" & _
                     "select def_code_1 as code,an_weight as weight " & _
                     "from h_pmis_wh97 where (SUBSTRING(shift_date, 1, 4) = '" + Date.Today.ToString("yyyy") + "') and (SUBSTRING(shift_date, 5, 2) = '" + Date.Today.ToString("MM") + "') " & _
@@ -299,6 +354,7 @@ Partial Public Class _2TNRL_Defect
                     ")top5 where code != '' group by code order by sum(weight) desc"
         dtTmp = execQuery(strACCESS, "", Conn)
 
+        ' 初始化月累計標籤
         lblR1.Text = "N/A"
         lblR2.Text = "N/A"
         lblR3.Text = "N/A"
@@ -309,25 +365,27 @@ Partial Public Class _2TNRL_Defect
                 If dtTmp.Rows(i).Item(0).ToString.Trim.Length <> 0 Then
                     Select Case i
                         Case 0
-                            '單位換算
+                            '單位換算（g → MT）
                             lblR1.Text = dtTmp.Rows(0).Item(0).ToString + "/" + (Val(dtTmp.Rows(0).Item(1).ToString) / 1000).ToString("0.00")
                         Case 1
-                            '單位換算
+                            '單位換算（g → MT）
                             lblR2.Text = dtTmp.Rows(1).Item(0).ToString + "/" + (Val(dtTmp.Rows(1).Item(1).ToString) / 1000).ToString("0.00")
                         Case 2
-                            '單位換算
+                            '單位換算（g → MT）
                             lblR3.Text = dtTmp.Rows(2).Item(0).ToString + "/" + (Val(dtTmp.Rows(2).Item(1).ToString) / 1000).ToString("0.00")
                         Case 3
-                            '單位換算
+                            '單位換算（g → MT）
                             lblR4.Text = dtTmp.Rows(3).Item(0).ToString + "/" + (Val(dtTmp.Rows(3).Item(1).ToString) / 1000).ToString("0.00")
                         Case 4
-                            '單位換算
+                            '單位換算（g → MT）
                             lblR5.Text = dtTmp.Rows(4).Item(0).ToString + "/" + (Val(dtTmp.Rows(4).Item(1).ToString) / 1000).ToString("0.00")
                     End Select
                 End If
             Next
         End If
 
+        ' ── 月累計其他缺陷 Top 3（lblC1~lblC3）───────────────
+        ' 查詢本月所有日期的 cd_code_1~4 合併，依 cd_weight 降冪取 Top 3
         strACCESS = "select top 3 code, sum(weight) from (" & _
                     "select cd_code_1 as code,cd_weight_1 as weight " & _
                     "from h_pmis_wh97 where (SUBSTRING(shift_date, 1, 4) = '" + Date.Today.ToString("yyyy") + "') and (SUBSTRING(shift_date, 5, 2) = '" + Date.Today.ToString("MM") + "') " & _
@@ -343,6 +401,7 @@ Partial Public Class _2TNRL_Defect
                     ")top3 where code != '' group by code order by sum(weight) desc"
         dtTmp = execQuery(strACCESS, "", Conn)
 
+        ' 初始化月累計標籤
         lblC1.Text = "N/A"
         lblC2.Text = "N/A"
         lblC3.Text = "N/A"
@@ -351,13 +410,13 @@ Partial Public Class _2TNRL_Defect
                 If dtTmp.Rows(i).Item(0).ToString.Trim.Length <> 0 Then
                     Select Case i
                         Case 0
-                            '單位換算
+                            '單位換算（g → MT）
                             lblC1.Text = dtTmp.Rows(0).Item(0).ToString + "/" + (Val(dtTmp.Rows(0).Item(1).ToString) / 1000).ToString("0.00")
                         Case 1
-                            '單位換算
+                            '單位換算（g → MT）
                             lblC2.Text = dtTmp.Rows(1).Item(0).ToString + "/" + (Val(dtTmp.Rows(1).Item(1).ToString) / 1000).ToString("0.00")
                         Case 2
-                            '單位換算
+                            '單位換算（g → MT）
                             lblC3.Text = dtTmp.Rows(2).Item(0).ToString + "/" + (Val(dtTmp.Rows(2).Item(1).ToString) / 1000).ToString("0.00")
                     End Select
                 End If
@@ -368,6 +427,11 @@ Partial Public Class _2TNRL_Defect
 
     End Sub
 
+    ' ============================================================
+    ' TeeChartData（已停用，改以 ECharts 取代）
+    ' 原用途：提供 TeeChart 控制項的月趨勢圖資料
+    ' 保留此區塊供歷史參考
+    ' ============================================================
     'Private Sub TeeChartData()
 
     '    'TeeChart data
@@ -484,6 +548,10 @@ Partial Public Class _2TNRL_Defect
     '    hAnc.Value = "#Chart"
     'End Sub
 
+    ' ============================================================
+    ' Mainprocess — 主流程進入點
+    ' 建立連線後依序呼叫班次缺陷表格和月統計表格
+    ' ============================================================
     Private Sub Mainprocess()
         Conn = New SqlConnection(getConnStr(Application("ConnStr")))
         TNRL1_Table()

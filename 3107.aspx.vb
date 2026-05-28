@@ -1,6 +1,15 @@
 ﻿Imports System.Data.SqlClient
 Imports System.Collections.Generic
 
+''' <summary>
+''' 4TNRL 生產績效 KPI 監控頁面 (PAGE_ID=3107)
+''' 資料來源：h_pmis_wh73 (g_weight)、h_pmis_wh76 (gross_weight)、
+'''           h_pmis_wh71 (coil_weight)、h_pmis_si01 (line_id=2)
+''' KPI 指標：PA(產量 MT)、PY(產率 %)、PO(訂單合格率 %)、OR(作業率 %)、MR(剔退重量)
+''' 班次代碼：A=中班(15:00-23:00)、N=夜班(23:00-07:00)、M=早班(07:00-15:00)
+''' 連線：getConnStr（HPMIS 資料庫）
+''' 注意：4TNRL MR = N/A（無剔退資料）
+''' </summary>
 Partial Public Class _4TNRL_Produce
     Inherits System.Web.UI.Page
     Private Const PAGE_ID = "3107"
@@ -18,6 +27,7 @@ Partial Public Class _4TNRL_Produce
             LabelStartdate.Text = Format(CDate(DR1(0)(0).ToString), "yyyy/MM")
             LabelEnddate.Text = Format(CDate(DR1(count - 1)(0).ToString), "yyyy/MM")
 
+            '組裝 ECharts 趨勢圖 JSON 資料（12個月）
             Dim xAxis As New List(Of String)()
             Dim pa As New List(Of Double)()
             Dim py As New List(Of Double)()
@@ -50,6 +60,15 @@ Partial Public Class _4TNRL_Produce
         'hAnc.Value = ""
     End Sub
 
+    ''' <summary>
+    ''' 三班 KPI 日報表（gvDaily）
+    ''' 欄位：PA/PY/PO/OR/MR × 三班
+    ''' PA = FULL OUTER JOIN(h_pmis_wh73.g_weight + h_pmis_wh76.gross_weight)，單位：kg→MT（/1000）
+    ''' PY = PA / Coil measured weight(h_pmis_wh71.coil_weight)
+    ''' PO = 合格產量(disposition in '1','2','H') / Coil measured weight
+    ''' OR = (480-延誤) / (480-停機) × 100，來源 h_pmis_si01，line_id=2
+    ''' MR = N/A（4TNRL 無剔退資料）
+    ''' </summary>
     Private Sub TNRL4_Table()
         Dim dtDataTable As New DataTable
         Dim dtTmp As DataTable = Nothing, dtTmp2 As DataTable = Nothing
@@ -69,29 +88,30 @@ Partial Public Class _4TNRL_Produce
 
         Dim tmpPA(2) As Double
 
+        '依目前時間判斷班次：A=中班、N=夜班、M=早班
         Select Case Now.Hour
-            Case 7 To 14 'M
+            Case 7 To 14 'M 早班時段 → 顯示順序：中夜早 (ANM)
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 15:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_sym = "中夜早"
                 shift_sym_c = "ANM"
                 shift_num = "231"
-            Case 15 To 22 'A
+            Case 15 To 22 'A 中班時段 → 顯示順序：夜早中 (NMA)
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 15:00:00")
                 shift_sym = "夜早中"
                 shift_sym_c = "NMA"
                 shift_num = "312"
-            Case 0 To 6 'N
+            Case 0 To 6 'N 夜班時段 → 顯示順序：早中夜 (MAN)
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 07:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 15:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_sym = "早中夜"
                 shift_sym_c = "MAN"
                 shift_num = "123"
-            Case 23 'N
+            Case 23 'N 夜班起始小時 → 顯示順序：早中夜 (MAN)
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 15:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date.AddDays(1) + " 23:00:00")
@@ -100,6 +120,7 @@ Partial Public Class _4TNRL_Produce
                 shift_num = "123"
         End Select
 
+        '設定表頭日期班別
         strDailyTitle(2) = shift_date(0).ToString("yyyy.MM.dd") + " " + shift_sym(0) + strDailyTitle(2)
         strDailyTitle(3) = shift_date(1).ToString("yyyy.MM.dd") + " " + shift_sym(1) + strDailyTitle(3)
         strDailyTitle(4) = shift_date(2).ToString("yyyy.MM.dd") + " " + shift_sym(2) + strDailyTitle(4)
@@ -120,6 +141,7 @@ Partial Public Class _4TNRL_Produce
         Conn.Open()
         'PA-----------------------------------------------------------
         'PA=Σ(wh73的第17項：Gross weight)
+        '4TNRL PA = wh73.g_weight(熱軋產品) FULL OUTER JOIN wh76.gross_weight(冷軋產品)
         For shift As Integer = 0 To 2
             strACCESS = String.Format("select ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod, ISNULL(A.product_day, B.product_day) as ProductDay from " & _
                                             "(select SUBSTRING(shift_date, 7, 2) as product_day, " & _
@@ -159,6 +181,7 @@ Partial Public Class _4TNRL_Produce
         'PY-----------------------------------------------------------
         'PY=PA/Coil measured weight
         'Coil measured weight=Σ(wh71的第33項：Coil weight)
+        'wh73 JOIN wh71（熱軋捲料）+ wh76（冷軋捲料）FULL OUTER JOIN
         For shift As Integer = 0 To 2
             strACCESS = String.Format("select (ISNULL(A.material_weight, 0) + ISNULL(B.material_weight, 0)) as material_weight, ISNULL(A.ProductDay, B.ProductDay) as ProductDay from " & _
                                             "(select SUBSTRING(wh73.shift_date, 7, 2) as ProductDay, SUM(wh71.coil_weight) as material_weight from " & _
@@ -182,6 +205,7 @@ Partial Public Class _4TNRL_Produce
                         If Val(dtTmp.Rows(0).Item(0)) <> 0 Then
                             'dtDataTable.Rows(1).Item(shift + 2) = Decimal.Round(dtTmp.Rows(0).Item(0), 2)
                             If dtDataTable.Rows(0).Item(shift + 2).ToString.Trim <> "N/A" Then
+                                'PY(%) = PA / 投入捲料重量 × 100
                                 dtDataTable.Rows(1).Item(shift + 2) = ((Val(dtDataTable.Rows(0).Item(shift + 2)) / Val(dtTmp.Rows(0).Item(0))) * 100).ToString("0.00")
                             Else
                                 dtDataTable.Rows(1).Item(shift + 2) = "N/A"
@@ -205,11 +229,12 @@ Partial Public Class _4TNRL_Produce
         'PO-----------------------------------------------------------
         'PO=[PA-Σ(disposition=3,4,5,6]/ Coil measured weight
         'Coil measured weight=Σ(wh71的第33項：Coil weight)
+        '合格條件：disposition in ('1', '2', 'H')
         For shift As Integer = 0 To 2
             bPO_pa_Ready = True
             bPO_coil_Ready = True
 
-            ' 合格產量
+            ' 合格產量（disposition 1/2/H 為合格，其餘為不合格或待判）
             strACCESS = String.Format("select ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod, ISNULL(A.product_day, B.product_day) as ProductDay from " & _
                                 "(select SUBSTRING(shift_date, 7, 2) as product_day, " & _
                                 "SUM(g_weight) as product_weight from h_pmis_wh73 " & _
@@ -225,7 +250,7 @@ Partial Public Class _4TNRL_Produce
                             "ORDER BY ProductDay", _
                             shift_date(shift).ToString("yyyyMMdd"), _
                             shift_sym_c(shift))
-            ' 投入鋼捲重量
+            ' 投入鋼捲重量（分母）
             strACCESS2 = String.Format("select (ISNULL(A.material_weight, 0) + ISNULL(B.material_weight, 0)) as material_weight, ISNULL(A.ProductDay, B.ProductDay) as ProductDay from " & _
                                 "(select SUBSTRING(wh73.shift_date, 7, 2) as ProductDay, SUM(wh71.coil_weight) as material_weight from " & _
                                 "(select distinct SUBSTRING(material_no, 1, 7) as mno, shift_date from h_pmis_wh73 " & _
@@ -263,6 +288,7 @@ Partial Public Class _4TNRL_Produce
                 If bPO_pa_Ready Then
                     If Not IsDBNull(dtTmp2.Rows(0).Item(0)) Then
                         If Val(dtTmp2.Rows(0).Item(0)) <> 0 Then
+                            'PO(%) = 合格產量 / 投入捲料重量 × 100
                             dtDataTable.Rows(2).Item(shift + 2) = Val(((IIf(IsDBNull(dtTmp.Rows(0).Item(0)), 0, Val(dtTmp.Rows(0).Item(0))) / Val(dtTmp2.Rows(0).Item(0))) * 100)).ToString("0.00")
                         Else
                             dtDataTable.Rows(2).Item(shift + 2) = "N/A"
@@ -297,6 +323,7 @@ Partial Public Class _4TNRL_Produce
         Next
 
         'OR-----------------------------------------------------------
+        'OR(%) = (480-延誤)/(480-停機) × 100，來源 h_pmis_si01，line_id=2（4TNRL）
         For shift As Integer = 0 To 2
             strACCESS = "SELECT " & _
                         "SUM(acci_delay_time+roll_delay_time+shutdown_time+others_delay_time)," & _
@@ -307,7 +334,7 @@ Partial Public Class _4TNRL_Produce
             dtTmp = execQuery(strACCESS, "", Conn)
 
             If dtTmp IsNot Nothing Then
-                'OR
+                'OR = (480 - 延誤時間) / (480 - 停機時間) × 100
                 If dtTmp.Rows(0).Item(0) Is DBNull.Value Then
                     calTmp = 480
                 Else
@@ -328,11 +355,12 @@ Partial Public Class _4TNRL_Produce
         Conn.Close()
 
         'MR-----------------------------------------------------------
+        '4TNRL 無剔退追蹤資料，顯示 N/A
         For shift As Integer = 0 To 2
             dtDataTable.Rows(4).Item(shift + 2) = "N/A"
         Next
 
-        '單位換算
+        '單位換算：PA 及 MR 原始單位為 kg，轉換為 MT（/ 1000）
         '------
         dtDataTable.Rows(0).Item(2) = (Val(dtDataTable.Rows(0).Item(2).ToString) / 1000).ToString("0.00")
         dtDataTable.Rows(0).Item(3) = (Val(dtDataTable.Rows(0).Item(3).ToString) / 1000).ToString("0.00")
@@ -350,11 +378,20 @@ Partial Public Class _4TNRL_Produce
         gvDaily.Rows(0).Cells(3).Width = 180
         gvDaily.Rows(0).Cells(4).Width = 180
 
+        '最新班欄位套用強調樣式
         For i As Integer = 0 To 4
             gvDaily.Rows(i).Cells(4).CssClass = "irondata0"
         Next
     End Sub
 
+    ''' <summary>
+    ''' 本月每日 KPI 月報表（gvMonth）及本月累計標籤（lblPA/lblPY/lblPO/lblOR/lblMR）
+    ''' PA月統計 = Σ(wh73.g_weight + wh76.gross_weight) / 1000 (MT)
+    ''' PY月統計 = Σ(PA) / Σ(coil_weight)
+    ''' PO月統計 = Σ(合格PA) / Σ(coil_weight)
+    ''' OR月統計 = (480×天數-Σ延誤) / (480×天數-Σ停機) × 100
+    ''' MR = "0"（4TNRL 無剔退）
+    ''' </summary>
     Private Sub SumTable()
         Dim dtDataTable As New DataTable
         Dim dtTmp As DataTable = Nothing
@@ -371,11 +408,13 @@ Partial Public Class _4TNRL_Produce
         'Dim sumSlabmw, sumCoilwm, sumMR As Integer
         Dim sumPA, sumDelay, sumShutdown As Integer
 
+        '建立月報表欄位
         'Month produce record
         For i As Integer = 0 To strMonthTitle.Length - 1
             dtDataTable.Columns.Add(New DataColumn(strMonthTitle(i)))
         Next
 
+        '依本月天數建立每日列
         'layout
         For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
             dr = dtDataTable.NewRow
@@ -396,6 +435,7 @@ Partial Public Class _4TNRL_Produce
 
         'PA-----------------------------------------------------------
         'PA=Σ(wh73的第17項：Gross weight)
+        '月度 PA = wh73 FULL OUTER JOIN wh76（同日累計）
         strACCESS = String.Format("select ISNULL(A.product_day, B.product_day) as ProductDay, " & _
                                 "ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " & _
                                     "(select SUBSTRING(shift_date, 7, 2) as product_day, " & _
@@ -418,7 +458,7 @@ Partial Public Class _4TNRL_Produce
                 End If
             Next
         End If
-        'PA月統計
+        'PA月統計（轉換在後段統一執行 /1000）
         lblPA.Text = sumPA.ToString
 
 
@@ -448,6 +488,7 @@ Partial Public Class _4TNRL_Produce
                                  "ON A.ProductDay = B.ProductDay", _
                                  Now.ToString("yyyyMM"))
 
+        '每日PY = PA / Coil_weight
         strACCESS = String.Format("select ISNULL(PA.ProductDay, Coil_sum.ProductDay) as PYDay, " & _
                                 "(CASE ISNULL(Coil_sum.material_weight, 0) when 0 then '0.00' " & _
                                 "else (ISNULL(PA.total_prod,0) / ISNULL(Coil_sum.material_weight, 0)) * 100 end) as PY " & _
@@ -586,6 +627,7 @@ Partial Public Class _4TNRL_Produce
         End If
 
         'OR-----------------------------------------------------------
+        'OR 月度統計：h_pmis_si01 line_id=2，每日三班加總
         strACCESS = "SELECT Day(select_dates)," & _
                     "SUM(acci_delay_time+roll_delay_time+shutdown_time+others_delay_time)," & _
                     "SUM(shutdown_time) " & _
@@ -621,10 +663,11 @@ Partial Public Class _4TNRL_Produce
         lblOR.Text = calTmp.ToString("0.00")
 
         'MR-----------------------------------------------------------
+        '4TNRL 無剔退追蹤，MR 固定為 0
         lblMR.Text = "0"
 
 
-        '單位換算
+        '單位換算：PA/MR kg→MT（/ 1000）
         '-----
         For idate As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
             dtDataTable.Rows(idate).Item(1) = (Val(dtDataTable.Rows(idate).Item(1).ToString) / 1000).ToString("0.00")
@@ -876,6 +919,9 @@ Partial Public Class _4TNRL_Produce
     '    hAnc.Value = "#Chart"
     'End Sub
 
+    ''' <summary>
+    ''' 主流程：建立 HPMIS 資料庫連線，依序執行三班日報表與月報表
+    ''' </summary>
     Private Sub Mainprocess()
         Conn = New SqlConnection(getConnStr(Application("ConnStr")))
         TNRL4_Table()

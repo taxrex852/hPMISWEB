@@ -1,6 +1,14 @@
 ﻿Imports System.Data.SqlClient
 Imports System.Collections.Generic
 
+''' <summary>
+''' 3401 TPM HSM 生產品種分類統計
+''' 依厚度/寬度分類（ETNG/WTNG/NTNG/NTCG/ETCG/MDSZ）以及
+''' 依強度/品質分類（EXLC/LSCS/MSCS/HICS/VHIS/SUS/NRCQ/HICQ/VHCQ）
+''' 顯示本月每日統計與近12個月趨勢圖
+''' 資料來源：h_pmis_coil_info
+''' EXLC_C = 100（低碳鋼界定碳含量上限）
+''' </summary>
 Partial Public Class TPM_Produce
     Inherits System.Web.UI.Page
     Private Const PAGE_ID = "3401"
@@ -10,9 +18,10 @@ Partial Public Class TPM_Produce
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
         If Page.IsPostBack = False Then
-            ' 設定Title
+            '設定Title
             setTitle(Me, PAGE_ID)
 
+            '設定趨勢圖資料區間標題（近12個月）
             LabelStartdate.Text = Date.Today.AddMonths(-11).ToString("yyyy/MM")
             LabelEnddate.Text = Date.Today.ToString("yyyy/MM")
 
@@ -21,20 +30,25 @@ Partial Public Class TPM_Produce
     End Sub
 
     Private Sub Mainprocess()
+        '建立資料庫連線（PMIS 主資料庫）
         Conn = New SqlConnection(getConnStr(Application("ConnStr")))
-        ' 保持您原有的當月表格產生邏輯
+        '產生本月日報表（尺寸分類 + 強度分類）
         HSM_Table1()
         HSM_Table2()
-
-        ' 產生圖表趨勢 JSON
+        '產生 ECharts 趨勢圖 JSON
         BuildChartData()
     End Sub
 
+    ''' <summary>
+    ''' 建立 ECharts 趨勢圖 JSON 資料（近12個月）
+    ''' sql1：尺寸與寬度分類，一次查詢涵蓋 ETNG/WTNG/NTNG/NTCG/ETCG/PA/NRWD/MDWD/WIWD
+    ''' sql2：強度與品質分類，一次查詢涵蓋 EXLC/LSCS/MSCS/HICS/VHIS/SUS/NRCQ/HICQ/VHCQ
+    ''' </summary>
     Private Sub BuildChartData()
         Dim startYYYYMM As String = Date.Today.AddMonths(-11).ToString("yyyyMM")
         Dim endYYYYMM As String = Date.Today.ToString("yyyyMM")
 
-        ' SQL 1: 尺寸與寬度 12個月趨勢 (整合單一高效率查詢)
+        'SQL 1: 尺寸與寬度 12個月趨勢（整合單一高效率查詢）
         Dim sql1 As String = "SELECT SUBSTRING(CONVERT(char, product_date, 112), 1, 6) AS yyyymm, " &
             "SUM(CASE WHEN target_width <= 1260 AND target_thickness <= 1500 THEN coil_weight ELSE 0 END)/1000.0 AS ETNG, " &
             "SUM(CASE WHEN target_width >= 1500 AND target_thickness <= 2300 THEN coil_weight ELSE 0 END)/1000.0 AS WTNG, " &
@@ -49,7 +63,7 @@ Partial Public Class TPM_Produce
             "WHERE SUBSTRING(CONVERT(char, product_date, 112), 1, 6) BETWEEN '" & startYYYYMM & "' AND '" & endYYYYMM & "' AND reject_reason = '00' " &
             "GROUP BY SUBSTRING(CONVERT(char, product_date, 112), 1, 6) ORDER BY yyyymm"
 
-        ' SQL 2: 強度與品質 12個月趨勢 (整合單一高效率查詢)
+        'SQL 2: 強度與品質 12個月趨勢（整合單一高效率查詢）
         Dim sql2 As String = "SELECT SUBSTRING(CONVERT(char, product_date, 112), 1, 6) AS yyyymm, " &
             "SUM(CASE WHEN c <= " & EXLC_C & " THEN coil_weight ELSE 0 END)/1000.0 AS EXLC, " &
             "SUM(CASE WHEN tensile_s <= 40 AND c > " & EXLC_C & " THEN coil_weight ELSE 0 END)/1000.0 AS LSCS, " &
@@ -69,7 +83,7 @@ Partial Public Class TPM_Produce
         Dim dt2 As DataTable = execQuery(sql2, "", Conn)
         Conn.Close()
 
-        ' 確保連續12個月的預設值，避免斷層
+        '確保連續12個月皆有預設值，避免缺月造成圖表斷點
         Dim dictDim As New Dictionary(Of String, Double())
         Dim dictStr As New Dictionary(Of String, Double())
         Dim xAxis As New List(Of String)()
@@ -81,6 +95,7 @@ Partial Public Class TPM_Produce
             dictStr(m) = New Double() {0, 0, 0, 0, 0, 0, 0, 0, 0}
         Next
 
+        '填入尺寸分類資料（ETNG/WTNG/NTNG/NTCG/ETCG/MDSZ/NRWD/MDWD/WIWD）
         If dt1 IsNot Nothing Then
             For i As Integer = 0 To dt1.Rows.Count - 1
                 Dim m As String = dt1.Rows(i)("yyyymm").ToString()
@@ -91,6 +106,7 @@ Partial Public Class TPM_Produce
                     Dim p_ntcg = If(IsDBNull(dt1.Rows(i)("NTCG")), 0, Convert.ToDouble(dt1.Rows(i)("NTCG")))
                     Dim p_etcg = If(IsDBNull(dt1.Rows(i)("ETCG")), 0, Convert.ToDouble(dt1.Rows(i)("ETCG")))
                     Dim p_pa = If(IsDBNull(dt1.Rows(i)("PA")), 0, Convert.ToDouble(dt1.Rows(i)("PA")))
+                    'MDSZ = PA - 其他各尺寸分類之總和
                     Dim p_mdsz = p_pa - p_etng - p_wtng - p_ntng - p_ntcg - p_etcg
 
                     Dim p_nrwd = If(IsDBNull(dt1.Rows(i)("NRWD")), 0, Convert.ToDouble(dt1.Rows(i)("NRWD")))
@@ -101,6 +117,7 @@ Partial Public Class TPM_Produce
             Next
         End If
 
+        '填入強度/品質分類資料（EXLC/LSCS/MSCS/HICS/VHIS/SUS/NRCQ/HICQ/VHCQ）
         If dt2 IsNot Nothing Then
             For i As Integer = 0 To dt2.Rows.Count - 1
                 Dim m As String = dt2.Rows(i)("yyyymm").ToString()
@@ -120,7 +137,7 @@ Partial Public Class TPM_Produce
             Next
         End If
 
-        ' 轉換成 JSON
+        '轉換成 ECharts JSON 格式各系列資料
         Dim etng As New List(Of Double)(), wtng As New List(Of Double)(), ntng As New List(Of Double)()
         Dim ntcg As New List(Of Double)(), etcg As New List(Of Double)(), mdsz As New List(Of Double)()
         Dim nrwd As New List(Of Double)(), mdwd As New List(Of Double)(), wiwd As New List(Of Double)()
@@ -139,6 +156,7 @@ Partial Public Class TPM_Produce
             nrcq.Add(dictStr(key)(6)) : hicq.Add(dictStr(key)(7)) : vhcq.Add(dictStr(key)(8))
         Next
 
+        '組合最終 ECharts JSON 字串並注入前端
         Dim script As String = "var chartData = {" &
             "xAxis: [" & String.Join(",", xAxis) & "]," &
             "etng: [" & String.Join(",", etng) & "], wtng: [" & String.Join(",", wtng) & "], ntng: [" & String.Join(",", ntng) & "]," &
@@ -152,7 +170,13 @@ Partial Public Class TPM_Produce
         ClientScript.RegisterStartupScript(Me.GetType(), "EChartsData", script, True)
     End Sub
 
-    ' ===== 以下原封不動保留您提供的 HSM_Table1() 與 HSM_Table2() ===== 
+    ''' <summary>
+    ''' 本月尺寸/寬度分類日報表（gvMonth1=厚度, gvMonth3=寬度）
+    ''' ETNG: 窄寬薄厚(W≤1260,T≤1500) / WTNG: 寬厚(W≥1500,T≤2300)
+    ''' NTNG: 中寬中厚(1260&lt;W&lt;1500, 1500≤T≤1900) / NTCG: 中厚捲(T 6000~9900)
+    ''' ETCG: 極厚捲(T&gt;9900) / MDSZ: 其他尺寸（PA 扣除以上各類）
+    ''' NRWD: 窄寬(W≤950) / MDWD: 中寬(950&lt;W&lt;1550) / WIWD: 寬(W≥1550)
+    ''' </summary>
     Private Sub HSM_Table1()
         Dim dtDataTable As New DataTable
         Dim dtdatatable1 As New DataTable
@@ -172,6 +196,7 @@ Partial Public Class TPM_Produce
             dtdatatable1.Columns.Add(New DataColumn(strMonthTitle1(i)))
         Next
 
+        '初始化每月天數列（預設值 0.00）
         For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
             dr = dtDataTable.NewRow
             dtDataTable.Rows.Add(dr)
@@ -193,7 +218,7 @@ Partial Public Class TPM_Produce
 
         Conn.Open()
 
-        'ETNG
+        'ETNG — 窄寬薄厚（W≤1260, T≤1500）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -213,7 +238,7 @@ Partial Public Class TPM_Produce
         Next
         lblETNG.Text = calTmp.ToString("0.00")
 
-        'WTNG
+        'WTNG — 寬厚（W≥1500, T≤2300）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -233,7 +258,7 @@ Partial Public Class TPM_Produce
         Next
         lblWTNG.Text = calTmp.ToString("0.00")
 
-        'NTNG
+        'NTNG — 中寬中厚（1260<W<1500, 1500≤T≤1900）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -255,7 +280,7 @@ Partial Public Class TPM_Produce
         Next
         lblNTNG.Text = calTmp.ToString("0.00")
 
-        'NTCG
+        'NTCG — 中厚捲（T 6000~9900）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -275,7 +300,7 @@ Partial Public Class TPM_Produce
         Next
         lblNTCG.Text = calTmp.ToString("0.00")
 
-        'ETCG
+        'ETCG — 極厚捲（T>9900）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -294,7 +319,7 @@ Partial Public Class TPM_Produce
         Next
         lblETCG.Text = calTmp.ToString("0.00")
 
-        'MDSZ
+        'MDSZ — 其他尺寸（PA 總量扣除 ETNG/WTNG/NTNG/NTCG/ETCG）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112), 7, 2) as day, SUM(coil_weight) as PA " &
                     "FROM h_pmis_coil_info WHERE " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 1, 6) = '" + Now.ToString("yyyyMM") + "' and reject_reason=0 GROUP BY SUBSTRING(CONVERT(char, product_date, 112), 7, 2)"
@@ -322,7 +347,7 @@ Partial Public Class TPM_Produce
             gvMonth1.Rows(0).Cells(i).Width = 80
         Next
 
-        'NRWD
+        'NRWD — 窄寬（W≤950）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -341,7 +366,7 @@ Partial Public Class TPM_Produce
         Next
         lblNRWD.Text = calTmp.ToString("0.00")
 
-        'MDWD
+        'MDWD — 中寬（950<W<1550）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -361,7 +386,7 @@ Partial Public Class TPM_Produce
         Next
         lblMDWD.Text = calTmp.ToString("0.00")
 
-        'WIWD
+        'WIWD — 寬（W≥1550）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -391,6 +416,14 @@ Partial Public Class TPM_Produce
         Conn.Close()
     End Sub
 
+    ''' <summary>
+    ''' 本月強度/品質分類日報表（gvMonth2=強度, gvMonth4=品質）
+    ''' EXLC: 低碳鋼(C≤100) / LSCS: 低強度(tensile≤40, C>100)
+    ''' MSCS: 中強度(40&lt;t≤50) / HICS: 高強度(50&lt;t≤60) / VHIS: 超高強度(t>60)
+    ''' SUS: 不鏽鋼(steel_gcode like '6%')
+    ''' NRCQ: 非輻射檢查(5000≤inspection&lt;6000)
+    ''' HICQ: 高檢查(4000≤inspection&lt;5000) / VHCQ: 超高檢查(2000≤inspection&lt;4000)
+    ''' </summary>
     Private Sub HSM_Table2()
         Dim dtDataTable As New DataTable
         Dim dtdatatable1 As New DataTable
@@ -410,6 +443,7 @@ Partial Public Class TPM_Produce
             dtdatatable1.Columns.Add(New DataColumn(strMonthTitle1(i)))
         Next
 
+        '初始化每月天數列
         For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
             dr = dtDataTable.NewRow
             dtDataTable.Rows.Add(dr)
@@ -430,7 +464,7 @@ Partial Public Class TPM_Produce
         lblMonth2.Text = Date.Today.ToString("MM")
 
         Conn.Open()
-        'EXLC
+        'EXLC — 低碳鋼（C ≤ EXLC_C = 100）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info WHERE " &
                     "SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Now.ToString("yyyy") + " and " &
@@ -446,7 +480,7 @@ Partial Public Class TPM_Produce
         Next
         lblEXLC.Text = calTmp.ToString("0.00")
 
-        'LSCS
+        'LSCS — 低強度鋼（tensile≤40, C>EXLC_C）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &
@@ -462,7 +496,7 @@ Partial Public Class TPM_Produce
         Next
         lblLSCS.Text = calTmp.ToString("0.00")
 
-        'MSCS
+        'MSCS — 中強度鋼（40<tensile≤50）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &
@@ -480,7 +514,7 @@ Partial Public Class TPM_Produce
         Next
         lblMSCS.Text = calTmp.ToString("0.00")
 
-        'HICS
+        'HICS — 高強度鋼（50<tensile≤60）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &
@@ -498,7 +532,7 @@ Partial Public Class TPM_Produce
         Next
         lblHICS.Text = calTmp.ToString("0.00")
 
-        'VHIS
+        'VHIS — 超高強度鋼（tensile>60）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &
@@ -515,7 +549,7 @@ Partial Public Class TPM_Produce
         Next
         lblVHIS.Text = calTmp.ToString("0.00")
 
-        'SUS
+        'SUS — 不鏽鋼（steel_gcode like '6%'）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &
@@ -541,7 +575,7 @@ Partial Public Class TPM_Produce
             gvMonth2.Rows(0).Cells(i).Width = 80
         Next
 
-        'NRCQ
+        'NRCQ — 非輻射檢查（5000≤inspection<6000）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &
@@ -559,7 +593,7 @@ Partial Public Class TPM_Produce
         Next
         lblNRCQ.Text = calTmp.ToString("0.00")
 
-        'HICQ
+        'HICQ — 高檢查（4000≤inspection<5000）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &
@@ -577,7 +611,7 @@ Partial Public Class TPM_Produce
         Next
         lblHICQ.Text = calTmp.ToString("0.00")
 
-        'VHCQ
+        'VHCQ — 超高檢查（2000≤inspection<4000）
         strACCESS = "SELECT SUBSTRING(CONVERT(char, product_date, 112),7,2), SUM(coil_weight) FROM h_pmis_coil_info " &
                     "WHERE SUBSTRING(CONVERT(char, product_date, 112),1,4) = " + Date.Today.ToString("yyyy") + " and " &
                     "SUBSTRING(CONVERT(char, product_date, 112),5,2) = " + Date.Today.ToString("MM") + " and " &

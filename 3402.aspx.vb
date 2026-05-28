@@ -1,10 +1,37 @@
 ﻿Imports System.Data.SqlClient
 Imports System.Collections.Generic
 
+''' <summary>
+''' 1TNRL 產品分類生產統計頁面 (PAGE_ID=3402)
+''' 資料來源：h_pmis_wh93（g_weight）+ h_pmis_wh9b（gross_weight）FULL OUTER JOIN
+'''           h_pmis_wh91（carbon、tensile、steel_grade_code、inspection_code）
+''' EXLC_C = 100：碳含量門檻，≤100 = 超低碳鋼 (EXLC)，>100 = 高碳鋼系列
+''' 尺寸分類（gvMonth1/gvMonth3）：
+'''   ETNG：width≤1260 & thickness≤1500（窄薄）
+'''   WTNG：width≥1500 & thickness≤2300（寬薄）
+'''   NTNG：1260<width<1500 & 1500≤thickness≤1900（中寬薄厚）
+'''   NTCG：6000≤thickness≤9900（中厚）
+'''   ETCG：thickness>9900（超厚）
+'''   MDSZ：PA - ETNG - WTNG - NTNG - NTCG - ETCG（衍生，其餘尺寸）
+'''   NRWD：width<950（窄）；MDWD：950≤width<1550（中寬）；WIWD：width≥1550（寬）
+''' 強度/品質分類（gvMonth2/gvMonth4）：
+'''   EXLC：carbon≤100（超低碳）
+'''   LSCS：carbon>100 & tensile≤40（低強度碳鋼）
+'''   MSCS：carbon>100 & 40<tensile≤50（中強度）
+'''   HICS：carbon>100 & 50<tensile≤60（高強度）
+'''   VHIS：carbon>100 & tensile>60（超高強度）
+'''   SUS：carbon>100 & steel_grade_code like '6%'（不鏽鋼系列）
+'''   NRCQ：inspection_code 5000~5999（普通檢驗）
+'''   HICQ：inspection_code 4000~4999（高精度檢驗）
+'''   VHCQ：inspection_code 2000~3999（超高精度檢驗）
+''' 圖表：近 1 年各分類月產量趨勢（ECharts）
+''' 連線：getConnStr（HPMIS 資料庫）
+''' </summary>
 Partial Public Class _1TNRL_Production
     Inherits System.Web.UI.Page
     Private Const PAGE_ID = "3402"
     Private Conn As SqlConnection
+    ' 碳含量門檻：≤100 歸類為超低碳鋼 EXLC，>100 歸類為高碳強度系列
     Private Const EXLC_C As Integer = 100
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
@@ -20,18 +47,24 @@ Partial Public Class _1TNRL_Production
         End If
     End Sub
 
+    ''' <summary>
+    ''' 主流程：建立連線，依序執行月報表 → ECharts 趨勢圖
+    ''' </summary>
     Private Sub Mainprocess()
         Conn = New SqlConnection(getConnStr(Application("ConnStr")))
-        ' 本月日報表
+        ' 本月日報表（尺寸分類）
         TNRL_Table1()
+        ' 本月日報表（強度/品質分類）
         TNRL_Table2()
         ' ECharts 趨勢圖資料（原始資料來源：h_pmis_wh93 + h_pmis_wh9b）
         BuildChartData()
     End Sub
 
     ''' <summary>
-    ''' 建立 ECharts 趨勢圖 JSON 資料（近 12 個月）
+    ''' 建立 ECharts 趨勢圖 JSON 資料（近 1 年 19 個分類）
     ''' 資料來源：h_pmis_wh93 + h_pmis_wh9b FULL OUTER JOIN（原始 SqlDataSource1 邏輯）
+    ''' 所有分類均以 process_date 月份為基礎，group by dateadd(m,datediff(m,0,process_date),0)
+    ''' 單位：g → MT（/1000），SQL 中使用 cast(round(SUM/1000,2) as float)
     ''' </summary>
     Private Sub BuildChartData()
         ' 原始 SelectCommand SQL（從 SqlDataSource1 還原，資料來源為 h_pmis_wh93 / h_pmis_wh9b / h_pmis_wh91）
@@ -279,7 +312,7 @@ Partial Public Class _1TNRL_Production
 
         If dt Is Nothing OrElse dt.Rows.Count = 0 Then Return
 
-        ' 組合 ECharts JSON 字串
+        ' 組合 ECharts JSON 字串（19 個分類）
         Dim xAxis As New List(Of String)()
         Dim etng As New List(Of String)()
         Dim wtng As New List(Of String)()
@@ -328,6 +361,7 @@ Partial Public Class _1TNRL_Production
             vhcq.Add(If(IsDBNull(dt.Rows(i)("VHCQ")), "0", Convert.ToDouble(dt.Rows(i)("VHCQ")).ToString("0.00")))
         Next
 
+        ' 注入 ECharts JSON 資料至前端 JS
         Dim script As String =
             "var chartData = {" &
             "xAxis:[" & String.Join(",", xAxis) & "]," &
@@ -355,8 +389,13 @@ Partial Public Class _1TNRL_Production
     End Sub
 
     ''' <summary>
-    ''' 厚度/前段製程：本月日報表 (gvMonth1 + gvMonth3)
-    ''' 資料來源：h_pmis_wh93 + h_pmis_wh9b（原始邏輯保留）
+    ''' 尺寸分類：本月日報表 (gvMonth1 + gvMonth3)
+    ''' gvMonth1 欄位：日期 | ETNG | WTNG | NTNG | NTCG | ETCG | MDSZ
+    ''' gvMonth3 欄位：NRWD | MDWD | WIWD
+    ''' 資料來源：h_pmis_wh93（avg_width/avg_thickness）+ h_pmis_wh9b（coil_width/coil_thickness）
+    ''' MDSZ = PA - ETNG - WTNG - NTNG - NTCG - ETCG（衍生值，負數補零）
+    ''' 月累計：lblETNG/lblWTNG/lblNTNG/lblNTCG/lblETCG/lblMDSZ/lblNRWD/lblMDWD/lblWIWD
+    ''' 單位：g → MT（除以 1000）
     ''' </summary>
     Private Sub TNRL_Table1()
         Dim dtDataTable As New DataTable
@@ -375,6 +414,7 @@ Partial Public Class _1TNRL_Production
             dtdatatable1.Columns.Add(New DataColumn(strMonthTitle1(i)))
         Next
 
+        ' 建立本月每日列（日期 + 預設 0.00）
         Dim daysInMonth As Integer = Date.DaysInMonth(Year(Today), Month(Today))
         For i As Integer = 0 To daysInMonth - 1
             dr = dtDataTable.NewRow
@@ -396,7 +436,7 @@ Partial Public Class _1TNRL_Production
         Conn.Open()
         Dim strACCESS As String
 
-        ' ETNG
+        ' ETNG（窄薄：width≤1260 & thickness≤1500）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -416,7 +456,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblETNG.Text = calTmp.ToString("0.00")
 
-        ' WTNG
+        ' WTNG（寬薄：width≥1500 & thickness≤2300）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -436,7 +476,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblWTNG.Text = calTmp.ToString("0.00")
 
-        ' NTNG
+        ' NTNG（中寬薄厚：1260<width<1500 & 1500≤thickness≤1900）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -456,7 +496,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblNTNG.Text = calTmp.ToString("0.00")
 
-        ' NTCG
+        ' NTCG（中厚：6000≤thickness≤9900）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -476,7 +516,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblNTCG.Text = calTmp.ToString("0.00")
 
-        ' ETCG
+        ' ETCG（超厚：thickness>9900）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -496,7 +536,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblETCG.Text = calTmp.ToString("0.00")
 
-        ' MDSZ = PA - ETNG - WTNG - NTNG - NTCG - ETCG
+        ' MDSZ = PA - ETNG - WTNG - NTNG - NTCG - ETCG（衍生，查 PA 全部產量再扣除已分類）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -512,6 +552,7 @@ Partial Public Class _1TNRL_Production
                 Dim dayIdx As Integer = CInt(dtTmp.Rows(i).Item(0)) - 1
                 With dtDataTable.Rows(dayIdx)
                     Dim paVal As Double = Val(dtTmp.Rows(i).Item(1)) / 1000
+                    ' 扣除 ETNG/WTNG/NTNG/NTCG/ETCG，負數補零
                     Dim mdszVal As Double = paVal - Val(.Item(1)) - Val(.Item(2)) - Val(.Item(3)) - Val(.Item(4)) - Val(.Item(5))
                     .Item(6) = IIf(mdszVal < 0, "0.00", mdszVal.ToString("0.00"))
                     calTmp += Val(.Item(6))
@@ -524,7 +565,7 @@ Partial Public Class _1TNRL_Production
         gvMonth1.DataBind()
         gvMonth1.HeaderRow.Visible = False
 
-        ' NRWD
+        ' NRWD（窄寬：width<950）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -544,7 +585,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblNRWD.Text = calTmp.ToString("0.00")
 
-        ' MDWD
+        ' MDWD（中寬：950≤width<1550）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -564,7 +605,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblMDWD.Text = calTmp.ToString("0.00")
 
-        ' WIWD
+        ' WIWD（寬寬：width≥1550）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -591,8 +632,12 @@ Partial Public Class _1TNRL_Production
     End Sub
 
     ''' <summary>
-    ''' 強度/表面製程：本月日報表 (gvMonth2 + gvMonth4)
-    ''' 資料來源：h_pmis_wh93 + h_pmis_wh9b + h_pmis_wh91（原始邏輯保留）
+    ''' 強度/品質分類：本月日報表 (gvMonth2 + gvMonth4)
+    ''' gvMonth2 欄位：日期 | EXLC | LSCS | MSCS | HICS | VHIS | SUS
+    ''' gvMonth4 欄位：NRCQ | HICQ | VHCQ
+    ''' 資料來源：h_pmis_wh93/wh9b（產量）+ h_pmis_wh91（carbon/tensile/steel_grade_code/inspection_code）
+    ''' 關聯條件：SUBSTRING(wh93.product_no,1,7) = wh91.coil_no（7碼料號對應）
+    ''' 月累計：lblEXLC/lblLSCS/lblMSCS/lblHICS/lblVHIS/lblSUS/lblNRCQ/lblHICQ/lblVHCQ
     ''' </summary>
     Private Sub TNRL_Table2()
         Dim dtDataTable As New DataTable
@@ -611,6 +656,7 @@ Partial Public Class _1TNRL_Production
             dtdatatable1.Columns.Add(New DataColumn(strMonthTitle1(i)))
         Next
 
+        ' 建立本月每日列
         Dim daysInMonth As Integer = Date.DaysInMonth(Year(Today), Month(Today))
         For i As Integer = 0 To daysInMonth - 1
             dr = dtDataTable.NewRow
@@ -632,7 +678,7 @@ Partial Public Class _1TNRL_Production
         Conn.Open()
         Dim strACCESS As String
 
-        ' EXLC（碳含量 <= EXLC_C）
+        ' EXLC（超低碳：carbon≤EXLC_C=100）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -654,7 +700,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblEXLC.Text = calTmp.ToString("0.00")
 
-        ' LSCS（tensile <= 40, carbon > EXLC_C）
+        ' LSCS（低強度碳鋼：carbon>EXLC_C & tensile≤40）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -676,7 +722,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblLSCS.Text = calTmp.ToString("0.00")
 
-        ' MSCS（tensile 40~50）
+        ' MSCS（中強度：carbon>EXLC_C & 40<tensile≤50）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -698,7 +744,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblMSCS.Text = calTmp.ToString("0.00")
 
-        ' HICS（tensile 50~60）
+        ' HICS（高強度：carbon>EXLC_C & 50<tensile≤60）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -720,7 +766,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblHICS.Text = calTmp.ToString("0.00")
 
-        ' VHIS（tensile > 60）
+        ' VHIS（超高強度：carbon>EXLC_C & tensile>60）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -742,7 +788,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblVHIS.Text = calTmp.ToString("0.00")
 
-        ' SUS（steel_grade_code like '6%'）
+        ' SUS（不鏽鋼：carbon>EXLC_C & steel_grade_code like '6%'）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -768,7 +814,7 @@ Partial Public Class _1TNRL_Production
         gvMonth2.DataBind()
         gvMonth2.HeaderRow.Visible = False
 
-        ' NRCQ
+        ' NRCQ（普通檢驗：inspection_code 5000~5999）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -790,7 +836,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblNRCQ.Text = calTmp.ToString("0.00")
 
-        ' HICQ
+        ' HICQ（高精度：inspection_code 4000~4999）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
@@ -812,7 +858,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblHICQ.Text = calTmp.ToString("0.00")
 
-        ' VHCQ
+        ' VHCQ（超高精度：inspection_code 2000~3999）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &

@@ -1,6 +1,11 @@
 ﻿Imports System.Data.SqlClient
 Imports System.Collections.Generic
 
+''' <summary>
+''' 3201 HSM 熱軋缺陷 Top5 監控
+''' 顯示當班三班缺陷代碼重量排名，以及本月每日缺陷統計
+''' 資料來源：h_pmis_whqh
+''' </summary>
 Partial Public Class HSM_Defect
     Inherits System.Web.UI.Page
     Private Const PAGE_ID = "3201"
@@ -9,21 +14,22 @@ Partial Public Class HSM_Defect
     Private chartDate As Date
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        ' 移除舊有 TeeChart 相關程式碼
 
         If Page.IsPostBack = False Then
             '設定Title
             setTitle(Me, PAGE_ID)
 
+            '讀取 SqlDataSource1 近12個月缺陷趨勢資料
             Dim args1 As New DataSourceSelectArguments()
             Dim DR1 As DataView = CType(SqlDataSource1.Select(args1), DataView)
 
             If DR1 IsNot Nothing AndAlso DR1.Count > 0 Then
                 Dim count As Integer = DR1.Count
+                '設定資料區間標題
                 LabelStartdate.Text = Format(CDate(DR1(0)("product_date").ToString()), "yyyy/MM")
                 LabelEnddate.Text = Format(CDate(DR1(count - 1)("product_date").ToString()), "yyyy/MM")
 
-                ' --- 準備 ECharts 格式資料 (Top 1 ~ Top 5) ---
+                ' 組裝 ECharts 格式資料（缺陷 Top1 ~ Top5）
                 Dim xAxis As New List(Of String)()
                 Dim d1 As New List(Of Double)()
                 Dim d2 As New List(Of Double)()
@@ -33,7 +39,7 @@ Partial Public Class HSM_Defect
 
                 For i As Integer = 0 To count - 1
                     xAxis.Add("'" & Convert.ToDateTime(DR1(i)("product_date")).ToString("yyyy/MM") & "'")
-                    ' 加上 IsDBNull 判斷避免空值報錯
+                    '加上 IsDBNull 判斷避免空值報錯
                     d1.Add(If(IsDBNull(DR1(i)("def_top1")), 0, Convert.ToDouble(DR1(i)("def_top1"))))
                     d2.Add(If(IsDBNull(DR1(i)("def_top2")), 0, Convert.ToDouble(DR1(i)("def_top2"))))
                     d3.Add(If(IsDBNull(DR1(i)("def_top3")), 0, Convert.ToDouble(DR1(i)("def_top3"))))
@@ -41,6 +47,7 @@ Partial Public Class HSM_Defect
                     d5.Add(If(IsDBNull(DR1(i)("def_top5")), 0, Convert.ToDouble(DR1(i)("def_top5"))))
                 Next
 
+                '注入 ECharts JavaScript 資料變數
                 Dim script As String = "var chartData = {" &
                     "xAxis: [" & String.Join(",", xAxis) & "]," &
                     "d1: [" & String.Join(",", d1) & "]," &
@@ -57,6 +64,11 @@ Partial Public Class HSM_Defect
         End If
     End Sub
 
+    ''' <summary>
+    ''' 建立三班當日缺陷 Top5 資料表
+    ''' 查詢 h_pmis_whqh 的 no1~no5 缺陷代碼，依班別時間區間統計重量
+    ''' 夜班（N）需跨日處理時間區間
+    ''' </summary>
     Private Sub HSMTable()
         Dim dtDataTable As New DataTable
         Dim dtTmp As DataTable = Nothing
@@ -71,31 +83,30 @@ Partial Public Class HSM_Defect
         Dim shift_num As String = "", shift_sym As String = ""
         Dim shift_date(2) As Date
 
-
-
+        '依目前時間判斷班別順序
         Select Case Now.Hour
-            Case 7 To 14 'M
+            Case 7 To 14 'M 早班
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 15:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_sym_c = "中夜早"
                 shift_sym = "ANM"
                 shift_num = "231"
-            Case 15 To 22 'A
+            Case 15 To 22 'A 中班
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 15:00:00")
                 shift_sym_c = "夜早中"
                 shift_sym = "NMA"
                 shift_num = "312"
-            Case 0 To 6 'N
+            Case 0 To 6 'N 夜班
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 07:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date.AddDays(-1) + " 15:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date + " 23:00:00")
                 shift_sym_c = "早中夜"
                 shift_sym = "MAN"
                 shift_num = "123"
-            Case 23 'N
+            Case 23 'N 夜班（23時起算）
                 shift_date(0) = Convert.ToDateTime(Date.Today.Date + " 07:00:00")
                 shift_date(1) = Convert.ToDateTime(Date.Today.Date + " 15:00:00")
                 shift_date(2) = Convert.ToDateTime(Date.Today.Date.AddDays(1) + " 23:00:00")
@@ -104,6 +115,7 @@ Partial Public Class HSM_Defect
                 shift_num = "123"
         End Select
 
+        '設定欄位標題（日期＋班別字符）
         strDailyTitle(1) = shift_date(0).ToString("yyyy.MM.dd") + " " + shift_sym_c(0) + strDailyTitle(1)
         strDailyTitle(2) = shift_date(1).ToString("yyyy.MM.dd") + " " + shift_sym_c(1) + strDailyTitle(2)
         strDailyTitle(3) = shift_date(2).ToString("yyyy.MM.dd") + " " + shift_sym_c(2) + strDailyTitle(3)
@@ -121,6 +133,7 @@ Partial Public Class HSM_Defect
 
         Conn.Open()
 
+        '每班查詢 Top5 缺陷代碼，夜班時間段特殊處理（AddDays(-1)）
         For shift As Integer = 0 To 2
             If shift_sym(shift) = "N" Then
                 strACCESS = "select top 5 code, sum(weight) from (" &
@@ -158,17 +171,15 @@ Partial Public Class HSM_Defect
                             ")top5 where code != '' group by code order by sum(weight) desc"
             End If
 
-
-
             dtTmp = execQuery(strACCESS, "", Conn)
 
             If dtTmp IsNot Nothing Then
                 For i As Integer = 0 To dtTmp.Rows.Count - 1
-                    '單位換算
-                    'calTmp = dtTmp.Rows(i).Item(1)
+                    '單位換算：g → MT
                     calTmp = Val(dtTmp.Rows(i).Item(1).ToString) / 1000
                     dtDataTable.Rows(i).Item(shift + 1) = dtTmp.Rows(i).Item(0) + "/" + calTmp.ToString("0.00")
                 Next
+                '不足5筆填 N/A
                 For i As Integer = dtTmp.Rows.Count To 4
                     dtDataTable.Rows(i).Item(shift + 1) = "N/A"
                 Next
@@ -184,12 +195,16 @@ Partial Public Class HSM_Defect
         gvDaily.Rows(0).Cells(2).Width = 200
         gvDaily.Rows(0).Cells(3).Width = 200
 
+        '最後一欄套用樣式
         For i As Integer = 0 To 4
             gvDaily.Rows(i).Cells(3).CssClass = "irondata0"
         Next
 
     End Sub
 
+    ''' <summary>
+    ''' 建立本月每日缺陷 Top5 統計表，並顯示月合計於標籤
+    ''' </summary>
     Private Sub SumTable()
         Dim dtDataTable As New DataTable
         Dim dtDataTable1 As New DataTable
@@ -202,12 +217,12 @@ Partial Public Class HSM_Defect
 
         Dim calTmp As Double
 
-        'Month produce record
+        '月報表欄位配置
         For i As Integer = 0 To strMonthTitle.Length - 1
             dtDataTable.Columns.Add(New DataColumn(strMonthTitle(i)))
         Next
 
-        'layout
+        'layout 每月天數列
         For i As Integer = 0 To Date.DaysInMonth(Year([Today]), Month([Today])) - 1
             dr = dtDataTable.NewRow
             dtDataTable.Rows.Add(dr)
@@ -218,6 +233,7 @@ Partial Public Class HSM_Defect
 
         Conn.Open()
 
+        '逐日查詢缺陷 Top5（以 product_date 比對）
         For idate As Integer = 1 To Date.DaysInMonth(Year([Today]), Month([Today]))
             strACCESS = "select top 5 code, sum(weight) from (" &
                         "select no1_code as code,coil_wm as weight " &
@@ -239,8 +255,7 @@ Partial Public Class HSM_Defect
 
             If dtTmp IsNot Nothing Then
                 For i As Integer = 0 To dtTmp.Rows.Count - 1
-                    '單位換算
-                    'calTmp = dtTmp.Rows(i).Item(1)
+                    '單位換算：g → MT
                     calTmp = Val(dtTmp.Rows(i).Item(1).ToString) / 1000
                     dtDataTable.Rows(idate - 1).Item(i + 1) = dtTmp.Rows(i).Item(0) + "/" + calTmp.ToString("0.00")
                 Next
@@ -261,6 +276,7 @@ Partial Public Class HSM_Defect
         Next
 
         lblMonth.Text = Date.Today.ToString("MM")
+        '查詢本月累計缺陷 Top5，顯示於標籤控制項
         strACCESS = "select top 5 code, sum(weight) from (" &
                     "select no1_code as code,coil_wm as weight " &
                     "from h_pmis_whqh where (Year(product_date) = " + Date.Today.ToString("yyyy") + ") and (Month(product_date) = " + Date.Today.ToString("MM") + ") " &
@@ -292,7 +308,7 @@ Partial Public Class HSM_Defect
                 If dtTmp.Rows(i).Item(0).ToString.Trim.Length <> 0 Then
                     Select Case i
                         Case 0
-                            '單位換算
+                            '單位換算：顯示「缺陷代碼/重量MT」
                             lblDT1.Text = dtTmp.Rows(0).Item(0).ToString + "/" + (Val(dtTmp.Rows(0).Item(1).ToString) / 1000).ToString("0.00")
                         Case 1
                             '單位換算
@@ -313,11 +329,10 @@ Partial Public Class HSM_Defect
 
     End Sub
 
-
     Private Sub Mainprocess()
+        '建立資料庫連線（PMIS 主資料庫）
         Conn = New SqlConnection(getConnStr(Application("ConnStr")))
         HSMTable()
         SumTable()
-        'TeeChartData()
     End Sub
 End Class
