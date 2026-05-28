@@ -295,7 +295,7 @@ Partial Public Class _2TNRL_Production
         Dim mscs As New List(Of String)()
         Dim hics As New List(Of String)()
         Dim vhis As New List(Of String)()
-        Dim sus  As New List(Of String)()
+        Dim sus As New List(Of String)()
         Dim nrcq As New List(Of String)()
         Dim hicq As New List(Of String)()
         Dim vhcq As New List(Of String)()
@@ -303,7 +303,7 @@ Partial Public Class _2TNRL_Production
         ' 同時更新資料區間標題（以實際資料為準）
         If dt.Rows.Count > 0 Then
             LabelStartdate.Text = Convert.ToDateTime(dt.Rows(0)("process_date")).ToString("yyyy/MM")
-            LabelEnddate.Text   = Convert.ToDateTime(dt.Rows(dt.Rows.Count - 1)("process_date")).ToString("yyyy/MM")
+            LabelEnddate.Text = Convert.ToDateTime(dt.Rows(dt.Rows.Count - 1)("process_date")).ToString("yyyy/MM")
         End If
 
         For i As Integer = 0 To dt.Rows.Count - 1
@@ -322,7 +322,7 @@ Partial Public Class _2TNRL_Production
             mscs.Add(If(IsDBNull(dt.Rows(i)("MSCS")), "0", Convert.ToDouble(dt.Rows(i)("MSCS")).ToString("0.00")))
             hics.Add(If(IsDBNull(dt.Rows(i)("HICS")), "0", Convert.ToDouble(dt.Rows(i)("HICS")).ToString("0.00")))
             vhis.Add(If(IsDBNull(dt.Rows(i)("VHIS")), "0", Convert.ToDouble(dt.Rows(i)("VHIS")).ToString("0.00")))
-            sus.Add( If(IsDBNull(dt.Rows(i)("SUS")),  "0", Convert.ToDouble(dt.Rows(i)("SUS")).ToString("0.00")))
+            sus.Add(If(IsDBNull(dt.Rows(i)("SUS")), "0", Convert.ToDouble(dt.Rows(i)("SUS")).ToString("0.00")))
             nrcq.Add(If(IsDBNull(dt.Rows(i)("NRCQ")), "0", Convert.ToDouble(dt.Rows(i)("NRCQ")).ToString("0.00")))
             hicq.Add(If(IsDBNull(dt.Rows(i)("HICQ")), "0", Convert.ToDouble(dt.Rows(i)("HICQ")).ToString("0.00")))
             vhcq.Add(If(IsDBNull(dt.Rows(i)("VHCQ")), "0", Convert.ToDouble(dt.Rows(i)("VHCQ")).ToString("0.00")))
@@ -345,7 +345,7 @@ Partial Public Class _2TNRL_Production
             "mscs:[" & String.Join(",", mscs) & "]," &
             "hics:[" & String.Join(",", hics) & "]," &
             "vhis:[" & String.Join(",", vhis) & "]," &
-            "sus:["  & String.Join(",", sus)  & "]," &
+            "sus:[" & String.Join(",", sus) & "]," &
             "nrcq:[" & String.Join(",", nrcq) & "]," &
             "hicq:[" & String.Join(",", hicq) & "]," &
             "vhcq:[" & String.Join(",", vhcq) & "]" &

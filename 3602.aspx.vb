@@ -1,4 +1,4 @@
-Imports System.Data.SqlClient
+﻿Imports System.Data.SqlClient
 Imports System.Collections.Generic
 
 Partial Public Class HSM_Stock2
@@ -98,7 +98,7 @@ Partial Public Class HSM_Stock2
             For i As Integer = 0 To 1
                 chartValues.Add(If(dtTmp.Rows.Count = 0, 0, Math.Round(CDbl(dtTmp.Rows(0).Item(18 + i)), 1)))
             Next
-            If dtTmp.Rows.Count > 0 AndAlso Not IsDBNull(dtTmp.Rows(0).Item(20)) Then
+            If lblDataTime IsNot Nothing AndAlso dtTmp.Rows.Count > 0 AndAlso Not IsDBNull(dtTmp.Rows(0).Item(20)) Then
                 lblDataTime.Text = dtTmp.Rows(0).Item(20).ToString
             End If
             dtTmp.Dispose()
@@ -193,54 +193,74 @@ Partial Public Class HSM_Stock2
         End If
 
         ' ── 繫結 gvlimit ───────────────────────────────
-        If dtLimit IsNot Nothing Then
+        If gvlimit IsNot Nothing AndAlso dtLimit IsNot Nothing Then
             gvlimit.DataSource = dtLimit
             gvlimit.DataBind()
-            gvlimit.HeaderRow.Visible = False
-            gvlimit.Rows(0).Cells(0).Width = 143
-            For i As Integer = 1 To 9
-                gvlimit.Rows(0).Cells(i).Width = 80
-            Next
+            If gvlimit.HeaderRow IsNot Nothing Then
+                gvlimit.HeaderRow.Visible = False
+            End If
+            If gvlimit.Rows.Count > 0 Then
+                gvlimit.Rows(0).Cells(0).Width = 143
+                For i As Integer = 1 To 9
+                    If gvlimit.Rows(0).Cells.Count > i Then
+                        gvlimit.Rows(0).Cells(i).Width = 80
+                    End If
+                Next
+            End If
         End If
 
         ' ── 繫結 gvStock ───────────────────────────────
-        If dtDataTable IsNot Nothing Then
+        If gvStock IsNot Nothing AndAlso dtDataTable IsNot Nothing Then
             gvStock.DataSource = dtDataTable
             gvStock.DataBind()
-            gvStock.Rows(0).Cells(0).Width = 143
-            gvStock.Rows(0).Cells(10).Width = 80
-            For i As Integer = 1 To 9
-                gvStock.Rows(0).Cells(i).Width = 80
-            Next
-
-            ' 標籤欄、小計欄、D1+D2欄、D3~D7欄 使用黑色字
-            For Each row As GridViewRow In gvStock.Rows
-                row.Cells(0).ForeColor = Drawing.Color.Black
-                row.Cells(3).ForeColor = Drawing.Color.Black
-                row.Cells(9).ForeColor = Drawing.Color.Black
-                row.Cells(10).ForeColor = Drawing.Color.Black
-            Next
-            ' 差異列（剩餘數量、剩餘容量）使用黑色字
-            For i As Integer = 1 To 10
-                gvStock.Rows(2).Cells(i).ForeColor = Drawing.Color.Black
-                gvStock.Rows(5).Cells(i).ForeColor = Drawing.Color.Black
-            Next
-            ' 為零的儲格加紅色警示
-            For i As Integer = 0 To 5
-                For y As Integer = 1 To 10
-                    If dtDataTable.Rows(i).Item(y).ToString = "0" Then
-                        If i = 2 OrElse i = 5 Then
-                            If CInt(Val(dtDataTable.Rows(i - 1).Item(y).ToString())) = CInt(Val(dtDataTable.Rows(i - 2).Item(y).ToString())) Then
-                                gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Black
-                            Else
-                                gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Red
-                            End If
-                        Else
-                            gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Red
-                        End If
+            If gvStock.Rows.Count > 0 Then
+                gvStock.Rows(0).Cells(0).Width = 143
+                If gvStock.Rows(0).Cells.Count > 10 Then
+                    gvStock.Rows(0).Cells(10).Width = 80
+                End If
+                For i As Integer = 1 To 9
+                    If gvStock.Rows(0).Cells.Count > i Then
+                        gvStock.Rows(0).Cells(i).Width = 80
                     End If
                 Next
-            Next
+
+                ' 標籤欄、小計欄、D1+D2欄、D3~D7欄 使用黑色字
+                For Each row As GridViewRow In gvStock.Rows
+                    If row.Cells.Count > 10 Then
+                        row.Cells(0).ForeColor = Drawing.Color.Black
+                        row.Cells(3).ForeColor = Drawing.Color.Black
+                        row.Cells(9).ForeColor = Drawing.Color.Black
+                        row.Cells(10).ForeColor = Drawing.Color.Black
+                    End If
+                Next
+                ' 差異列（剩餘數量、剩餘容量）使用黑色字
+                If gvStock.Rows.Count > 5 Then
+                    For i As Integer = 1 To 10
+                        If gvStock.Rows(2).Cells.Count > i Then gvStock.Rows(2).Cells(i).ForeColor = Drawing.Color.Black
+                        If gvStock.Rows(5).Cells.Count > i Then gvStock.Rows(5).Cells(i).ForeColor = Drawing.Color.Black
+                    Next
+                End If
+                ' 為零的儲格加紅色警示
+                For i As Integer = 0 To 5
+                    For y As Integer = 1 To 10
+                        If dtDataTable.Rows.Count > i AndAlso dtDataTable.Rows(i).Item(y).ToString = "0" Then
+                            If gvStock.Rows.Count > i AndAlso gvStock.Rows(i).Cells.Count > y Then
+                                If i = 2 OrElse i = 5 Then
+                                    If dtDataTable.Rows.Count > (i - 1) AndAlso dtDataTable.Rows.Count > (i - 2) Then
+                                        If CInt(Val(dtDataTable.Rows(i - 1).Item(y).ToString())) = CInt(Val(dtDataTable.Rows(i - 2).Item(y).ToString())) Then
+                                            gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Black
+                                        Else
+                                            gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Red
+                                        End If
+                                    End If
+                                Else
+                                    gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Red
+                                End If
+                            End If
+                        End If
+                    Next
+                Next
+            End If
         End If
     End Sub
 
