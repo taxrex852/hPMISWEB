@@ -1,191 +1,236 @@
-<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3602.aspx.vb" Inherits="hPMISWEB.HSM_Stock2" %>
+<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3602.aspx.vb" Inherits="hPMISWEB.HSM_Stock2" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" >
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <link rel="stylesheet" type="text/css" href="css\diagram.css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HSM_Stock2</title>
-      <script src="libs/echarts.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="libs/bootstrap.min.css" />
+
+    <style type="text/css">
+        body { background-color: #f8f9fc; padding-bottom: 20px; }
+
+        .main-content {
+            clear: both !important;
+            display: block !important;
+            position: relative;
+            padding-top: 20px;
+        }
+
+        .card-custom {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e3e6f0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: block !important;
+        }
+
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-card-body {
+            padding: 20px;
+            background-color: #ffffff;
+            display: block !important;
+            min-height: 380px;
+            width: 100%;
+        }
+
+        .gv {
+            width: auto !important;
+            white-space: nowrap;
+            border-collapse: collapse;
+        }
+
+        tr.gvrs td {
+            padding: 10px 18px;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+            white-space: nowrap;
+            background-color: #ffffff;
+        }
+
+        tr.gvhs td {
+            background-color: #34495e !important;
+            color: white !important;
+            font-weight: 600;
+            padding: 10px 18px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .gv tbody tr:nth-child(even) td { background-color: #f8f9fc !important; }
+        .gv tbody tr:hover td { background-color: #e9ecef !important; }
+
+        .gv tbody tr td:first-child {
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #f8f9fa !important;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+        }
+    </style>
+
+    <script type="text/javascript" src="libs/echarts.min.js"></script>
 </head>
 
 <body>
     <form id="form1" runat="server">
-    <hPMISWEB:PageHeader ID="ph" runat="server" />
-    
-    <style>
-        .main-container {
-            width: 95%; /* ÅTÀ³¦¡¼e«×¡A·|ÀHµøµ¡ÁY©ñ */
-            max-width: 1200px; /* ³Ì¤j¼e«×­­¨î¡AÁ×§K¤j¿Ã¹õ¬İ°_¨Ó¤Ó¼e */
-            margin: 30px auto; /* ¤W¤U¯d 30px Ãä¶Z¡A¥ª¥k auto ¹F¨ì¤ô¥­¸m¤¤ */
-            display: flex;
-            flex-direction: column; /* Åı¤º®e¥Ñ¤W©¹¤U««ª½±Æ¦C */
-            align-items: center; /* Åı¤º®e¤ô¥­¸m¤¤ */
-            gap: 20px; /* ¨C­Ó°Ï¶ô¤§¶¡ªº¶¡¶Z */
-        }
-        .chart-box {
-            width: 100%; /* ¹Ïªí¼e«×¼µº¡®e¾¹ */
-            height: 380px; 
-        }
-        .grid-box {
-            width: 100%;
-            overflow-x: auto; /* ­Y¿Ã¹õ¤Ó¤p¡Aªí®æ·|¥X²{¾î¦V¨÷¶b¡AÁ×§K¶]ª© */
-            text-align: center; /* Åı¤º³¡ªí®æ¸m¤¤ */
-        }
-        /* ½T«O GridView ¥Í¦¨ªº table ¤]¬O¸m¤¤ªº */
-        .grid-box table {
-            margin: 0 auto;
-        }
-    </style>
+        <hPMISWEB:PageHeader ID="ph" runat="server" />
 
-    <div class="main-container">
-        
-        <div id="mainChart" class="chart-box"></div>
+        <div class="container-fluid main-content px-4">
 
-        <div class="grid-box">
-            <asp:GridView ID="gvlimit" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
-                <RowStyle CssClass="gvrs" />
-                <HeaderStyle CssClass="gvhs" />
-                <FooterStyle CssClass="gvfs" />
-                <PagerStyle CssClass="gvps" />
-                <SelectedRowStyle CssClass="gvsrs" />
-                <EditRowStyle CssClass="gvers" />
-            </asp:GridView>
+            <!-- Card 1: æ»¿å„²ç‡åœ–è¡¨ -->
+            <div class="card-custom mb-4 mt-2">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">&#128202; æˆå“å» /è£½å“åº«å„å„²å€æ»¿å„²ç‡</span>
+                    <span class="badge bg-warning text-dark fs-6 shadow-sm">è³‡æ–™æ™‚é–“ï¼š<asp:Label ID="lblDataTime" runat="server"></asp:Label></span>
+                </div>
+                <div class="chart-card-body">
+                    <div id="mainChart" style="width: 100%; height: 360px;"></div>
+                </div>
+            </div>
+
+            <!-- Card 2: æ»¿å„²ç‡é–€æª» -->
+            <div class="card-custom mb-4">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">&#9888; æ»¿å„²ç‡é–€æª»è¨­å®š (%)</span>
+                </div>
+                <div class="card-body p-3">
+                    <div style="text-align: center;">
+                        <div class="table-scroll" style="display: inline-block; text-align: left;">
+                            <asp:GridView ID="gvlimit" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
+                                <RowStyle CssClass="gvrs" />
+                                <HeaderStyle CssClass="gvhs" />
+                                <FooterStyle CssClass="gvfs" />
+                                <PagerStyle CssClass="gvps" />
+                                <SelectedRowStyle CssClass="gvsrs" />
+                                <EditRowStyle CssClass="gvers" />
+                            </asp:GridView>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: åº«å­˜æ˜ç´° -->
+            <div class="card-custom mb-5">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">&#128203; åº«å­˜æ˜ç´°</span>
+                </div>
+                <div class="card-body p-3">
+                    <div style="text-align: center;">
+                        <div class="table-scroll" style="display: inline-block; text-align: left;">
+                            <asp:GridView ID="gvStock" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
+                                <RowStyle CssClass="gvrs" ForeColor="Blue" />
+                                <HeaderStyle CssClass="gvhs" />
+                                <FooterStyle CssClass="gvfs" />
+                                <PagerStyle CssClass="gvps" />
+                                <SelectedRowStyle CssClass="gvsrs" />
+                                <EditRowStyle CssClass="gvers" />
+                            </asp:GridView>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
-
-        <div class="grid-box" style="margin-top: -15px;"> <asp:GridView ID="gvStock" runat="server" CellSpacing="1" CssClass="gv" GridLines="None">
-                <RowStyle CssClass="gvrs" ForeColor="Blue" />
-                <HeaderStyle CssClass="gvhs" />
-                <FooterStyle CssClass="gvfs" />
-                <PagerStyle CssClass="gvps" />
-                <SelectedRowStyle CssClass="gvsrs" />
-                <EditRowStyle CssClass="gvers" />
-            </asp:GridView>
-        </div>
-
-        <div style="display: none;">
-         <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="
-            SELECT 1 as c1, 2 as c2, 3 as c3, 4 as c4, 5 as c5, 6 as c6, 7 as c7, 8 as c8, 9 as c9, 
-                   a.*, b.*, c.*, 
-                   'D3toD7_' + cast(round((b.d3_orate+c.d4_orate+c.d5_orate+c.d6_orate+c.d7_orate)/5,2) as varchar) as D3_to_D7, 
-                   round((b.d3_orate+c.d4_orate+c.d5_orate+c.d6_orate+c.d7_orate)/5,2) as d3_to_d7_orate
-            FROM 
-                (SELECT top(1)
-                    'D1_'+cast(round(cast( d1_orate/10 as float),2) as varchar) as D1, round(cast( d1_orate/10 as float),2) as d1_orate, 
-                    'D2_'+cast(round(cast( d2_orate/10 as float),2) as varchar) as D2, round(cast( d2_orate/10 as float),2) as d2_orate,
-                    'D1+D2_'+cast(round(cast(((d1_orate/10)+(d2_orate/10))/2 as float),2) as varchar) as D1_D2,
-                    round(cast(((d1_orate/10)+(d2_orate/10))/2 as float),2) as d1_d2_orate
-                 FROM h_pmis_ys03 order by process_date desc) a
-            CROSS JOIN 
-                (SELECT top(1) 
-                    'D3_'+cast(round(cast( d3_orate/10 as float),2) as varchar) as D3, round(cast( d3_orate/10 as float),2) as d3_orate 
-                 FROM h_pmis_di01 order by process_date desc) b
-            CROSS JOIN 
-                (SELECT top(1) 
-                    'D4_'+cast(round(cast( d4_orate/10 as float),2) as varchar) as D4, round(cast( d4_orate/10 as float),2) as d4_orate,
-                    'D5_'+cast(round(cast( d5_orate/10 as float),2) as varchar) as D5, round(cast( d5_orate/10 as float),2) as d5_orate,
-                    'D6_'+cast(round(cast( d6_orate/10 as float),2) as varchar) as D6, round(cast( d6_orate/10 as float),2) as d6_orate,
-                    'D7_'+cast(round(cast( d7_orate/10 as float),2) as varchar) as D7, round(cast( d7_orate/10 as float),2) as d7_orate 
-                 FROM h_pmis_pi01 order by process_date desc) c
-        "></asp:SqlDataSource>
-        
-        <asp:SqlDataSource ID="SqlDataSource2" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="
-            SELECT 
-                a.d1_orate, a.d2_orate, a.d1_d2_orate,
-                b.d3_orate,
-                c.d4_orate, c.d5_orate, c.d6_orate, c.d7_orate,
-                round((b.d3_orate+c.d4_orate+c.d5_orate+c.d6_orate+c.d7_orate)/5,2) as d3_to_d7_orate
-            FROM 
-                (SELECT top(1)
-                    round(cast( d1_orate/10 as float),2) as d1_orate, 
-                    round(cast( d2_orate/10 as float),2) as d2_orate,
-                    round(cast(((d1_orate/10)+(d2_orate/10))/2 as float),2) as d1_d2_orate
-                 FROM h_pmis_ys03 order by process_date desc) a
-            CROSS JOIN 
-                (SELECT top(1) round(cast( d3_orate/10 as float),2) as d3_orate 
-                 FROM h_pmis_di01 order by process_date desc) b
-            CROSS JOIN 
-                (SELECT top(1) 
-                    round(cast( d4_orate/10 as float),2) as d4_orate,
-                    round(cast( d5_orate/10 as float),2) as d5_orate,
-                    round(cast( d6_orate/10 as float),2) as d6_orate,
-                    round(cast( d7_orate/10 as float),2) as d7_orate 
-                 FROM h_pmis_pi01 order by process_date desc) c
-        "></asp:SqlDataSource>
-        </div>
-
-    </div>
     </form>
-    
+
     <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function() {
-            if (typeof echarts === 'undefined') {
-               
-                return; 
-            }
-
+        document.addEventListener("DOMContentLoaded", function () {
             var rawData = '<%= ChartDataJson %>';
+            var limitData = <%= LimitDataJson %>;
             var chartData = [];
-            try {
-                chartData = JSON.parse(rawData);
-            } catch (e) {
-                console.error("¸ê®Æ¸ÑªR¥¢±Ñ", e);
-                return;
-            }
+            try { chartData = JSON.parse(rawData); } catch (e) { return; }
+            if (!chartData || chartData.length === 0) return;
 
-            if (chartData && chartData.length > 0) {
-                var chartDom = document.getElementById('mainChart');
-                var myChart = echarts.init(chartDom);
-                
-                var option = {
-                    title: { 
-                        text: '	¿û±²Àx°Ï/¦¨«~­Ü®w®w¦s¶q',
-                        left: 'center', // Åı¼ĞÃD¤]¸m¤¤¹ï»ô
-                        top: 0
-                    },
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                    grid: { 
-                        left: '3%', right: '4%', bottom: '3%', 
-                        top: '15%', // ¼W¥[ top Ãä¶Z¡AÁ×§Kªø±ø¹Ï¼²¨ì¤W­±ªº¼ĞÃD
-                        containLabel: true 
-                    },
-                    xAxis: {
-                        type: 'category',
-                        data: ['D1', 'D2', 'D1+D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D3~D7'],
-                        axisTick: { alignWithLabel: true },
-                        axisLabel: { interval: 0 } 
-                    },
-                    yAxis: { type: 'value', max: 100 },
-                    series: [
-                        {
-                            name: '	¿û±²Àx°Ï/¦¨«~­Ü®w®w¦s¶q',
-                            type: 'bar',
-                            barWidth: '40%', // ªø±ø¹Ïµy·L½Õ²Ó¤@ÂIÂI¡Aµe­±·|¤ñ¸ûºë½o
-                            label: { show: true, position: 'top' },
-                            data: chartData,
-                            itemStyle: {
-                                color: function(params) {
-                                    var val = params.value;
-                                    var idx = params.dataIndex;
-                                    if (idx <= 2 && val > 80) { return '#ff0000'; }
-                                    else if (idx >= 3 && val > 75) { return '#ff0000'; }
-                                    return '#5470c6'; 
-                                }
+            var categories = ['D1', 'D2', 'D1+D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D3ËœD7'];
+            var chartDom = document.getElementById('mainChart');
+            var myChart = echarts.init(chartDom);
+
+            var option = {
+                backgroundColor: 'transparent',
+                title: {
+                    text: 'æˆå“å» /è£½å“åº«å„å„²å€æ»¿å„²ç‡ (%)',
+                    left: 'center',
+                    top: 0,
+                    textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'shadow' },
+                    formatter: function (params) {
+                        var idx = params[0].dataIndex;
+                        var val = params[0].value;
+                        var limit = limitData ? limitData[idx] : '-';
+                        return categories[idx] + '<br/>æ»¿å„²ç‡ï¼š<b>' + val + '%</b><br/>é–€æª»ï¼š' + limit + '%';
+                    }
+                },
+                legend: {
+                    data: ['æ»¿å„²ç‡', 'é–€æª»'],
+                    bottom: 0,
+                    icon: 'circle'
+                },
+                grid: { left: '3%', right: '4%', bottom: '10%', top: '15%', containLabel: true },
+                xAxis: {
+                    type: 'category',
+                    data: categories,
+                    axisTick: { alignWithLabel: true },
+                    axisLabel: { interval: 0, fontWeight: 'bold' }
+                },
+                yAxis: {
+                    type: 'value',
+                    max: 100,
+                    name: '%',
+                    splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } }
+                },
+                series: [
+                    {
+                        name: 'æ»¿å„²ç‡',
+                        type: 'bar',
+                        barWidth: '45%',
+                        label: { show: true, position: 'top', formatter: '{c}%', fontWeight: 'bold' },
+                        data: chartData,
+                        itemStyle: {
+                            color: function (params) {
+                                var val = params.value;
+                                var limit = limitData ? limitData[params.dataIndex] : 80;
+                                return (val >= limit) ? '#e74c3c' : '#3498db';
                             }
                         }
-                    ]
-                };
+                    },
+                    {
+                        name: 'é–€æª»',
+                        type: 'line',
+                        symbol: 'none',
+                        lineStyle: { type: 'dashed', color: '#e67e22', width: 2 },
+                        itemStyle: { color: '#e67e22' },
+                        data: limitData
+                    }
+                ]
+            };
 
-                myChart.setOption(option);
-
-                //Åı ECharts ÀHµÛµøµ¡¤j¤p¦Û°ÊÁY©ñ
-                window.addEventListener('resize', function() {
-                    myChart.resize();
-                });
-
-            }
+            myChart.setOption(option);
+            window.addEventListener('resize', function () { myChart.resize(); });
         });
     </script>
+    <script src="libs/bootstrap.bundle.min.js"></script>
 </body>
 </html>
