@@ -124,7 +124,7 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
 
-            // 月份表格合併 (thead / tfoot 注入)
+            
             try {
                 var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
                 var tblHeader = document.getElementById('tempMonthHeader');
@@ -149,7 +149,7 @@
                 console.error("表格合併失敗:", e);
             }
 
-            // ECharts 初始化
+            
             try {
                 if (typeof chartData !== 'undefined') {
                     var defectDom = document.getElementById('echartDefect');
@@ -157,18 +157,18 @@
 
                     defectChart.setOption({
                         backgroundColor: 'transparent',
-                        title: { text: '退火爐 #1 缺陷月累計趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                        title: { text: 'TNRL #1 缺陷月累計趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
                         tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                        legend: { data: ['退火缺陷 Top 1', '退火缺陷 Top 2', '退火缺陷 Top 3', '退火缺陷 Top 4', '退火缺陷 Top 5'], bottom: 0, icon: 'circle' },
+                        legend: { data: ['TNRL缺陷 Top 1', 'TNRL缺陷 Top 2', 'TNRL缺陷 Top 3', 'TNRL缺陷 Top 4', 'TNRL缺陷 Top 5'], bottom: 0, icon: 'circle' },
                         grid: { left: '8%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
                         xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
                         yAxis: [{ type: 'value', name: '重量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
                         series: [
-                            { name: '退火缺陷 Top 1', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d1 },
-                            { name: '退火缺陷 Top 2', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d2 },
-                            { name: '退火缺陷 Top 3', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d3 },
-                            { name: '退火缺陷 Top 4', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d4 },
-                            { name: '退火缺陷 Top 5', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d5 }
+                            { name: 'TNRL缺陷 Top 1', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d1 },
+                            { name: 'TNRL缺陷 Top 2', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d2 },
+                            { name: 'TNRL缺陷 Top 3', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d3 },
+                            { name: 'TNRL缺陷 Top 4', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d4 },
+                            { name: 'TNRL缺陷 Top 5', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d5 }
                         ]
                     });
 
@@ -226,10 +226,10 @@ GROUP BY product_month
 ORDER BY product_month">
             </asp:SqlDataSource>
 
-            <!-- Card 1：缺陷趨勢圖 -->
+            
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
-                    <span class="fs-4" style="color: white !important;">&#128202; 退火爐 #1 缺陷月累計趨勢</span>
+                    <span class="fs-4" style="color: white !important;">&#128202; TNRL爐 #1 缺陷月累計趨勢</span>
                     <span class="badge bg-warning text-dark fs-6 shadow-sm">資料區間：<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
                 </div>
                 <div class="chart-card-body">
@@ -237,7 +237,7 @@ ORDER BY product_month">
                 </div>
             </div>
 
-            <!-- Card 2：每日缺陷統計 -->
+            
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <span class="fs-4" style="color: white !important;">&#128203; 近期每日缺陷重量累計</span>
@@ -251,7 +251,7 @@ ORDER BY product_month">
                 </div>
             </div>
 
-            <!-- Card 3：月份缺陷統計 -->
+            
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <span class="fs-4" style="color: white !important;">&#128203; 近期月份缺陷重量累計</span>

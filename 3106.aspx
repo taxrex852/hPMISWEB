@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="libs/bootstrap.min.css" />
     
     <style type="text/css">
-        /* --- 全域與背景 --- */
+        
         body { background-color: #f8f9fc; padding-bottom: 20px; }
         
         .main-content {
@@ -19,7 +19,7 @@
             padding-top: 20px;
         }
 
-        /* --- 卡片風格 --- */
+        
         .card-custom { 
             background: #fff; 
             border-radius: 8px; 
@@ -30,7 +30,7 @@
             display: block !important;
         }
         
-        /* 統一深色表頭設定 */
+        
         .card-header-custom { 
             background-color: #2c3e50 !important; 
             color: #ffffff !important; 
@@ -41,12 +41,12 @@
             align-items: center; 
         }
 
-        /* --- 防塌陷圖表區塊 (這段是解決圖表消失的關鍵) --- */
+        
         .chart-card-body {
             padding: 20px;
             background-color: #ffffff;
             display: block !important;
-            min-height: 420px; /* 強制最低高度 */
+            min-height: 420px; 
             width: 100%;
         }
         .chart-flex-wrapper {
@@ -62,10 +62,10 @@
             height: 380px;
         }
 
-        /* --- 表格自適應與置中設定 --- */
+        
         .table-wrapper-center {
             display: flex;
-            justify-content: center; /* 讓表格在 Card 中置中 */
+            justify-content: center; 
             width: 100%;
             padding: 15px 0;
         }
@@ -86,10 +86,10 @@
             border-collapse: separate; 
             border-spacing: 0;
             margin-bottom: 0;
-            font-size: 1.1rem; /* 字體放大 */
+            font-size: 1.1rem; 
         }
 
-        /* --- 凍結表頭與表尾 --- */
+        
         .custom-auto-table thead th, .custom-auto-table th {
             position: sticky;
             top: 0;
@@ -116,7 +116,7 @@
             border-top: 2px solid #cbd5e1;
         }
 
-        /* 資料列樣式 */
+        
         .custom-auto-table tbody td {
             vertical-align: middle;
             text-align: center;
@@ -139,9 +139,9 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
             
-            // ==========================================
-            // 1. 表格合併腳本
-            // ==========================================
+            
+            
+            
             try {
                 var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
                 var tblHeader = document.getElementById('tempMonthHeader');
@@ -173,9 +173,9 @@
                 console.error("表格設定失敗:", e);
             }
 
-            // ==========================================
-            // 2. ECharts 初始化 (容錯設計)
-            // ==========================================
+            
+            
+            
             try {
                 if (typeof chartData !== 'undefined') {
                     var percentChart = echarts.init(document.getElementById('echartPercent'));
@@ -282,7 +282,7 @@
                 <div class="card-header-custom">
                     <div>
                         <span class="fs-4" style="color: white !important;">📋 型鋼每日生產履歷</span>
-                      <%--  <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 07:00 / 15:00 / 23:00 進行資料更新</span>--%>
+                      
                     </div>
                 </div>
                 
@@ -300,7 +300,7 @@
                 <div class="card-header-custom">
                     <div>
                         <span class="fs-4" style="color: white !important;">📋 型鋼當月生產履歷</span>
-                       <%-- <span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">資料於每日 23:00 更新，月初重新編排</span>--%>
+                       
                     </div>
                 </div>
                 

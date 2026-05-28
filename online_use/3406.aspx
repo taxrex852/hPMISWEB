@@ -102,7 +102,7 @@
 
         .pmisdata { font-weight: bold; }
 
-        /* 合併捲軸容器：header/footer sticky，資料列共用一個 scrollbar */
+        
         .combined-tbl-scroll {
             max-height: 340px;
             overflow-y: auto;
@@ -137,76 +137,76 @@
     </style>
 
     <script type="text/javascript" src="libs/echarts.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-
-
-
-
-            function syncTables(dataId, headId, footId) {
-                var dataTable = document.getElementById(dataId);
-                var headerTable = document.getElementById(headId);
-                var footerTable = document.getElementById(footId);
-
-                if (dataTable && dataTable.rows.length > 0 && headerTable && footerTable) {
-                    var dataCells = dataTable.rows[0].cells;
-                    var headerCells = headerTable.rows[0].cells;
-                    var footerCells = footerTable.rows[0].cells;
-
-                    for (var i = 0; i < headerCells.length; i++) {
-                        if (headerCells[i]) headerCells[i].style.width = 'auto';
-                        if (dataCells[i]) dataCells[i].style.width = 'auto';
-                        if (footerCells[i]) footerCells[i].style.width = 'auto';
-                    }
-
-                    setTimeout(function () {
-                        for (var i = 0; i < headerCells.length; i++) {
-                            var hw = headerCells[i] ? headerCells[i].offsetWidth : 0;
-                            var dw = dataCells[i] ? dataCells[i].offsetWidth : 0;
-                            var fw = footerCells[i] ? footerCells[i].offsetWidth : 0;
-                            var maxWidth = Math.max(hw, dw, fw);
-                            if (headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
-                            if (dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
-                            if (footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
-                        }
-                    }, 50);
-                }
-            }
-
-            function syncAllTables() {
-                syncTables('<%= gvMonth1.ClientID %>', 'tblHeader1', 'tblFooter1');
-            }
-
-            window.addEventListener('load', syncAllTables);
-            window.addEventListener('resize', syncAllTables);
-
-
-
-
-            if (typeof chartData === 'undefined') return;
-
-            var prodDom = document.getElementById('echartProd');
-            var prodChart = echarts.init(prodDom);
-            var optionProd = {
-                backgroundColor: 'transparent',
-                title: { text: 'HBM 生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                legend: { data: ['H型鋼 (Hxx)', 'F型鋼 (Fxx)', '輕量型 (Lxx)'], bottom: 0, icon: 'circle' },
-                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
-                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                yAxis: [{ type: 'value', name: '產量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
-                series: [
-                    { name: 'H型鋼 (Hxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hxx },
-                    { name: 'F型鋼 (Fxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.fxx },
-                    { name: '輕量型 (Lxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.lxx }
-                ]
-            };
-            prodChart.setOption(optionProd);
-
-            window.addEventListener('resize', function () {
-                prodChart.resize();
-            });
-        });
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+
+            
+            
+            
+            function syncTables(dataId, headId, footId) {
+                var dataTable = document.getElementById(dataId);
+                var headerTable = document.getElementById(headId);
+                var footerTable = document.getElementById(footId);
+
+                if (dataTable && dataTable.rows.length > 0 && headerTable && footerTable) {
+                    var dataCells = dataTable.rows[0].cells;
+                    var headerCells = headerTable.rows[0].cells;
+                    var footerCells = footerTable.rows[0].cells;
+
+                    for (var i = 0; i < headerCells.length; i++) {
+                        if (headerCells[i]) headerCells[i].style.width = 'auto';
+                        if (dataCells[i]) dataCells[i].style.width = 'auto';
+                        if (footerCells[i]) footerCells[i].style.width = 'auto';
+                    }
+
+                    setTimeout(function () {
+                        for (var i = 0; i < headerCells.length; i++) {
+                            var hw = headerCells[i] ? headerCells[i].offsetWidth : 0;
+                            var dw = dataCells[i] ? dataCells[i].offsetWidth : 0;
+                            var fw = footerCells[i] ? footerCells[i].offsetWidth : 0;
+                            var maxWidth = Math.max(hw, dw, fw);
+                            if (headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
+                        }
+                    }, 50);
+                }
+            }
+
+            function syncAllTables() {
+                syncTables('<%= gvMonth1.ClientID %>', 'tblHeader1', 'tblFooter1');
+            }
+
+            window.addEventListener('load', syncAllTables);
+            window.addEventListener('resize', syncAllTables);
+
+            
+            
+            
+            if (typeof chartData === 'undefined') return;
+
+            var prodDom = document.getElementById('echartProd');
+            var prodChart = echarts.init(prodDom);
+            var optionProd = {
+                backgroundColor: 'transparent',
+                title: { text: 'HBM 生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                legend: { data: ['H型鋼 (Hxx)', 'F型鋼 (Fxx)', '輕量型 (Lxx)'], bottom: 0, icon: 'circle' },
+                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
+                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                yAxis: [{ type: 'value', name: '產量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                series: [
+                    { name: 'H型鋼 (Hxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hxx },
+                    { name: 'F型鋼 (Fxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.fxx },
+                    { name: '輕量型 (Lxx)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.lxx }
+                ]
+            };
+            prodChart.setOption(optionProd);
+
+            window.addEventListener('resize', function () {
+                prodChart.resize();
+            });
+        });
     </script>
 </head>
 

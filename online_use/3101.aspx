@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="libs/bootstrap.min.css" />
     
     <style type="text/css">
-        /* --- 全域與背景 --- */
+        
         body { background-color: #f8f9fc; padding-bottom: 20px; }
         
         .main-content {
@@ -20,7 +20,7 @@
             padding-top: 20px;
         }
 
-        /* --- 卡片風格 --- */
+        
         .card-custom { 
             background: #fff; 
             border-radius: 8px; 
@@ -40,12 +40,12 @@
             align-items: center;
         }
 
-        /* --- 防塌陷圖表區塊 (獨立於 Bootstrap Grid) --- */
+        
         .chart-card-body {
             padding: 20px;
             background-color: #ffffff;
             display: block !important;
-            min-height: 420px; /* 強制最低高度，就算沒圖表也不會塌陷 */
+            min-height: 420px; 
             width: 100%;
             text-align: center
         }
@@ -62,7 +62,7 @@
             height: 380px;
         }
 
-        /* --- 表格自適應與捲軸設定 --- */
+        
         .table-responsive-custom {
             max-height: 450px; 
             overflow-y: auto;
@@ -81,7 +81,7 @@
             margin: 0 auto
         }
 
-        /* --- 凍結表頭與表尾 --- */
+        
         .custom-auto-table thead th {
             position: sticky;
             top: 0;
@@ -108,7 +108,7 @@
             border-top: 2px solid #cbd5e1;
         }
 
-        /* 資料列樣式 */
+        
         .custom-auto-table tbody td {
             vertical-align: middle;
             text-align: center;
@@ -128,97 +128,97 @@
     </style>
     
     <script type="text/javascript" src="libs/echarts.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            
-
-
-
-            try {
-                var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
-                var tblHeader = document.getElementById('tempMonthHeader');
-                var tblFooter = document.getElementById('tempMonthFooter');
-
-                if (gvMonth && tblHeader && tblFooter) {
-                    var theadRow = tblHeader.querySelector('tr');
-                    if (theadRow) {
-                        var thead = document.createElement('thead');
-                        thead.appendChild(theadRow);
-                        gvMonth.insertBefore(thead, gvMonth.firstChild);
-                    }
-
-                    var tfootRow = tblFooter.querySelector('tr');
-                    if (tfootRow) {
-                        var tfoot = document.createElement('tfoot');
-                        tfoot.appendChild(tfootRow);
-                        gvMonth.appendChild(tfoot);
-                    }
-                    gvMonth.className = 'table custom-auto-table';
-                }
-            } catch (e) {
-                console.error("表格合併失敗:", e);
-            }
-
-
-
-
-            try {
-                if (typeof chartData !== 'undefined') {
-                    var percentChart = echarts.init(document.getElementById('echartPercent'));
-                    var optionPercent = {
-                        backgroundColor: 'transparent',
-                        title: { text: '📈 熱軋生產效益趨勢 (百分比)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
-                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                        legend: { bottom: 0, icon: 'circle', data: ['產率 (%)', '訂單合格率 (%)', '作業率 (%)'] },
-                        grid: { left: '10%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
-                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                        yAxis: [{ 
-                            type: 'value', 
-                            name: '百分比 (%)', 
-                            axisLabel: { formatter: '{value} %' }, 
-                            scale: true,
-                            splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } }
-                        }],
-                        series: [
-                            { name: '產率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#2ecc71' }, data: chartData.py },
-                            { name: '訂單合格率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#3498db' }, data: chartData.po },
-                            { name: '作業率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#9b59b6' }, data: chartData.or }
-                        ]
-                    };
-                    percentChart.setOption(optionPercent);
-
-                    var weightChart = echarts.init(document.getElementById('echartWeight'));
-                    var optionWeight = {
-                        backgroundColor: 'transparent',
-                        title: { text: '⚖️ 熱軋生產重量趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
-                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                        legend: { bottom: 0, icon: 'circle', data: ['產量 (MT)', '剔退重量 (MT)'] },
-                        grid: { left: '12%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
-                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                        yAxis: [{ 
-                            type: 'value', 
-                            name: '重量 (MT)', 
-                            scale: true,
-                            splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } 
-                        }],
-                        series: [
-                            { name: '產量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#f39c12' }, data: chartData.pa },
-                            { name: '剔退重量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#e74c3c' }, data: chartData.mr }
-                        ]
-                    };
-                    weightChart.setOption(optionWeight);
-
-                    window.addEventListener('resize', function () {
-                        percentChart.resize();
-                        weightChart.resize();
-                    });
-                } else {
-                    console.warn("找不到 chartData，圖表無法繪製。");
-                }
-            } catch (e) {
-                console.error("ECharts 繪製失敗:", e);
-            }
-        });
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            
+            
+            
+            
+            try {
+                var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
+                var tblHeader = document.getElementById('tempMonthHeader');
+                var tblFooter = document.getElementById('tempMonthFooter');
+
+                if (gvMonth && tblHeader && tblFooter) {
+                    var theadRow = tblHeader.querySelector('tr');
+                    if (theadRow) {
+                        var thead = document.createElement('thead');
+                        thead.appendChild(theadRow);
+                        gvMonth.insertBefore(thead, gvMonth.firstChild);
+                    }
+
+                    var tfootRow = tblFooter.querySelector('tr');
+                    if (tfootRow) {
+                        var tfoot = document.createElement('tfoot');
+                        tfoot.appendChild(tfootRow);
+                        gvMonth.appendChild(tfoot);
+                    }
+                    gvMonth.className = 'table custom-auto-table';
+                }
+            } catch (e) {
+                console.error("表格合併失敗:", e);
+            }
+
+            
+            
+            
+            try {
+                if (typeof chartData !== 'undefined') {
+                    var percentChart = echarts.init(document.getElementById('echartPercent'));
+                    var optionPercent = {
+                        backgroundColor: 'transparent',
+                        title: { text: '📈 熱軋生產效益趨勢 (百分比)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                        legend: { bottom: 0, icon: 'circle', data: ['產率 (%)', '訂單合格率 (%)', '作業率 (%)'] },
+                        grid: { left: '10%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
+                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                        yAxis: [{ 
+                            type: 'value', 
+                            name: '百分比 (%)', 
+                            axisLabel: { formatter: '{value} %' }, 
+                            scale: true,
+                            splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } }
+                        }],
+                        series: [
+                            { name: '產率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#2ecc71' }, data: chartData.py },
+                            { name: '訂單合格率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#3498db' }, data: chartData.po },
+                            { name: '作業率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#9b59b6' }, data: chartData.or }
+                        ]
+                    };
+                    percentChart.setOption(optionPercent);
+
+                    var weightChart = echarts.init(document.getElementById('echartWeight'));
+                    var optionWeight = {
+                        backgroundColor: 'transparent',
+                        title: { text: '⚖️ 熱軋生產重量趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                        legend: { bottom: 0, icon: 'circle', data: ['產量 (MT)', '剔退重量 (MT)'] },
+                        grid: { left: '12%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
+                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                        yAxis: [{ 
+                            type: 'value', 
+                            name: '重量 (MT)', 
+                            scale: true,
+                            splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } 
+                        }],
+                        series: [
+                            { name: '產量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#f39c12' }, data: chartData.pa },
+                            { name: '剔退重量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#e74c3c' }, data: chartData.mr }
+                        ]
+                    };
+                    weightChart.setOption(optionWeight);
+
+                    window.addEventListener('resize', function () {
+                        percentChart.resize();
+                        weightChart.resize();
+                    });
+                } else {
+                    console.warn("找不到 chartData，圖表無法繪製。");
+                }
+            } catch (e) {
+                console.error("ECharts 繪製失敗:", e);
+            }
+        });
     </script>
 </head>
 <body>

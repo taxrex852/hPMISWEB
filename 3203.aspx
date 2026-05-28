@@ -124,7 +124,7 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
 
-            // 月份表格合併 (thead / tfoot 注入)
+            
             try {
                 var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
                 var tblHeader = document.getElementById('tempMonthHeader');
@@ -149,7 +149,7 @@
                 console.error("表格合併失敗:", e);
             }
 
-            // ECharts 初始化
+            
             try {
                 if (typeof chartData !== 'undefined') {
                     var defectDom = document.getElementById('echartDefect');
@@ -226,7 +226,7 @@ GROUP BY product_month
 ORDER BY product_month">
             </asp:SqlDataSource>
 
-            <!-- Card 1：缺陷趨勢圖 -->
+            
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
                     <span class="fs-4" style="color: white !important;">&#128202; TNRL #2 缺陷月累計趨勢</span>
@@ -237,7 +237,7 @@ ORDER BY product_month">
                 </div>
             </div>
 
-            <!-- Card 2：每日缺陷統計 -->
+            
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <span class="fs-4" style="color: white !important;">&#128203; 近期每日缺陷重量累計</span>
@@ -251,7 +251,7 @@ ORDER BY product_month">
                 </div>
             </div>
 
-            <!-- Card 3：月份缺陷統計 -->
+            
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <span class="fs-4" style="color: white !important;">&#128203; 近期月份缺陷重量累計</span>

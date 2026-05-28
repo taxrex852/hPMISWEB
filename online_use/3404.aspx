@@ -102,7 +102,7 @@
 
         .pmisdata { font-weight: bold; }
 
-        /* 合併捲軸容器：header/footer sticky，資料列共用一個 scrollbar */
+        
         .combined-tbl-scroll {
             max-height: 340px;
             overflow-y: auto;
@@ -137,110 +137,110 @@
     </style>
 
     <script type="text/javascript" src="libs/echarts.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-
-
-
-
-            function syncTables(dataId, headId, footId) {
-                var dataTable = document.getElementById(dataId);
-                var headerTable = document.getElementById(headId);
-                var footerTable = document.getElementById(footId);
-
-                if (dataTable && dataTable.rows.length > 0 && headerTable && footerTable) {
-                    var dataCells = dataTable.rows[0].cells;
-                    var headerCells = headerTable.rows[0].cells;
-                    var footerCells = footerTable.rows[0].cells;
-
-                    for (var i = 0; i < headerCells.length; i++) {
-                        if (headerCells[i]) headerCells[i].style.width = 'auto';
-                        if (dataCells[i]) dataCells[i].style.width = 'auto';
-                        if (footerCells[i]) footerCells[i].style.width = 'auto';
-                    }
-
-                    setTimeout(function () {
-                        for (var i = 0; i < headerCells.length; i++) {
-                            var hw = headerCells[i] ? headerCells[i].offsetWidth : 0;
-                            var dw = dataCells[i] ? dataCells[i].offsetWidth : 0;
-                            var fw = footerCells[i] ? footerCells[i].offsetWidth : 0;
-                            var maxWidth = Math.max(hw, dw, fw);
-                            if (headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
-                            if (dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
-                            if (footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
-                        }
-                    }, 50);
-                }
-            }
-
-            function syncAllTables() {
-                syncTables('<%= gvMonth1.ClientID %>', 'tblHeader1', 'tblFooter1');
-                syncTables('<%= gvMonth3.ClientID %>', 'tblHeader3', 'tblFooter3');
-                syncTables('<%= gvMonth2.ClientID %>', 'tblHeader2', 'tblFooter2');
-                syncTables('<%= gvMonth4.ClientID %>', 'tblHeader4', 'tblFooter4');
-            }
-
-            window.addEventListener('load', syncAllTables);
-            window.addEventListener('resize', syncAllTables);
-
-
-
-
-            if (typeof chartData === 'undefined') return;
-
-            var dimDom = document.getElementById('echartDim');
-            var dimChart = echarts.init(dimDom);
-            var optionDim = {
-                backgroundColor: 'transparent',
-                title: { text: '#3TNRL 厚度與前段製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                legend: { data: ['ETNG', 'WTNG', 'NTNG', 'NTCG', 'ETCG', 'MDSZ', 'NRWD', 'MDWD', 'WIWD'], bottom: 0, icon: 'circle' },
-                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
-                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                yAxis: [{ type: 'value', name: '產量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
-                series: [
-                    { name: 'ETNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.etng },
-                    { name: 'WTNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.wtng },
-                    { name: 'NTNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.ntng },
-                    { name: 'NTCG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.ntcg },
-                    { name: 'ETCG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.etcg },
-                    { name: 'MDSZ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mdsz },
-                    { name: 'NRWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.nrwd },
-                    { name: 'MDWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mdwd },
-                    { name: 'WIWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.wiwd }
-                ]
-            };
-            dimChart.setOption(optionDim);
-
-            var strDom = document.getElementById('echartStrength');
-            var strChart = echarts.init(strDom);
-            var optionStr = {
-                backgroundColor: 'transparent',
-                title: { text: '#3TNRL 強度與表面製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                legend: { data: ['EXLC', 'LSCS', 'MSCS', 'HICS', 'VHIS', 'SUS', 'NRCQ', 'HICQ', 'VHCQ'], bottom: 0, icon: 'circle' },
-                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
-                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                yAxis: [{ type: 'value', name: '產量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
-                series: [
-                    { name: 'EXLC', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.exlc },
-                    { name: 'LSCS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.lscs },
-                    { name: 'MSCS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mscs },
-                    { name: 'HICS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hics },
-                    { name: 'VHIS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.vhis },
-                    { name: 'SUS',  type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.sus  },
-                    { name: 'NRCQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.nrcq },
-                    { name: 'HICQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hicq },
-                    { name: 'VHCQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.vhcq }
-                ]
-            };
-            strChart.setOption(optionStr);
-
-            window.addEventListener('resize', function () {
-                dimChart.resize();
-                strChart.resize();
-            });
-        });
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+
+            
+            
+            
+            function syncTables(dataId, headId, footId) {
+                var dataTable = document.getElementById(dataId);
+                var headerTable = document.getElementById(headId);
+                var footerTable = document.getElementById(footId);
+
+                if (dataTable && dataTable.rows.length > 0 && headerTable && footerTable) {
+                    var dataCells = dataTable.rows[0].cells;
+                    var headerCells = headerTable.rows[0].cells;
+                    var footerCells = footerTable.rows[0].cells;
+
+                    for (var i = 0; i < headerCells.length; i++) {
+                        if (headerCells[i]) headerCells[i].style.width = 'auto';
+                        if (dataCells[i]) dataCells[i].style.width = 'auto';
+                        if (footerCells[i]) footerCells[i].style.width = 'auto';
+                    }
+
+                    setTimeout(function () {
+                        for (var i = 0; i < headerCells.length; i++) {
+                            var hw = headerCells[i] ? headerCells[i].offsetWidth : 0;
+                            var dw = dataCells[i] ? dataCells[i].offsetWidth : 0;
+                            var fw = footerCells[i] ? footerCells[i].offsetWidth : 0;
+                            var maxWidth = Math.max(hw, dw, fw);
+                            if (headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
+                            if (footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
+                        }
+                    }, 50);
+                }
+            }
+
+            function syncAllTables() {
+                syncTables('<%= gvMonth1.ClientID %>', 'tblHeader1', 'tblFooter1');
+                syncTables('<%= gvMonth3.ClientID %>', 'tblHeader3', 'tblFooter3');
+                syncTables('<%= gvMonth2.ClientID %>', 'tblHeader2', 'tblFooter2');
+                syncTables('<%= gvMonth4.ClientID %>', 'tblHeader4', 'tblFooter4');
+            }
+
+            window.addEventListener('load', syncAllTables);
+            window.addEventListener('resize', syncAllTables);
+
+            
+            
+            
+            if (typeof chartData === 'undefined') return;
+
+            var dimDom = document.getElementById('echartDim');
+            var dimChart = echarts.init(dimDom);
+            var optionDim = {
+                backgroundColor: 'transparent',
+                title: { text: '#3TNRL 厚度與前段製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                legend: { data: ['ETNG', 'WTNG', 'NTNG', 'NTCG', 'ETCG', 'MDSZ', 'NRWD', 'MDWD', 'WIWD'], bottom: 0, icon: 'circle' },
+                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
+                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                yAxis: [{ type: 'value', name: '產量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                series: [
+                    { name: 'ETNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.etng },
+                    { name: 'WTNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.wtng },
+                    { name: 'NTNG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.ntng },
+                    { name: 'NTCG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.ntcg },
+                    { name: 'ETCG', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.etcg },
+                    { name: 'MDSZ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mdsz },
+                    { name: 'NRWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.nrwd },
+                    { name: 'MDWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mdwd },
+                    { name: 'WIWD', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.wiwd }
+                ]
+            };
+            dimChart.setOption(optionDim);
+
+            var strDom = document.getElementById('echartStrength');
+            var strChart = echarts.init(strDom);
+            var optionStr = {
+                backgroundColor: 'transparent',
+                title: { text: '#3TNRL 強度與表面製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                legend: { data: ['EXLC', 'LSCS', 'MSCS', 'HICS', 'VHIS', 'SUS', 'NRCQ', 'HICQ', 'VHCQ'], bottom: 0, icon: 'circle' },
+                grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
+                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                yAxis: [{ type: 'value', name: '產量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                series: [
+                    { name: 'EXLC', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.exlc },
+                    { name: 'LSCS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.lscs },
+                    { name: 'MSCS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.mscs },
+                    { name: 'HICS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hics },
+                    { name: 'VHIS', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.vhis },
+                    { name: 'SUS',  type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.sus  },
+                    { name: 'NRCQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.nrcq },
+                    { name: 'HICQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.hicq },
+                    { name: 'VHCQ', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.vhcq }
+                ]
+            };
+            strChart.setOption(optionStr);
+
+            window.addEventListener('resize', function () {
+                dimChart.resize();
+                strChart.resize();
+            });
+        });
     </script>
 </head>
 
@@ -282,19 +282,19 @@
                                     <table id="tblHeader1" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
                                         <tr>
                                             <td class="gvhs_data">月份</td>
-                                            <td class="gvhs_data">東窄薄料<br />(ETNG)</td>
-                                            <td class="gvhs_data">西寬薄料<br />(WTNG)</td>
-                                            <td class="gvhs_data">中寬料<br />(NTNG)</td>
-                                            <td class="gvhs_data">北薄中厚<br />(NTCG)</td>
-                                            <td class="gvhs_data">東中厚料<br />(ETCG)</td>
-                                            <td class="gvhs_data">中尺寸<br />(MDSZ)</td>
+                                            <td class="gvhs_data"><br />(ETNG)</td>
+                                            <td class="gvhs_data"><br />(WTNG)</td>
+                                            <td class="gvhs_data"><br />(NTNG)</td>
+                                            <td class="gvhs_data"><br />(NTCG)</td>
+                                            <td class="gvhs_data"><br />(ETCG)</td>
+                                            <td class="gvhs_data"><br />(MDSZ)</td>
                                         </tr>
                                     </table>
                                     <table id="tblHeader3" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
                                         <tr>
-                                            <td class="gvhs_data">窄寬<br />(NRWD)</td>
-                                            <td class="gvhs_data">中等寬<br />(MDWD)</td>
-                                            <td class="gvhs_data">寬寬<br />(WIWD)</td>
+                                            <td class="gvhs_data"><br />(NRWD)</td>
+                                            <td class="gvhs_data"><br />(MDWD)</td>
+                                            <td class="gvhs_data"><br />(WIWD)</td>
                                         </tr>
                                     </table>
                                 </div>

@@ -26,54 +26,54 @@
         .custom-auto-table tbody td:first-child { font-weight: bold; color: #2c3e50; background-color: #f8f9fa; }
     </style>
     <script type="text/javascript" src="libs/echarts.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            try {
-                var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
-                var tblHeader = document.getElementById('tempMonthHeader');
-                var tblFooter = document.getElementById('tempMonthFooter');
-                if (gvMonth && tblHeader && tblFooter) {
-                    var theadRow = tblHeader.querySelector('tr');
-                    if (theadRow) { var thead = document.createElement('thead'); thead.appendChild(theadRow); gvMonth.insertBefore(thead, gvMonth.firstChild); }
-                    var tfootRow = tblFooter.querySelector('tr');
-                    if (tfootRow) { var tfoot = document.createElement('tfoot'); tfoot.appendChild(tfootRow); gvMonth.appendChild(tfoot); }
-                    gvMonth.className = 'table custom-auto-table';
-                }
-                var gvDaily = document.getElementById('<%= gvDaily.ClientID %>');
-                if (gvDaily) gvDaily.className = 'table custom-auto-table';
-            } catch (e) { console.error("表格合併失敗:", e); }
-
-            try {
-                if (typeof chartData !== 'undefined') {
-                    var percentChart = echarts.init(document.getElementById('echartPercent'));
-                    percentChart.setOption({
-                        backgroundColor: 'transparent', title: { text: '📈 精整#3 生產效益趨勢 (百分比)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 16, fontWeight: 'bold' } },
-                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } }, legend: { bottom: 0, icon: 'circle', data: ['產率 (%)', '訂單合格率 (%)', '作業率 (%)'] },
-                        grid: { left: '10%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
-                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                        yAxis: [{ type: 'value', name: '百分比 (%)', axisLabel: { formatter: '{value} %' }, scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
-                        series: [
-                            { name: '產率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#2ecc71' }, data: chartData.py },
-                            { name: '訂單合格率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#3498db' }, data: chartData.po },
-                            { name: '作業率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#9b59b6' }, data: chartData.or }
-                        ]
-                    });
-                    var weightChart = echarts.init(document.getElementById('echartWeight'));
-                    weightChart.setOption({
-                        backgroundColor: 'transparent', title: { text: '⚖️ 精整#3 生產重量趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 16, fontWeight: 'bold' } },
-                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } }, legend: { bottom: 0, icon: 'circle', data: ['產量 (MT)', '剔退重量 (MT)'] },
-                        grid: { left: '12%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
-                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                        yAxis: [{ type: 'value', name: '重量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
-                        series: [
-                            { name: '產量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#f39c12' }, data: chartData.pa },
-                            { name: '剔退重量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#e74c3c' }, data: chartData.mr }
-                        ]
-                    });
-                    window.addEventListener('resize', function () { percentChart.resize(); weightChart.resize(); });
-                }
-            } catch (e) { console.error("ECharts 繪製失敗:", e); }
-        });
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            try {
+                var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
+                var tblHeader = document.getElementById('tempMonthHeader');
+                var tblFooter = document.getElementById('tempMonthFooter');
+                if (gvMonth && tblHeader && tblFooter) {
+                    var theadRow = tblHeader.querySelector('tr');
+                    if (theadRow) { var thead = document.createElement('thead'); thead.appendChild(theadRow); gvMonth.insertBefore(thead, gvMonth.firstChild); }
+                    var tfootRow = tblFooter.querySelector('tr');
+                    if (tfootRow) { var tfoot = document.createElement('tfoot'); tfoot.appendChild(tfootRow); gvMonth.appendChild(tfoot); }
+                    gvMonth.className = 'table custom-auto-table';
+                }
+                var gvDaily = document.getElementById('<%= gvDaily.ClientID %>');
+                if (gvDaily) gvDaily.className = 'table custom-auto-table';
+            } catch (e) { console.error("表格合併失敗:", e); }
+
+            try {
+                if (typeof chartData !== 'undefined') {
+                    var percentChart = echarts.init(document.getElementById('echartPercent'));
+                    percentChart.setOption({
+                        backgroundColor: 'transparent', title: { text: '📈 精整#3 生產效益趨勢 (百分比)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 16, fontWeight: 'bold' } },
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } }, legend: { bottom: 0, icon: 'circle', data: ['產率 (%)', '訂單合格率 (%)', '作業率 (%)'] },
+                        grid: { left: '10%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
+                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                        yAxis: [{ type: 'value', name: '百分比 (%)', axisLabel: { formatter: '{value} %' }, scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                        series: [
+                            { name: '產率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#2ecc71' }, data: chartData.py },
+                            { name: '訂單合格率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#3498db' }, data: chartData.po },
+                            { name: '作業率 (%)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#9b59b6' }, data: chartData.or }
+                        ]
+                    });
+                    var weightChart = echarts.init(document.getElementById('echartWeight'));
+                    weightChart.setOption({
+                        backgroundColor: 'transparent', title: { text: '⚖️ 精整#3 生產重量趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 16, fontWeight: 'bold' } },
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } }, legend: { bottom: 0, icon: 'circle', data: ['產量 (MT)', '剔退重量 (MT)'] },
+                        grid: { left: '12%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
+                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                        yAxis: [{ type: 'value', name: '重量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                        series: [
+                            { name: '產量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#f39c12' }, data: chartData.pa },
+                            { name: '剔退重量 (MT)', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, itemStyle: { color: '#e74c3c' }, data: chartData.mr }
+                        ]
+                    });
+                    window.addEventListener('resize', function () { percentChart.resize(); weightChart.resize(); });
+                }
+            } catch (e) { console.error("ECharts 繪製失敗:", e); }
+        });
     </script>
 </head>
 <body>

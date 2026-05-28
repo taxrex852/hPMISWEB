@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="libs/bootstrap.min.css" />
 
     <style type="text/css">
-        /* --- 全域與背景 --- */
+        
         body { background-color: #f8f9fc; padding-bottom: 20px; }
 
         .main-content {
@@ -20,7 +20,7 @@
             padding-top: 20px;
         }
 
-        /* --- 卡片風格 --- */
+        
         .card-custom {
             background: #fff;
             border-radius: 8px;
@@ -40,7 +40,7 @@
             align-items: center;
         }
 
-        /* --- 圖表區塊 --- */
+        
         .chart-card-body {
             padding: 20px;
             background-color: #ffffff;
@@ -49,7 +49,7 @@
             width: 100%;
         }
 
-        /* --- 表格捲軸設定 --- */
+        
         .table-responsive-custom {
             max-height: 450px;
             overflow-y: auto;
@@ -68,7 +68,7 @@
             margin: 0 auto;
         }
 
-        /* --- 凍結表頭 --- */
+        
         .custom-auto-table thead th {
             position: sticky;
             top: 0;
@@ -81,7 +81,7 @@
             font-weight: 600;
             border-bottom: 2px solid #233140 !important;
         }
-        /* --- 強制 GridView 表頭深色白字 --- */
+        
 .table-header-dark th, .table-header-dark td {
     background-color: #34495e !important;
     color: #ffffff !important;
@@ -94,7 +94,7 @@
     font-weight: 600;
     border-bottom: 2px solid #233140 !important;
 }
-        /* --- 凍結表尾 --- */
+        
         .custom-auto-table tfoot td {
             position: sticky;
             bottom: 0;
@@ -108,7 +108,7 @@
             border-top: 2px solid #cbd5e1;
         }
 
-        /* --- 資料列 --- */
+        
         .custom-auto-table tbody td {
             vertical-align: middle;
             text-align: center;
@@ -131,9 +131,9 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
 
-            // ==========================================
-            // 1. 月份表格合併 (thead / tfoot 注入)
-            // ==========================================
+            
+            
+            
             try {
                 var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
                 var tblHeader = document.getElementById('tempMonthHeader');
@@ -159,9 +159,9 @@
                 console.error("表格合併失敗:", e);
             }
 
-            // ==========================================
-            // 2. ECharts 初始化
-            // ==========================================
+            
+            
+            
             try {
                 if (typeof chartData !== 'undefined') {
                     var defectDom = document.getElementById('echartDefect');
@@ -247,7 +247,7 @@ GROUP BY product_month
 ORDER BY product_month;">
             </asp:SqlDataSource>
 
-            <!-- ========== 第一層 Card：缺陷趨勢圖 ========== -->
+            
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
                     <span class="fs-4" style="color: white !important;">📊 缺陷月累計趨勢</span>
@@ -258,12 +258,12 @@ ORDER BY product_month;">
                 </div>
             </div>
 
-            <!-- ========== 第二層 Card：每日缺陷統計 ========== -->
+            
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <div>
                         <span class="fs-4" style="color: white !important;">📋 近期每日缺陷重量累計</span>
-                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 0700/1500/2300 更新 / 每日 1500 為前一日完整統計</span>--%>
+                        
                     
                     </div>
                 </div>
@@ -277,12 +277,12 @@ ORDER BY product_month;">
                 </div>
             </div>
 
-            <!-- ========== 第三層 Card：月份缺陷統計 ========== -->
+            
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <div>
                         <span class="fs-4" style="color: white !important;">📋 近期月份缺陷重量累計</span>
-                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每晚 23:00 更新 / 月初重新統計</span>--%>
+                        
                     </div>
                 </div>
                 <div class="card-body p-0">

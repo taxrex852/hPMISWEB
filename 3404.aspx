@@ -102,7 +102,7 @@
 
         .pmisdata { font-weight: bold; }
 
-        /* 合併捲軸容器：header/footer sticky，資料列共用一個 scrollbar */
+        
         .combined-tbl-scroll {
             max-height: 340px;
             overflow-y: auto;
@@ -140,9 +140,9 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
 
-            // ==========================================
-            // A. 表格欄位自動寬度同步
-            // ==========================================
+            
+            
+            
             function syncTables(dataId, headId, footId) {
                 var dataTable = document.getElementById(dataId);
                 var headerTable = document.getElementById(headId);
@@ -183,9 +183,9 @@
             window.addEventListener('load', syncAllTables);
             window.addEventListener('resize', syncAllTables);
 
-            // ==========================================
-            // B. ECharts 圖表繪製
-            // ==========================================
+            
+            
+            
             if (typeof chartData === 'undefined') return;
 
             var dimDom = document.getElementById('echartDim');
@@ -251,7 +251,7 @@
 
         <div class="container-fluid main-content px-4">
 
-            <!-- ========== 第一層 Card：#3TNRL 生產趨勢圖 ========== -->
+            
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
                     <span class="fs-4" style="color: white !important;">📊 #3TNRL 生產趨勢</span>
@@ -265,7 +265,7 @@
                 </div>
             </div>
 
-            <!-- ========== 第二層 Card：廠區厚度與前段製程進度 ========== -->
+            
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <div>
@@ -273,28 +273,28 @@
                     </div>
                 </div>
                 <div class="card-body p-3">
-                    <!-- 置中容器 -->
+                    
                     <div style="text-align: center;">
                         <div style="display: inline-block; text-align: left;">
-                            <!-- 合併捲軸：header sticky-top、兩個 GridView 共用一個 scrollbar、footer sticky-bottom -->
+                            
                             <div class="combined-tbl-scroll">
                                 <div class="ctbl-hdr-row">
                                     <table id="tblHeader1" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
                                         <tr>
                                             <td class="gvhs_data">月份</td>
-                                            <td class="gvhs_data">東窄薄料<br />(ETNG)</td>
-                                            <td class="gvhs_data">西寬薄料<br />(WTNG)</td>
-                                            <td class="gvhs_data">中寬料<br />(NTNG)</td>
-                                            <td class="gvhs_data">北薄中厚<br />(NTCG)</td>
-                                            <td class="gvhs_data">東中厚料<br />(ETCG)</td>
-                                            <td class="gvhs_data">中尺寸<br />(MDSZ)</td>
+                                            <td class="gvhs_data"><br />(ETNG)</td>
+                                            <td class="gvhs_data"><br />(WTNG)</td>
+                                            <td class="gvhs_data"><br />(NTNG)</td>
+                                            <td class="gvhs_data"><br />(NTCG)</td>
+                                            <td class="gvhs_data"><br />(ETCG)</td>
+                                            <td class="gvhs_data"><br />(MDSZ)</td>
                                         </tr>
                                     </table>
                                     <table id="tblHeader3" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
                                         <tr>
-                                            <td class="gvhs_data">窄寬<br />(NRWD)</td>
-                                            <td class="gvhs_data">中等寬<br />(MDWD)</td>
-                                            <td class="gvhs_data">寬寬<br />(WIWD)</td>
+                                            <td class="gvhs_data"><br />(NRWD)</td>
+                                            <td class="gvhs_data"><br />(MDWD)</td>
+                                            <td class="gvhs_data"><br />(WIWD)</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -332,7 +332,7 @@
                 </div>
             </div>
 
-            <!-- ========== 第三層 Card：廠區強度與表面製程進度 ========== -->
+            
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <div>

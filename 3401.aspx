@@ -102,7 +102,7 @@
 
         .pmisdata { font-weight: bold; }
 
-        /* 合併捲軸容器：header/footer sticky，資料列共用一個 scrollbar */
+        
         .combined-tbl-scroll {
             max-height: 340px;
             overflow-y: auto;
@@ -140,9 +140,9 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
 
-            // ==========================================
-            // A. 表格欄位自動寬度同步
-            // ==========================================
+            
+            
+            
             function syncTables(dataId, headId, footId) {
                 var dataTable = document.getElementById(dataId);
                 var headerTable = document.getElementById(headId);
@@ -183,16 +183,16 @@
             window.addEventListener('load', syncAllTables);
             window.addEventListener('resize', syncAllTables);
 
-            // ==========================================
-            // B. ECharts 圖表繪製
-            // ==========================================
+            
+            
+            
             if (typeof chartData === 'undefined') return;
 
             var dimDom = document.getElementById('echartDim');
             var dimChart = echarts.init(dimDom);
             var optionDim = {
                 backgroundColor: 'transparent',
-                title: { text: '廠區厚度與前段製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                title: { text: 'HSM厚度與前段製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
                 legend: { data: ['ETNG', 'WTNG', 'NTNG', 'NTCG', 'ETCG', 'MDSZ', 'NRWD', 'MDWD', 'WIWD'], bottom: 0, icon: 'circle' },
                 grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
@@ -216,7 +216,7 @@
             var strChart = echarts.init(strDom);
             var optionStr = {
                 backgroundColor: 'transparent',
-                title: { text: '廠區強度與表面製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                title: { text: 'HSM強度與表面製程生產趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
                 legend: { data: ['EXLC', 'LSCS', 'MSCS', 'HICS', 'VHIS', 'SUS', 'NRCQ', 'HICQ', 'VHCQ'], bottom: 0, icon: 'circle' },
                 grid: { left: '8%', right: '5%', bottom: '20%', top: '15%', containLabel: true },
@@ -251,10 +251,10 @@
 
         <div class="container-fluid main-content px-4">
 
-            <!-- ========== 第一層 Card：廠區生產趨勢圖 ========== -->
+            
             <div class="card-custom mb-4 mt-2">
                 <div class="card-header-custom">
-                    <span class="fs-4" style="color: white !important;">📊 廠區生產趨勢</span>
+                    <span class="fs-4" style="color: white !important;">📊 HSM生產趨勢</span>
                     <span class="badge bg-warning text-dark fs-6 shadow-sm">資料區間：<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
                 </div>
                 <div class="chart-card-body">
@@ -265,19 +265,19 @@
                 </div>
             </div>
 
-            <!-- ========== 第二層 Card：廠區厚度與前段製程進度 ========== -->
+            
             <div class="card-custom mb-4">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4" style="color: white !important;">📋 廠區厚度與前段製程進度</span>
-                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 2300 更新，每月第一天 2300 重新統計</span>--%>
+                        <span class="fs-4" style="color: white !important;">📋 HSM厚度與前段製程進度</span>
+                        
                     </div>
                 </div>
                 <div class="card-body p-3">
-                    <!-- 置中容器 -->
+                    
                     <div style="text-align: center;">
                         <div style="display: inline-block; text-align: left;">
-                            <!-- 合併捲軸：header sticky-top、兩個 GridView 共用一個 scrollbar、footer sticky-bottom -->
+                            
                             <div class="combined-tbl-scroll">
                                 <div class="ctbl-hdr-row">
                                     <table id="tblHeader1" class="auto-fit-table" border="0" cellpadding="0" cellspacing="0">
@@ -333,12 +333,12 @@
                 </div>
             </div>
 
-            <!-- ========== 第三層 Card：廠區強度與表面製程進度 ========== -->
+            
             <div class="card-custom mb-5">
                 <div class="card-header-custom">
                     <div>
-                        <span class="fs-4" style="color: white !important;">📋 廠區強度與表面製程進度</span>
-                        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 2300 更新，每月第一天 2300 重新統計</span>--%>
+                        <span class="fs-4" style="color: white !important;">📋 HSM強度與表面製程進度</span>
+                        
                     </div>
                 </div>
                 <div class="card-body p-3">

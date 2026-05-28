@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="libs/bootstrap.min.css" />
 
     <style type="text/css">
-        /* --- 全域與背景 --- */
+        
         body { background-color: #f8f9fc; padding-bottom: 20px; }
 
         .main-content {
@@ -20,7 +20,7 @@
             padding-top: 20px;
         }
 
-        /* --- 卡片風格 --- */
+        
         .card-custom {
             background: #fff;
             border-radius: 8px;
@@ -40,7 +40,7 @@
             align-items: center;
         }
 
-        /* --- 圖表區塊 --- */
+        
         .chart-card-body {
             padding: 20px;
             background-color: #ffffff;
@@ -49,7 +49,7 @@
             width: 100%;
         }
 
-        /* --- 表格捲軸設定 --- */
+        
         .table-responsive-custom {
             max-height: 450px;
             overflow-y: auto;
@@ -68,7 +68,7 @@
             margin: 0 auto;
         }
 
-        /* --- 凍結表頭 --- */
+        
         .custom-auto-table thead th {
             position: sticky;
             top: 0;
@@ -81,7 +81,7 @@
             font-weight: 600;
             border-bottom: 2px solid #233140 !important;
         }
-        /* --- 強制 GridView 表頭深色白字 --- */
+        
 .table-header-dark th, .table-header-dark td {
     background-color: #34495e !important;
     color: #ffffff !important;
@@ -94,7 +94,7 @@
     font-weight: 600;
     border-bottom: 2px solid #233140 !important;
 }
-        /* --- 凍結表尾 --- */
+        
         .custom-auto-table tfoot td {
             position: sticky;
             bottom: 0;
@@ -108,7 +108,7 @@
             border-top: 2px solid #cbd5e1;
         }
 
-        /* --- 資料列 --- */
+        
         .custom-auto-table tbody td {
             vertical-align: middle;
             text-align: center;
@@ -128,74 +128,74 @@
     </style>
 
     <script type="text/javascript" src="libs/echarts.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-
-
-
-
-            try {
-                var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
-                var tblHeader = document.getElementById('tempMonthHeader');
-                var tblFooter = document.getElementById('tempMonthFooter');
-
-                if (gvMonth && tblHeader && tblFooter) {
-                    var theadRow = tblHeader.querySelector('tr');
-                    if (theadRow) {
-                        var thead = document.createElement('thead');
-                        thead.appendChild(theadRow);
-                        gvMonth.insertBefore(thead, gvMonth.firstChild);
-                    }
-
-                    var tfootRow = tblFooter.querySelector('tr');
-                    if (tfootRow) {
-                        var tfoot = document.createElement('tfoot');
-                        tfoot.appendChild(tfootRow);
-                        gvMonth.appendChild(tfoot);
-                    }
-                    gvMonth.className = 'table custom-auto-table';
-                }
-            } catch (e) {
-                console.error("表格合併失敗:", e);
-            }
-
-
-
-
-            try {
-                if (typeof chartData !== 'undefined') {
-                    var defectDom = document.getElementById('echartDefect');
-                    var defectChart = echarts.init(defectDom);
-
-                    var optionDefect = {
-                        backgroundColor: 'transparent',
-                        title: { text: '缺陷月累計趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
-                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                        legend: { data: ['缺陷 Top 1', '缺陷 Top 2', '缺陷 Top 3', '缺陷 Top 4', '缺陷 Top 5'], bottom: 0, icon: 'circle' },
-                        grid: { left: '8%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
-                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
-                        yAxis: [{ type: 'value', name: '重量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
-                        series: [
-                            { name: '缺陷 Top 1', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d1 },
-                            { name: '缺陷 Top 2', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d2 },
-                            { name: '缺陷 Top 3', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d3 },
-                            { name: '缺陷 Top 4', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d4 },
-                            { name: '缺陷 Top 5', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d5 }
-                        ]
-                    };
-
-                    defectChart.setOption(optionDefect);
-
-                    window.addEventListener('resize', function () {
-                        defectChart.resize();
-                    });
-                } else {
-                    console.warn("找不到 chartData，圖表無法繪製。");
-                }
-            } catch (e) {
-                console.error("ECharts 繪製失敗:", e);
-            }
-        });
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+
+            
+            
+            
+            try {
+                var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
+                var tblHeader = document.getElementById('tempMonthHeader');
+                var tblFooter = document.getElementById('tempMonthFooter');
+
+                if (gvMonth && tblHeader && tblFooter) {
+                    var theadRow = tblHeader.querySelector('tr');
+                    if (theadRow) {
+                        var thead = document.createElement('thead');
+                        thead.appendChild(theadRow);
+                        gvMonth.insertBefore(thead, gvMonth.firstChild);
+                    }
+
+                    var tfootRow = tblFooter.querySelector('tr');
+                    if (tfootRow) {
+                        var tfoot = document.createElement('tfoot');
+                        tfoot.appendChild(tfootRow);
+                        gvMonth.appendChild(tfoot);
+                    }
+                    gvMonth.className = 'table custom-auto-table';
+                }
+            } catch (e) {
+                console.error("表格合併失敗:", e);
+            }
+
+            
+            
+            
+            try {
+                if (typeof chartData !== 'undefined') {
+                    var defectDom = document.getElementById('echartDefect');
+                    var defectChart = echarts.init(defectDom);
+
+                    var optionDefect = {
+                        backgroundColor: 'transparent',
+                        title: { text: '缺陷月累計趨勢 (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                        legend: { data: ['缺陷 Top 1', '缺陷 Top 2', '缺陷 Top 3', '缺陷 Top 4', '缺陷 Top 5'], bottom: 0, icon: 'circle' },
+                        grid: { left: '8%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
+                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                        yAxis: [{ type: 'value', name: '重量 (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                        series: [
+                            { name: '缺陷 Top 1', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d1 },
+                            { name: '缺陷 Top 2', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d2 },
+                            { name: '缺陷 Top 3', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d3 },
+                            { name: '缺陷 Top 4', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d4 },
+                            { name: '缺陷 Top 5', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d5 }
+                        ]
+                    };
+
+                    defectChart.setOption(optionDefect);
+
+                    window.addEventListener('resize', function () {
+                        defectChart.resize();
+                    });
+                } else {
+                    console.warn("找不到 chartData，圖表無法繪製。");
+                }
+            } catch (e) {
+                console.error("ECharts 繪製失敗:", e);
+            }
+        });
     </script>
 </head>
 

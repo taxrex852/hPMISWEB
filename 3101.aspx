@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="libs/bootstrap.min.css" />
     
     <style type="text/css">
-        /* --- 全域與背景 --- */
+        
         body { background-color: #f8f9fc; padding-bottom: 20px; }
         
         .main-content {
@@ -20,7 +20,7 @@
             padding-top: 20px;
         }
 
-        /* --- 卡片風格 --- */
+        
         .card-custom { 
             background: #fff; 
             border-radius: 8px; 
@@ -40,12 +40,12 @@
             align-items: center;
         }
 
-        /* --- 防塌陷圖表區塊 (獨立於 Bootstrap Grid) --- */
+        
         .chart-card-body {
             padding: 20px;
             background-color: #ffffff;
             display: block !important;
-            min-height: 420px; /* 強制最低高度，就算沒圖表也不會塌陷 */
+            min-height: 420px; 
             width: 100%;
             text-align: center
         }
@@ -62,7 +62,7 @@
             height: 380px;
         }
 
-        /* --- 表格自適應與捲軸設定 --- */
+        
         .table-responsive-custom {
             max-height: 450px; 
             overflow-y: auto;
@@ -81,7 +81,7 @@
             margin: 0 auto
         }
 
-        /* --- 凍結表頭與表尾 --- */
+        
         .custom-auto-table thead th {
             position: sticky;
             top: 0;
@@ -108,7 +108,7 @@
             border-top: 2px solid #cbd5e1;
         }
 
-        /* 資料列樣式 */
+        
         .custom-auto-table tbody td {
             vertical-align: middle;
             text-align: center;
@@ -131,9 +131,9 @@
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
             
-            // ==========================================
-            // 1. 表格合併 (加入 try-catch 避免錯誤中斷執行)
-            // ==========================================
+            
+            
+            
             try {
                 var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
                 var tblHeader = document.getElementById('tempMonthHeader');
@@ -159,9 +159,9 @@
                 console.error("表格合併失敗:", e);
             }
 
-            // ==========================================
-            // 2. ECharts 初始化 (加入容錯機制)
-            // ==========================================
+            
+            
+            
             try {
                 if (typeof chartData !== 'undefined') {
                     var percentChart = echarts.init(document.getElementById('echartPercent'));
@@ -255,7 +255,7 @@
     <div>
         <span class="fs-4 text-white" style="color: white !important;">📋 熱軋當月生產履歷</span>
         
-        <%--<span class="badge bg-warning text-dark ms-2 fw-normal" style="font-size: 0.9rem;">每日 23:00 更新 / 月初重新編排</span>--%>
+        
     </div>
 </div>
                 
