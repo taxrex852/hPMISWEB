@@ -116,6 +116,22 @@
         .bs5-table tbody tr:nth-child(even) { background-color: #f8f9fc; }
         .bs5-table tbody tr:hover           { background-color: #e9ecef; }
 
+        /* ---- Card 2 三欄內表格：自適應內容寬度，不強迫撐滿欄寬 ---- */
+        /* 讓左欄(今日入儲)與右欄(今日消耗)的兩欄表格依內容縮合，不被拉寬 */
+        /* 讓中欄(每日增減量)多欄表格保持自然寬並啟用水平捲動 */
+        .flex-col-third .bs5-table {
+            width: auto !important;      /* 依內容自適應，不強迫 100% */
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+        /* 表格外層容器：flex 置中，使表格對齊上方圖表中央 */
+        .flex-col-third .table-wrap {
+            width: 100%;
+            overflow-x: auto;           /* 欄位過多時（中欄）水平捲動 */
+            display: flex;
+            justify-content: center;    /* 表格置中對齊 ECharts */
+        }
+
         /* ---- 響應式斷點：當視窗寬度 ≤ 900px 時，三欄改為垂直堆疊 ---- */
         @media (max-width: 900px) {
             .flex-col-third {
@@ -739,28 +755,29 @@
                 <%-- 三欄並排：使用獨立 flex 容器，確保不同解析度下自動換行 --%>
                 <div class="flex-row-layout" style="gap: 15px;">
 
-                    <%-- 左欄：今日入儲 --%>
+                    <%-- 左欄：今日入儲（兩欄表格，自適應寬度置中對齊圖表） --%>
                     <div class="flex-col-third">
                         <div id="todayRcvChart" style="width: 100%; height: 240px; min-width: 0;"></div>
-                        <div style="margin-top: 8px; overflow-x: auto; width: 100%;">
+                        <div class="table-wrap" style="margin-top: 8px;">
                             <asp:GridView ID="GridView4" runat="server" DataSourceID="dsImport" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
                         </div>
                     </div>
 
-                    <%-- 中欄：每日增減趨勢 --%>
+                    <%-- 中欄：每日增減趨勢（多欄表格，水平捲動確保 header 完整顯示） --%>
                     <div class="flex-col-third">
                         <div id="weeklyChart" style="width: 100%; height: 240px; min-width: 0;"></div>
-                        <div style="margin-top: 8px; overflow-x: auto; width: 100%;">
+                        <div class="table-wrap" style="margin-top: 8px; justify-content: flex-start;">
+                            <%-- 中欄表格欄位多，justify-content 改 flex-start 讓表格靠左從頭顯示 --%>
                             <asp:GridView ID="GridView5" runat="server" DataSourceID="dsWeekly" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
                         </div>
                     </div>
 
-                    <%-- 右欄：今日消耗 --%>
+                    <%-- 右欄：今日消耗（兩欄表格，自適應寬度置中對齊圖表） --%>
                     <div class="flex-col-third">
                         <div id="todayUsedChart" style="width: 100%; height: 240px; min-width: 0;"></div>
-                        <div style="margin-top: 8px; overflow-x: auto; width: 100%;">
+                        <div class="table-wrap" style="margin-top: 8px;">
                             <asp:GridView ID="GridView6" runat="server" DataSourceID="dsExport" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
                         </div>
