@@ -25,16 +25,16 @@ Partial Public Class _3TNRL_Production
         ' 本月日報表
         TNRL_Table1()
         TNRL_Table2()
-        ' ECharts 趨勢圖資料（原始資料來源：h_pmis_wh93 + h_pmis_wh9b）
+        ' ECharts 趨勢圖資料（原始資料來源：h_pmis_wh83 + h_pmis_wh86）
         BuildChartData()
     End Sub
 
     ''' <summary>
     ''' 建立 ECharts 趨勢圖 JSON 資料（近 12 個月）
-    ''' 資料來源：h_pmis_wh93 + h_pmis_wh9b FULL OUTER JOIN（原始 SqlDataSource1 邏輯）
+    ''' 資料來源：h_pmis_wh83 + h_pmis_wh86 FULL OUTER JOIN（原始 SqlDataSource1 邏輯）
     ''' </summary>
     Private Sub BuildChartData()
-        ' 原始 SelectCommand SQL（從 SqlDataSource1 還原，資料來源為 h_pmis_wh93 / h_pmis_wh9b / h_pmis_wh91）
+        ' 原始 SelectCommand SQL（從 SqlDataSource1 還原，資料來源為 h_pmis_wh83 / h_pmis_wh86 / h_pmis_wh81）
         Dim sql As String =
             "select " &
             "ETNG.process_date, " &
@@ -60,217 +60,217 @@ Partial Public Class _3TNRL_Production
             "select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_width <= 1260 and avg_thickness <= 1500 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_width <= 1260 and coil_thickness <= 1500 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as ETNG " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_width >= 1500 and avg_thickness <= 2300 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_width >= 1500 and coil_thickness <= 2300 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as WTNG on ETNG.process_date=WTNG.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_width > 1260 and avg_width < 1500 and avg_thickness >= 1500 and avg_thickness <= 1900 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_width > 1260 and coil_width < 1500 and coil_thickness >= 1500 and coil_thickness <= 1900 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as NTNG on ETNG.process_date=NTNG.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_thickness >= 6000 and avg_thickness <= 9900 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_thickness >= 6000 and coil_thickness <= 9900 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as NTCG on ETNG.process_date=NTCG.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_thickness > 9900 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_thickness > 9900 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as ETCG on ETNG.process_date=ETCG.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as PA on ETNG.process_date=PA.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_width < 950 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_width < 950 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as NRWD on ETNG.process_date=NRWD.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_width >= 950 and avg_width < 1550 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_width >= 950 and coil_width < 1550 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as MDWD on ETNG.process_date=MDWD.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
             "from (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 with(nolock) " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and avg_width >= 1550 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as A " &
             "FULL OUTER JOIN (select dateadd(m,datediff(m,0,process_date),0) as process_date, " &
-            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b with(nolock) " &
+            "cast(round(SUM(gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 with(nolock) " &
             "where process_date between DATEADD(year,-1,getdate()) and getdate() " &
             "and coil_width >= 1550 " &
             "group by dateadd(m,datediff(m,0,process_date),0)) as B ON A.process_date=B.process_date) as WIWD on ETNG.process_date=WIWD.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.carbon <= " & EXLC_C & " " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.carbon <= " & EXLC_C & " " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as EXLC on ETNG.process_date=EXLC.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.carbon <= " & EXLC_C & " " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.carbon <= " & EXLC_C & " " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as EXLC on ETNG.process_date=EXLC.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile <= 40 " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile <= 40 " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as LSCS on ETNG.process_date=LSCS.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile <= 40 " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile <= 40 " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as LSCS on ETNG.process_date=LSCS.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile <= 50 and wh91.tensile > 40 " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile <= 50 and wh91.tensile > 40 " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as MSCS on ETNG.process_date=MSCS.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile <= 50 and wh81.tensile > 40 " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile <= 50 and wh81.tensile > 40 " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as MSCS on ETNG.process_date=MSCS.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile <= 60 and wh91.tensile > 50 " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile <= 60 and wh91.tensile > 50 " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as HICS on ETNG.process_date=HICS.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile <= 60 and wh81.tensile > 50 " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile <= 60 and wh81.tensile > 50 " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as HICS on ETNG.process_date=HICS.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile > 60 " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.tensile > 60 " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as VHIS on ETNG.process_date=VHIS.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile > 60 " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.tensile > 60 " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as VHIS on ETNG.process_date=VHIS.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.steel_grade_code like '6%' " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.carbon > " & EXLC_C & " and wh91.steel_grade_code like '6%' " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as SUS on ETNG.process_date=SUS.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.steel_grade_code like '6%' " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.carbon > " & EXLC_C & " and wh81.steel_grade_code like '6%' " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as SUS on ETNG.process_date=SUS.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.inspection_code < '6000' and wh91.inspection_code >= '5000' " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.inspection_code < '6000' and wh91.inspection_code >= '5000' " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as NRCQ on ETNG.process_date=NRCQ.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as NRCQ on ETNG.process_date=NRCQ.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.inspection_code < '5000' and wh91.inspection_code >= '4000' " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.inspection_code < '5000' and wh91.inspection_code >= '4000' " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as HICQ on ETNG.process_date=HICQ.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as HICQ on ETNG.process_date=HICQ.process_date " &
             "left join (select dateadd(m,datediff(m,0,A.process_date),0) as process_date, " &
             "round(ISNULL(A.product_weight,0)+ISNULL(B.product_weight,0),2) as total_prod " &
-            "from (select dateadd(m,datediff(m,0,wh93.process_date),0) as process_date, " &
-            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh93 as wh93 with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh93.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and SUBSTRING(wh93.product_no,1,7)=wh91.coil_no and wh91.inspection_code < '4000' and wh91.inspection_code >= '2000' " &
-            "group by dateadd(m,datediff(m,0,wh93.process_date),0)) as A " &
-            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh9b.process_date),0) as process_date, " &
-            "cast(round(SUM(wh9b.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh9b as wh9b with(nolock),h_pmis_wh91 as wh91 with(nolock) " &
-            "where wh9b.process_date between DATEADD(year,-1,getdate()) and getdate() " &
-            "and wh9b.coil_no=wh91.coil_no and wh91.inspection_code < '4000' and wh91.inspection_code >= '2000' " &
-            "group by dateadd(m,datediff(m,0,wh9b.process_date),0)) as B ON A.process_date=B.process_date) as VHCQ on ETNG.process_date=VHCQ.process_date " &
+            "from (select dateadd(m,datediff(m,0,wh83.process_date),0) as process_date, " &
+            "cast(round(SUM(g_weight)/1000,2) as float) as product_weight from h_pmis_wh83 as wh83 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh83.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and SUBSTRING(wh83.product_no,1,7)=wh81.coil_no and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " &
+            "group by dateadd(m,datediff(m,0,wh83.process_date),0)) as A " &
+            "FULL OUTER JOIN (select dateadd(m,datediff(m,0,wh86.process_date),0) as process_date, " &
+            "cast(round(SUM(wh86.gross_weight)/1000,2) as float) as product_weight from h_pmis_wh86 as wh86 with(nolock),h_pmis_wh81 as wh81 with(nolock) " &
+            "where wh86.process_date between DATEADD(year,-1,getdate()) and getdate() " &
+            "and wh86.coil_no=wh81.coil_no and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " &
+            "group by dateadd(m,datediff(m,0,wh86.process_date),0)) as B ON A.process_date=B.process_date) as VHCQ on ETNG.process_date=VHCQ.process_date " &
             "order by ETNG.process_date"
 
         Conn.Open()
@@ -356,7 +356,7 @@ Partial Public Class _3TNRL_Production
 
     ''' <summary>
     ''' 厚度/前段製程：本月日報表 (gvMonth1 + gvMonth3)
-    ''' 資料來源：h_pmis_wh93 + h_pmis_wh9b（原始邏輯保留）
+    ''' 資料來源：h_pmis_wh83 + h_pmis_wh86（原始邏輯保留）
     ''' </summary>
     Private Sub TNRL_Table1()
         Dim dtDataTable As New DataTable
@@ -399,11 +399,11 @@ Partial Public Class _3TNRL_Production
         ' ETNG
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_width <= 1260 and avg_thickness <= 1500 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_width <= 1260 and coil_thickness <= 1500 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -419,11 +419,11 @@ Partial Public Class _3TNRL_Production
         ' WTNG
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_width >= 1500 and avg_thickness <= 2300 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_width >= 1500 and coil_thickness <= 2300 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -439,11 +439,11 @@ Partial Public Class _3TNRL_Production
         ' NTNG
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_width > 1260 and avg_width < 1500 and avg_thickness >= 1500 and avg_thickness <= 1900 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_width > 1260 and coil_width < 1500 and coil_thickness >= 1500 and coil_thickness <= 1900 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -459,11 +459,11 @@ Partial Public Class _3TNRL_Production
         ' NTCG
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_thickness >= 6000 and avg_thickness <= 9900 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_thickness >= 6000 and coil_thickness <= 9900 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -479,11 +479,11 @@ Partial Public Class _3TNRL_Production
         ' ETCG
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_thickness > 9900 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_thickness > 9900 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -499,10 +499,10 @@ Partial Public Class _3TNRL_Production
         ' MDSZ = PA - ETNG - WTNG - NTNG - NTCG - ETCG
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
@@ -527,11 +527,11 @@ Partial Public Class _3TNRL_Production
         ' NRWD
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_width <= 950 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_width <= 950 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -547,11 +547,11 @@ Partial Public Class _3TNRL_Production
         ' MDWD
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_width > 950 and avg_width < 1550 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_width > 950 and coil_width < 1550 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -567,11 +567,11 @@ Partial Public Class _3TNRL_Production
         ' WIWD
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh83 " &
             "where shift_date like '{0}%' and avg_width >= 1550 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh9b " &
+            "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(gross_weight) as product_weight from h_pmis_wh86 " &
             "where shift_date like '{0}%' and coil_width >= 1550 " &
             "Group by SUBSTRING(shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
@@ -592,7 +592,7 @@ Partial Public Class _3TNRL_Production
 
     ''' <summary>
     ''' 強度/表面製程：本月日報表 (gvMonth2 + gvMonth4)
-    ''' 資料來源：h_pmis_wh93 + h_pmis_wh9b + h_pmis_wh91（原始邏輯保留）
+    ''' 資料來源：h_pmis_wh83 + h_pmis_wh86 + h_pmis_wh81（原始邏輯保留）
     ''' </summary>
     Private Sub TNRL_Table2()
         Dim dtDataTable As New DataTable
@@ -635,15 +635,15 @@ Partial Public Class _3TNRL_Production
         ' EXLC（碳含量 <= EXLC_C）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.carbon <= " & EXLC_C.ToString() &
-            " Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.carbon <= " & EXLC_C.ToString() &
+            " Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.carbon <= " & EXLC_C.ToString() &
-            " Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.carbon <= " & EXLC_C.ToString() &
+            " Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -657,15 +657,15 @@ Partial Public Class _3TNRL_Production
         ' LSCS（tensile <= 40, carbon > EXLC_C）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile <= 40 " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile <= 40 " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile <= 40 " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile <= 40 " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -679,15 +679,15 @@ Partial Public Class _3TNRL_Production
         ' MSCS（tensile 40~50）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 40 and wh91.tensile <= 50 " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile > 40 and wh81.tensile <= 50 " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 40 and wh91.tensile <= 50 " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile > 40 and wh81.tensile <= 50 " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -701,15 +701,15 @@ Partial Public Class _3TNRL_Production
         ' HICS（tensile 50~60）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 50 and wh91.tensile <= 60 " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile > 50 and wh81.tensile <= 60 " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 50 and wh91.tensile <= 60 " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile > 50 and wh81.tensile <= 60 " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -723,15 +723,15 @@ Partial Public Class _3TNRL_Production
         ' VHIS（tensile > 60）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 60 " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile > 60 " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.tensile > 60 " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.tensile > 60 " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -745,15 +745,15 @@ Partial Public Class _3TNRL_Production
         ' SUS（steel_grade_code like '6%'）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.steel_grade_code like '6%' " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.steel_grade_code like '6%' " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.carbon > " & EXLC_C.ToString() & " and wh91.steel_grade_code like '6%' " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.carbon > " & EXLC_C.ToString() & " and wh81.steel_grade_code like '6%' " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -771,15 +771,15 @@ Partial Public Class _3TNRL_Production
         ' NRCQ
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.inspection_code < '6000' and wh91.inspection_code >= '5000' " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.inspection_code < '6000' and wh91.inspection_code >= '5000' " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.inspection_code < '6000' and wh81.inspection_code >= '5000' " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -793,15 +793,15 @@ Partial Public Class _3TNRL_Production
         ' HICQ
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.inspection_code < '5000' and wh91.inspection_code >= '4000' " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.inspection_code < '5000' and wh91.inspection_code >= '4000' " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.inspection_code < '5000' and wh81.inspection_code >= '4000' " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
@@ -815,15 +815,15 @@ Partial Public Class _3TNRL_Production
         ' VHCQ
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
-            "(select SUBSTRING(wh93.shift_date, 7, 2) as product_day, SUM(wh93.g_weight) as product_weight from h_pmis_wh93 as wh93, h_pmis_wh91 as wh91 " &
-            "where wh93.shift_date like '{0}%' and SUBSTRING(wh93.product_no,1, 7) = wh91.coil_no " &
-            "and wh91.inspection_code < '4000' and wh91.inspection_code >= '2000' " &
-            "Group by SUBSTRING(wh93.shift_date, 7, 2)) as A " &
+            "(select SUBSTRING(wh83.shift_date, 7, 2) as product_day, SUM(wh83.g_weight) as product_weight from h_pmis_wh83 as wh83, h_pmis_wh81 as wh81 " &
+            "where wh83.shift_date like '{0}%' and SUBSTRING(wh83.product_no,1, 7) = wh81.coil_no " &
+            "and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " &
+            "Group by SUBSTRING(wh83.shift_date, 7, 2)) as A " &
             "FULL OUTER JOIN " &
-            "(select SUBSTRING(wh9b.shift_date, 7, 2) as product_day, SUM(wh9b.gross_weight) as product_weight from h_pmis_wh9b as wh9b, h_pmis_wh91 as wh91 " &
-            "where wh9b.shift_date like '{0}%' and wh9b.coil_no = wh91.coil_no " &
-            "and wh91.inspection_code < '4000' and wh91.inspection_code >= '2000' " &
-            "Group by SUBSTRING(wh9b.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
+            "(select SUBSTRING(wh86.shift_date, 7, 2) as product_day, SUM(wh86.gross_weight) as product_weight from h_pmis_wh86 as wh86, h_pmis_wh81 as wh81 " &
+            "where wh86.shift_date like '{0}%' and wh86.coil_no = wh81.coil_no " &
+            "and wh81.inspection_code < '4000' and wh81.inspection_code >= '2000' " &
+            "Group by SUBSTRING(wh86.shift_date, 7, 2)) as B ON A.product_day = B.product_day",
             Now.ToString("yyyyMM"))
         dtTmp = execQuery(strACCESS, "", Conn)
         calTmp = 0
