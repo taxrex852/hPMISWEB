@@ -565,7 +565,7 @@ Partial Public Class _1TNRL_Production
         gvMonth1.DataBind()
         gvMonth1.HeaderRow.Visible = False
 
-        ' NRWD（窄寬：width<950）
+        ' NRWD（：width<950）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &
@@ -605,7 +605,7 @@ Partial Public Class _1TNRL_Production
         Next
         lblMDWD.Text = calTmp.ToString("0.00")
 
-        ' WIWD（寬寬：width≥1550）
+        ' WIWD（：width≥1550）
         strACCESS = String.Format(
             "select ISNULL(A.product_day, B.product_day) as ProductDay, ISNULL(A.product_weight, 0) + ISNULL(B.product_weight, 0) as total_prod from " &
             "(select SUBSTRING(shift_date, 7, 2) as product_day, SUM(g_weight) as product_weight from h_pmis_wh93 " &

@@ -172,10 +172,10 @@ Partial Public Class TPM_Produce
 
     ''' <summary>
     ''' 本月尺寸/寬度分類日報表（gvMonth1=厚度, gvMonth3=寬度）
-    ''' ETNG: 窄寬薄厚(W≤1260,T≤1500) / WTNG: 寬厚(W≥1500,T≤2300)
+    ''' ETNG: 薄厚(W≤1260,T≤1500) / WTNG: 寬厚(W≥1500,T≤2300)
     ''' NTNG: 中寬中厚(1260&lt;W&lt;1500, 1500≤T≤1900) / NTCG: 中厚捲(T 6000~9900)
     ''' ETCG: 極厚捲(T&gt;9900) / MDSZ: 其他尺寸（PA 扣除以上各類）
-    ''' NRWD: 窄寬(W≤950) / MDWD: 中寬(950&lt;W&lt;1550) / WIWD: 寬(W≥1550)
+    ''' NRWD: (W≤950) / MDWD: 中寬(950&lt;W&lt;1550) / WIWD: 寬(W≥1550)
     ''' </summary>
     Private Sub HSM_Table1()
         Dim dtDataTable As New DataTable
@@ -218,7 +218,7 @@ Partial Public Class TPM_Produce
 
         Conn.Open()
 
-        'ETNG — 窄寬薄厚（W≤1260, T≤1500）
+        'ETNG — 薄厚（W≤1260, T≤1500）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &
@@ -347,7 +347,7 @@ Partial Public Class TPM_Produce
             gvMonth1.Rows(0).Cells(i).Width = 80
         Next
 
-        'NRWD — 窄寬（W≤950）
+        'NRWD — （W≤950）
         strACCESS = "SELECT " &
                     "SUBSTRING(CONVERT(char, product_date, 112), 7, 2), SUM(coil_weight) " &
                     "FROM h_pmis_coil_info " &

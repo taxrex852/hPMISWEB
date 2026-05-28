@@ -1,4 +1,4 @@
-﻿'------------------------------------------------------------------------------
+'------------------------------------------------------------------------------
 ' <自動產生>
 '     這段程式碼是由工具產生的。
 '
@@ -30,6 +30,15 @@ Partial Public Class Offline_packing_Produce
     '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents ph As Global.hPMISWEB.PageHeader
+    
+    '''<summary>
+    '''Panel1 控制項。
+    '''</summary>
+    '''<remarks>
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
+    '''</remarks>
+    Protected WithEvents Panel1 As Global.System.Web.UI.WebControls.Panel
     
     '''<summary>
     '''SqlDataSource1 控制項。
