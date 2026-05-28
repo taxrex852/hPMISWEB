@@ -1,10 +1,10 @@
 ﻿'------------------------------------------------------------------------------
-' <自動產生的>
+' <自動產生>
 '     這段程式碼是由工具產生的。
 '
 '     變更這個檔案可能會導致不正確的行為，而且如果已重新產生
-'     程式碼，則會遺失變更。
-' </自動產生的>
+'     程式碼，變更將會遺失。
+' </自動產生>
 '------------------------------------------------------------------------------
 
 Option Strict On
@@ -14,20 +14,11 @@ Option Explicit On
 Partial Public Class Offline_packing_Produce
     
     '''<summary>
-    '''Head1 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents Head1 As Global.System.Web.UI.HtmlControls.HtmlHead
-    
-    '''<summary>
     '''form1 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents form1 As Global.System.Web.UI.HtmlControls.HtmlForm
     
@@ -35,44 +26,26 @@ Partial Public Class Offline_packing_Produce
     '''ph 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents ph As Global.hPMISWEB.PageHeader
     
     '''<summary>
-    '''gvDaily 控制項。
+    '''SqlDataSource1 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
-    Protected WithEvents gvDaily As Global.System.Web.UI.WebControls.GridView
-    
-    '''<summary>
-    '''Panel1 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents Panel1 As Global.System.Web.UI.WebControls.Panel
-    
-    '''<summary>
-    '''gvMonth 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents gvMonth As Global.System.Web.UI.WebControls.GridView
+    Protected WithEvents SqlDataSource1 As Global.System.Web.UI.WebControls.SqlDataSource
     
     '''<summary>
     '''LabelStartdate 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents LabelStartdate As Global.System.Web.UI.WebControls.Label
     
@@ -80,35 +53,26 @@ Partial Public Class Offline_packing_Produce
     '''LabelEnddate 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents LabelEnddate As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''WebChart1 控制項。
+    '''gvDaily 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
-    Protected WithEvents WebChart1 As Global.Steema.TeeChart.Web.WebChart
-    
-    '''<summary>
-    '''SqlDataSource1 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents SqlDataSource1 As Global.System.Web.UI.WebControls.SqlDataSource
+    Protected WithEvents gvDaily As Global.System.Web.UI.WebControls.GridView
     
     '''<summary>
     '''lblMonth 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents lblMonth As Global.System.Web.UI.WebControls.Label
     
@@ -116,8 +80,17 @@ Partial Public Class Offline_packing_Produce
     '''lblPA 控制項。
     '''</summary>
     '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
+    '''自動產生 nudge 控制項。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
     '''</remarks>
     Protected WithEvents lblPA As Global.System.Web.UI.WebControls.Label
+    
+    '''<summary>
+    '''gvMonth 控制項。
+    '''</summary>
+    '''<remarks>
+    '''自動產生。
+    '''若要修改，請將宣告從設計工具檔案移到程式碼後置檔案。
+    '''</remarks>
+    Protected WithEvents gvMonth As Global.System.Web.UI.WebControls.GridView
 End Class
