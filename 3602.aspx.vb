@@ -63,7 +63,7 @@ Partial Public Class HSM_Stock2
             dtTmp.Dispose()
         End If
 
-        ' ── 初始化庫存資料表 ────────────────────────────
+        ' ── 初始化庫存資料表（所有數值欄預設 "0"，避免 DBNull 轉型錯誤）───
         dtDataTable = New DataTable
         For i As Integer = 0 To strTitle.Length - 1
             dtDataTable.Columns.Add(New DataColumn(strTitle(i)))
@@ -72,6 +72,9 @@ Partial Public Class HSM_Stock2
             dr = dtDataTable.NewRow
             dtDataTable.Rows.Add(dr)
             dtDataTable.Rows(i).Item(0) = strColName(i)
+            For j As Integer = 1 To strTitle.Length - 1
+                dtDataTable.Rows(i).Item(j) = "0"
+            Next
         Next
 
         ' ── D1、D2 資料（h_pmis_ys03）─────────────────
@@ -95,7 +98,7 @@ Partial Public Class HSM_Stock2
             For i As Integer = 0 To 1
                 chartValues.Add(If(dtTmp.Rows.Count = 0, 0, Math.Round(CDbl(dtTmp.Rows(0).Item(18 + i)), 1)))
             Next
-            If dtTmp.Rows.Count > 0 Then
+            If dtTmp.Rows.Count > 0 AndAlso Not IsDBNull(dtTmp.Rows(0).Item(20)) Then
                 lblDataTime.Text = dtTmp.Rows(0).Item(20).ToString
             End If
             dtTmp.Dispose()
@@ -103,9 +106,9 @@ Partial Public Class HSM_Stock2
             chartValues.Add(0) : chartValues.Add(0)
         End If
 
-        ' D1+D2 滿儲率（計算）
-        Dim d12Design As Integer = CType(dtDataTable.Rows(0).Item(3), Integer)
-        Dim d12Stock As Integer = CType(dtDataTable.Rows(1).Item(3), Integer)
+        ' D1+D2 滿儲率（計算，用 Val() 安全轉換避免 DBNull 問題）
+        Dim d12Design As Integer = CInt(Val(dtDataTable.Rows(0).Item(3).ToString()))
+        Dim d12Stock As Integer = CInt(Val(dtDataTable.Rows(1).Item(3).ToString()))
         chartValues.Add(Math.Round(If(d12Design > 0, (d12Stock / CDbl(d12Design)) * 100, 0), 1))
 
         ' ── D3 資料（h_pmis_di01）─────────────────────
@@ -120,7 +123,8 @@ Partial Public Class HSM_Stock2
                 If dtTmp.Rows.Count = 0 Then
                     dtDataTable.Rows(i).Item(4) = "0"
                 Else
-                    Dim v As Integer = CType(dtTmp.Rows(0).Item(i), Integer)
+                    Dim rawVal As Object = dtTmp.Rows(0).Item(i)
+                    Dim v As Integer = If(IsDBNull(rawVal), 0, CInt(rawVal))
                     dtDataTable.Rows(i).Item(4) = If(v < 0, "0", v.ToString)
                 End If
             Next
@@ -144,14 +148,15 @@ Partial Public Class HSM_Stock2
         dtTmp = execQuery(strAccess, "", Conn)
         If dtTmp IsNot Nothing Then
             For i As Integer = 0 To 5
-                totalTmp = CType(dtDataTable.Rows(i).Item(1), Integer) +
-                           CType(dtDataTable.Rows(i).Item(2), Integer) +
-                           CType(dtDataTable.Rows(i).Item(4), Integer)
+                totalTmp = CInt(Val(dtDataTable.Rows(i).Item(1).ToString())) +
+                           CInt(Val(dtDataTable.Rows(i).Item(2).ToString())) +
+                           CInt(Val(dtDataTable.Rows(i).Item(4).ToString()))
                 For j As Integer = 0 To 3
                     If dtTmp.Rows.Count = 0 Then
                         dtDataTable.Rows(i).Item(j + 5) = "0"
                     Else
-                        Dim v As Integer = CType(dtTmp.Rows(0).Item(i * 4 + j), Integer)
+                        Dim rawVal As Object = dtTmp.Rows(0).Item(i * 4 + j)
+                        Dim v As Integer = If(IsDBNull(rawVal), 0, CInt(rawVal))
                         Dim sv As String = If(v < 0, "0", v.ToString)
                         dtDataTable.Rows(i).Item(j + 5) = sv
                         totalTmp += CInt(Val(sv))
@@ -161,7 +166,7 @@ Partial Public Class HSM_Stock2
             Next
             ' D3~D7 合計
             For i As Integer = 0 To 5
-                totalD37 = CType(dtDataTable.Rows(i).Item(10), Integer) - CType(dtDataTable.Rows(i).Item(3), Integer)
+                totalD37 = CInt(Val(dtDataTable.Rows(i).Item(10).ToString())) - CInt(Val(dtDataTable.Rows(i).Item(3).ToString()))
                 dtDataTable.Rows(i).Item(9) = totalD37
             Next
             ' D4~D7 滿儲率
@@ -169,8 +174,8 @@ Partial Public Class HSM_Stock2
                 chartValues.Add(If(dtTmp.Rows.Count = 0, 0, Math.Round(CDbl(dtTmp.Rows(0).Item(24 + i)), 1)))
             Next
             ' D3~D7 總體滿儲率（計算）
-            Dim d37Design As Integer = CType(dtDataTable.Rows(0).Item(9), Integer)
-            Dim d37Stock As Integer = CType(dtDataTable.Rows(1).Item(9), Integer)
+            Dim d37Design As Integer = CInt(Val(dtDataTable.Rows(0).Item(9).ToString()))
+            Dim d37Stock As Integer = CInt(Val(dtDataTable.Rows(1).Item(9).ToString()))
             chartValues.Add(Math.Round(If(d37Design > 0, (d37Stock / CDbl(d37Design)) * 100, 0), 1))
             dtTmp.Dispose()
         Else
@@ -225,7 +230,7 @@ Partial Public Class HSM_Stock2
                 For y As Integer = 1 To 10
                     If dtDataTable.Rows(i).Item(y).ToString = "0" Then
                         If i = 2 OrElse i = 5 Then
-                            If CType(dtDataTable.Rows(i - 1).Item(y), Integer) = CType(dtDataTable.Rows(i - 2).Item(y), Integer) Then
+                            If CInt(Val(dtDataTable.Rows(i - 1).Item(y).ToString())) = CInt(Val(dtDataTable.Rows(i - 2).Item(y).ToString())) Then
                                 gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Black
                             Else
                                 gvStock.Rows(i).Cells(y).ForeColor = Drawing.Color.Red
