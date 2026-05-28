@@ -1,0 +1,417 @@
+﻿body 
+{ 
+	color:#000000;font-size:10pt;font-family:Verdana;
+	}
+
+div 
+{ 
+	color:#000000;font-size:10pt;font-family:Verdana; 
+	}
+
+td 
+{ 
+	font-size:10pt;font-family:Verdana; 
+	}
+
+/**/	
+.nodata, .data, .seldata, .txtdata, .gvhs_data, .Ldata, .Lgvhs_data
+{
+	border:solid 1px Black;
+	padding:1px;
+	}	
+.nodata 
+{
+	text-align:right;
+	background-color:#D3D3D3;
+	height:16pt
+	}
+
+.data, .Ldata 
+{
+	text-align:right;
+	background-color:White;
+	}
+	
+.seldata  
+{
+	text-align:left;
+	background-color:White;
+	}
+		
+.txtdata
+{
+	text-align:center;
+	background-color:White;
+	height:24pt
+	}
+	
+.txtdata2
+{
+	text-align:left;
+	background-color:White;
+	height:16pt
+	}
+	
+.Ldata, .Lgvhs_data
+{
+	font-size:large;
+	}
+	
+/**/
+.pagedata
+{
+	text-align:center;
+	background-color:White;
+	height:24pt
+	}
+
+.tabdata
+{
+	text-align:left;
+	background-color:White;
+	height:24pt;
+	padding:10px;
+	}	
+/**/	
+.unitdata1
+{
+	text-align:right;
+	background-color:White;
+	border:solid 1px Black;
+	border-right:none;
+	}
+	
+.unitdata2
+{
+	text-align:left;
+	background-color:White;
+	border:solid 1px Black;
+	border-left:none;
+	}
+
+.unitdata3
+{
+	text-align:right;
+	background-color:White;
+	border:solid 1px Black;
+	border-right:none;
+	border-left:none;
+	}
+	
+/*coal,iron,stone*/			
+.coaldata, .irondata, .stonedata, .cokedata, .sinterdata
+{
+	text-align:right;
+	padding:2px;
+	border:solid 1px Black;
+}
+
+.coaldata, .coaldata0
+{
+	background-color:#b4aea4;
+	
+	}
+	
+.irondata, .irondata0
+{
+	background-color:#f8ced6;
+	
+	}
+	
+.stonedata, .stonedata0
+{
+	background-color:#f2eed2;
+
+	}
+	
+.cokedata, .otherdata0
+{
+	background-color:#b6e8de;
+
+	}
+	
+.sinterdata
+{
+	background-color:#d3bae5;
+
+	}		
+
+/*coal,iron,stone for 1513 */			
+.coaldata2, .irondata2, .stonedata2
+{
+	text-align:right;
+	padding:2px;
+	border:solid 1px Black;
+}
+
+.coaldata2
+{
+	background-color:#a59f97;
+	
+	}
+	
+.irondata2
+{
+	background-color:#fdbbc7;
+	
+	}
+	
+.stonedata2
+{
+	background-color:#f2efb4;
+
+	}
+
+/*coal,iron,stone for teechart*/			
+.coaldata3
+{
+	background-color:#9a9691;
+	
+	}
+	
+.irondata3
+{
+	background-color:#ffb2be;
+
+	}
+	
+.stonedata3
+{
+	background-color:#faf5a4;
+
+	}
+	
+.cokedata3
+{
+	background-color:#5dcef0;
+
+	}
+	
+.sinterdata3
+{
+	background-color:#ba94dd;
+	/*border-width:5px*/
+	}	
+
+/*teechart background-color*/	
+.teech
+{
+	background-color:#caddc6;
+}
+		
+/**/	
+.col, .row, .colsum
+{
+	font-size:11pt;
+	padding:1px;
+	border:solid 2px Black;
+	height:16pt;
+}		
+
+.col 
+{
+	text-align:left;
+	background-color:#ADFF2F;
+	}
+
+.colsum 
+{
+	text-align:center;
+	background-color:#70c010;
+	}
+		
+.row, .rowtop, .rowbot 
+{
+	text-align:center;
+	font-weight:bold;
+	background-color:#FFD700;
+	}
+	
+.rowtop, .rowbot
+{
+	font-size:11pt;
+	border:solid 2px Black;
+	height:16pt;
+}
+
+.rowtop
+{
+	border-bottom-style:none
+	}
+
+.rowbot
+{
+	border-top-style:none
+	}
+		
+
+/*hyperlink*/
+a 
+{
+	text-decoration:underline ; 
+	font-weight: bold;
+	}
+	
+a:link 
+{
+	color:#0000FF
+	}
+	
+a:visited 
+{
+	color:#3875f1
+	}
+	
+a:active 
+{
+	color:#8080FF
+	}
+	
+a:hover
+{
+	background-color:#FFD700;
+	}
+
+/*GridView*/
+
+.gv
+{
+	background-color:black;
+	}
+
+.gvrs
+{
+	background-color:#C0FFC0;
+	text-align:right;
+    }
+    
+.gvrs2
+{
+	background-color:#C0FFC0;
+	text-align:right;
+	height:15pt;
+	}
+		
+.gvars
+{
+	background-color:white;
+	text-align:center;	
+	}
+
+.gvhs_data, .Lgvhs_data
+{
+	background-color:#507CD1;
+	color:white;
+	text-align:left;
+	font-weight:bold;}
+	
+.gvhs
+{
+	background-color:#507CD1;
+	color:white;
+	text-align:center;
+	font-weight:bold;}
+			
+.gvfs
+{
+	background-color:#507CD1;
+	color:White;
+	font-weight:bold;
+	}
+		
+.gvps
+{
+	background-color:#FFCC66;
+	color:White;
+	text-align:center;
+	}
+	
+.gvsrs
+{
+	background-color:#D1DDF1;
+	color:#333333;
+	}
+	
+.gvers
+{
+	background-color:#2461BF;
+	}
+	
+.gvemrs
+{
+	border-width:thin;
+	border-style:none;
+    }
+    
+
+/*LinkButton*/
+
+.lb
+{
+	font-size:14pt;
+	}
+
+/*host,pmis,computer */
+
+.hostdata
+{
+	color:Green
+	}
+	
+.pmisdata
+{
+	color:Black
+	}
+
+.comdata
+{
+	color:Blue
+	}
+	
+/*OnlineHelp*/
+
+.helpdata, .helpdata2
+{
+	font-size:11pt;
+	padding:1px;
+	border:solid 2px Black;
+	height:16pt;
+	}
+	
+.helpdata
+{
+	background-color:#faf5a4;
+	
+	}
+
+.helpdata2
+{
+	background-color:#f2efb4;
+	
+	}
+
+/*Home*/
+.homedata, .homedata2, .homedata3
+{
+	border:solid 1px Black;
+	font-weight:bold;
+	text-align:center;
+	}
+
+.homedata
+{
+	background-color:#faf5a4;
+	
+	}
+
+.homedata2
+{
+	background-color:#f2efb4;
+	
+	}		
+	
+.homedata3
+{
+	background-color:#f2eed2;
+	
+	}

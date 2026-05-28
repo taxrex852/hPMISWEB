@@ -1,0 +1,24 @@
+# 編譯產出
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+# Visual Studio
+.vs/
+*.vspscc
+*.vssscc
+
+# 暫存檔
+temp_*.txt
+bak/
+
+# 敏感設定（若有本地覆蓋）
+Web.config.user
+
+# ASP.NET 暫存
+aspnet_client/
+
+# Log
+*.log

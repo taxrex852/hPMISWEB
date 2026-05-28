@@ -1,0 +1,554 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="Current">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F47A90F4-A0F7-42C5-A8F5-435618835D88}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>hPMISWEB</RootNamespace>
+    <AssemblyName>hPMISWEB</AssemblyName>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+    <UseIISExpress>false</UseIISExpress>
+    <Use64BitIISExpress />
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>hPMISWEB.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>hPMISWEB.xml</DocumentationFile>
+    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022,42353,42354,42355</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DataVisualization" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web.Mobile" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="TeeChart, Version=4.1.2018.5042, Culture=neutral, PublicKeyToken=9c8126276c77bdb7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\TeeChart.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Import Include="Microsoft.VisualBasic" />
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.Data" />
+    <Import Include="System.Diagnostics" />
+    <Import Include="System.Collections.Specialized" />
+    <Import Include="System.Configuration" />
+    <Import Include="System.Text" />
+    <Import Include="System.Text.RegularExpressions" />
+    <Import Include="System.Web" />
+    <Import Include="System.Web.Caching" />
+    <Import Include="System.Web.SessionState" />
+    <Import Include="System.Web.Security" />
+    <Import Include="System.Web.Profile" />
+    <Import Include="System.Web.UI" />
+    <Import Include="System.Web.UI.WebControls" />
+    <Import Include="System.Web.UI.WebControls.WebParts" />
+    <Import Include="System.Web.UI.HtmlControls" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="3091.aspx" />
+    <Content Include="3703.aspx" />
+    <Content Include="GetChart.aspx" />
+    <Content Include="GetChart.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Content>
+    <Content Include="images\HBMFCE-1.jpg" />
+    <Content Include="images\HBMFCE_3.jpg" />
+    <Content Include="images\SYMClayout.png" />
+    <Content Include="images\Y6P2.JPG" />
+    <Content Include="disk_report.aspx" />
+    <Content Include="sys_que_status.aspx" />
+    <Content Include="3105.aspx" />
+    <Content Include="3202.aspx" />
+    <Content Include="3302.aspx" />
+    <Content Include="3502.aspx" />
+    <Content Include="3102.aspx" />
+    <Content Include="3402.aspx" />
+    <Content Include="3203.aspx" />
+    <Content Include="3303.aspx" />
+    <Content Include="3503.aspx" />
+    <Content Include="3103.aspx" />
+    <Content Include="3403.aspx" />
+    <Content Include="3701.aspx" />
+    <Content Include="3702.aspx" />
+    <Content Include="css\diagram.css" />
+    <Content Include="Default.aspx" />
+    <Content Include="Global.asax" />
+    <Content Include="Home.aspx" />
+    <Content Include="3201.aspx" />
+    <Content Include="3301.aspx" />
+    <Content Include="3501.aspx" />
+    <Content Include="3101.aspx" />
+    <Content Include="3401.aspx" />
+    <Content Include="3601.aspx" />
+    <Content Include="3602.aspx" />
+    <Content Include="images\1TNRL_Process.JPG" />
+    <Content Include="images\1TNRL_Process_New.JPG" />
+    <Content Include="images\2TNRL_Process.JPG" />
+    <Content Include="images\2TNRL_Process_New.JPG" />
+    <Content Include="images\3TNRL_Process_New.JPG" />
+    <Content Include="images\4TNRL_Process_New.JPG" />
+    <Content Include="images\DSS.jpg" />
+    <Content Include="images\FCE.JPG" />
+    <Content Include="images\HBM_Process.JPG" />
+    <Content Include="images\HSM_Process.JPG" />
+    <Content Include="images\ipmis-header.jpg" />
+    <Content Include="images\line_horizontal.jpg" />
+    <Content Include="images\line_vertical.jpg" />
+    <Content Include="images\North.JPG" />
+    <Content Include="images\OFFLINEPACKING.JPG" />
+    <Content Include="images\pc_host_bad.jpg" />
+    <Content Include="images\pc_host_normal.jpg" />
+    <Content Include="images\pc_pmis_bad.jpg" />
+    <Content Include="images\pc_pmis_normal.jpg" />
+    <Content Include="images\pc_svr_bad.jpg" />
+    <Content Include="images\pc_svr_normal.jpg" />
+    <Content Include="images\status.jpg" />
+    <Content Include="images\Working.jpg" />
+    <Content Include="include\header.ascx" />
+    <Content Include="libs\AjaxControlToolkit.dll" />
+    <Content Include="onlinehelp.aspx" />
+    <Content Include="PagePrint.aspx" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="3092.aspx" />
+    <Content Include="Working.aspx" />
+    <Content Include="3504.aspx" />
+    <Content Include="3506.aspx" />
+    <Content Include="3104.aspx" />
+    <Content Include="3106.aspx" />
+    <Content Include="3404.aspx" />
+    <Content Include="3406.aspx" />
+    <Content Include="3204.aspx" />
+    <Content Include="3206.aspx" />
+    <Content Include="3107.aspx" />
+    <Content Include="3207.aspx" />
+    <Content Include="3407.aspx" />
+    <Content Include="3507.aspx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="3091.aspx.designer.vb">
+      <DependentUpon>3091.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3091.aspx.vb">
+      <DependentUpon>3091.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3703.aspx.designer.vb">
+      <DependentUpon>3703.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3703.aspx.vb">
+      <DependentUpon>3703.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="disk_report.aspx.vb">
+      <DependentUpon>disk_report.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="sys_que_status.aspx.vb">
+      <DependentUpon>sys_que_status.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3105.aspx.designer.vb">
+      <DependentUpon>3105.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3105.aspx.vb">
+      <DependentUpon>3105.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3202.aspx.designer.vb">
+      <DependentUpon>3202.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3202.aspx.vb">
+      <DependentUpon>3202.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3302.aspx.designer.vb">
+      <DependentUpon>3302.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3302.aspx.vb">
+      <DependentUpon>3302.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3502.aspx.designer.vb">
+      <DependentUpon>3502.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3502.aspx.vb">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>3502.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3102.aspx.designer.vb">
+      <DependentUpon>3102.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3102.aspx.vb">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>3102.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3402.aspx.designer.vb">
+      <DependentUpon>3402.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3402.aspx.vb">
+      <DependentUpon>3402.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3203.aspx.designer.vb">
+      <DependentUpon>3203.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3203.aspx.vb">
+      <DependentUpon>3203.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3303.aspx.designer.vb">
+      <DependentUpon>3303.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3303.aspx.vb">
+      <DependentUpon>3303.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3503.aspx.designer.vb">
+      <DependentUpon>3503.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3503.aspx.vb">
+      <DependentUpon>3503.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3103.aspx.designer.vb">
+      <DependentUpon>3103.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3103.aspx.vb">
+      <DependentUpon>3103.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3403.aspx.designer.vb">
+      <DependentUpon>3403.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3403.aspx.vb">
+      <DependentUpon>3403.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3501.aspx.vb">
+      <DependentUpon>3501.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3701.aspx.designer.vb">
+      <DependentUpon>3701.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3701.aspx.vb">
+      <SubType>ASPXCodebehind</SubType>
+      <DependentUpon>3701.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3702.aspx.designer.vb">
+      <DependentUpon>3702.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3702.aspx.vb">
+      <SubType>ASPXCodebehind</SubType>
+      <DependentUpon>3702.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Default.aspx.vb">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Default.aspx.designer.vb">
+      <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.vb">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Home.aspx.designer.vb">
+      <DependentUpon>Home.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Home.aspx.vb">
+      <DependentUpon>Home.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3201.aspx.designer.vb">
+      <DependentUpon>3201.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3201.aspx.vb">
+      <DependentUpon>3201.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3301.aspx.designer.vb">
+      <DependentUpon>3301.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3301.aspx.vb">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>3301.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3501.aspx.designer.vb">
+      <DependentUpon>3501.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3101.aspx.designer.vb">
+      <DependentUpon>3101.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3101.aspx.vb">
+      <DependentUpon>3101.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3401.aspx.designer.vb">
+      <DependentUpon>3401.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3401.aspx.vb">
+      <DependentUpon>3401.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3601.aspx.designer.vb">
+      <DependentUpon>3601.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3601.aspx.vb">
+      <DependentUpon>3601.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3602.aspx.designer.vb">
+      <DependentUpon>3602.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3602.aspx.vb">
+      <DependentUpon>3602.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="include\header.ascx.designer.vb">
+      <DependentUpon>header.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="include\header.ascx.vb">
+      <DependentUpon>header.ascx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="modDLDeclare.vb" />
+    <Compile Include="modGeneral.vb" />
+    <Compile Include="modPageDeclare.vb" />
+    <Compile Include="modSQL.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="My Project\Application.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Application.myapp</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Resources.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="My Project\Settings.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="onlinehelp.aspx.designer.vb">
+      <DependentUpon>onlinehelp.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="onlinehelp.aspx.vb">
+      <SubType>ASPXCodeBehind</SubType>
+      <DependentUpon>onlinehelp.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="PagePrint.aspx.designer.vb">
+      <DependentUpon>PagePrint.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="PagePrint.aspx.vb">
+      <SubType>ASPXCodebehind</SubType>
+      <DependentUpon>PagePrint.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3092.aspx.designer.vb">
+      <DependentUpon>3092.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3092.aspx.vb">
+      <DependentUpon>3092.aspx</DependentUpon>
+      <SubType>ASPXCodebehind</SubType>
+    </Compile>
+    <Compile Include="WebPrint.vb" />
+    <Compile Include="Working.aspx.designer.vb">
+      <DependentUpon>Working.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Working.aspx.vb">
+      <DependentUpon>Working.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3504.aspx.designer.vb">
+      <DependentUpon>3504.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3504.aspx.vb">
+      <DependentUpon>3504.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3506.aspx.designer.vb">
+      <DependentUpon>3506.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3506.aspx.vb">
+      <DependentUpon>3506.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3104.aspx.designer.vb">
+      <DependentUpon>3104.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3104.aspx.vb">
+      <DependentUpon>3104.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3106.aspx.designer.vb">
+      <DependentUpon>3106.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3106.aspx.vb">
+      <DependentUpon>3106.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3404.aspx.designer.vb">
+      <DependentUpon>3404.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3404.aspx.vb">
+      <DependentUpon>3404.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3406.aspx.designer.vb">
+      <DependentUpon>3406.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3406.aspx.vb">
+      <DependentUpon>3406.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3204.aspx.designer.vb">
+      <DependentUpon>3204.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3204.aspx.vb">
+      <DependentUpon>3204.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3206.aspx.designer.vb">
+      <DependentUpon>3206.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3206.aspx.vb">
+      <DependentUpon>3206.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3107.aspx.designer.vb">
+      <DependentUpon>3107.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3107.aspx.vb">
+      <DependentUpon>3107.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3207.aspx.designer.vb">
+      <DependentUpon>3207.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3207.aspx.vb">
+      <DependentUpon>3207.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3407.aspx.designer.vb">
+      <DependentUpon>3407.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3407.aspx.vb">
+      <DependentUpon>3407.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="3507.aspx.designer.vb">
+      <DependentUpon>3507.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="3507.aspx.vb">
+      <DependentUpon>3507.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="GetChart.aspx.resx" />
+    <EmbeddedResource Include="My Project\licenses.licx" />
+    <EmbeddedResource Include="My Project\Resources.resx">
+      <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.vb</LastGenOutput>
+      <CustomToolNamespace>My.Resources</CustomToolNamespace>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="My Project\Application.myapp">
+      <Generator>MyApplicationCodeGenerator</Generator>
+      <LastGenOutput>Application.Designer.vb</LastGenOutput>
+    </None>
+    <None Include="My Project\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <CustomToolNamespace>My</CustomToolNamespace>
+      <LastGenOutput>Settings.Designer.vb</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>1608</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost/hPMISWEB</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

@@ -1,0 +1,192 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.Master.cs" Inherits="WebApplication20.Site1" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" runat="server" href="~/Welcome.aspx">Y6P2主題工作系統
+                    </a>
+
+                    &nbsp;
+                </div>
+                <div class="navbar-collapse collapse">
+                    <table class="auto-style1">
+                        <tr>
+                            <td><a runat="server" href="~/CreateIssueDuty.aspx">新增值勤主題</a></td>
+                            <td><a runat="server" href="~/CreateIssue.aspx">新增主題</a></td>
+
+                            <td><a runat="server" href="~/IssueList.aspx">主題清單</a></td>
+                            <td><a runat="server" href="~/CreateTask.aspx">填寫工作日誌</a></td>
+                            <td><a runat="server" href="~/TaskList.aspx">工作日誌查詢</a></td>
+                            <td><a runat="server" href="~/TaskHourList.aspx">工時統計</a></td>
+                            <td><a runat="server" href="~/IssueList_personal.aspx">個人工時統計</a></td>
+                            <td><a runat="server" href="~/WeeklyReport.aspx">周報</a></td>
+                            <td><a runat="server" href="~/SumTaskHour.aspx">工時類別統計</a></td>
+                              <td><a runat="server" href="~/SumDuty.aspx">系統事故統計</a></td>
+                            <td><a runat="server" href="~/IssueDutyListManage.aspx">Y6P2值勤事故處理紀錄管理</a></td>
+                         <td id="Menu_Test" runat="server">
+    <a runat="server" href="~/TaskList_test.aspx">工作日誌查詢_TEST</a>
+</td>
+                            <td>
+                                <asp:Label ID="LB_SessionID" runat="server" Text="Label" ForeColor="#CC9900"></asp:Label>
+                                應填工時：<asp:Label ID="LB_SubTask" runat="server" Text="Label" ForeColor="Red"></asp:Label>
+
+                                <asp:Button ID="BT_Logout" runat="server" OnClick="BT_Logout_Click" Text="登出" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" runat="server" href="~/Welcome.aspx">Y6P2物料管理系統
+
+                    </a>
+
+                </div>
+                <div class="navbar-collapse collapse">
+                    <table class="auto-style1">
+                        <tr>
+                            <td>
+                                <asp:Menu ID="Menu5" runat="server" DisappearAfter="100" Orientation="Horizontal">
+                                    <StaticMenuItemStyle HorizontalPadding="10px" VerticalPadding="2px" />
+                                    <DynamicMenuStyle BackColor="#CCFFFF" />
+                                    <StaticSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicMenuItemStyle HorizontalPadding="10px" VerticalPadding="10px" BackColor="#CCFFFF" />
+                                    <Items>
+                                        <asp:MenuItem Text="異儲作業" Value="異儲作業" NavigateUrl="~/ModifyMaterialStorage.aspx"></asp:MenuItem>
+                                    </Items>
+
+                                </asp:Menu>
+                            </td>
+                            <td>
+                                <asp:Menu ID="Menu7" runat="server" DisappearAfter="100" Orientation="Horizontal">
+                                    <StaticMenuItemStyle HorizontalPadding="10px" VerticalPadding="2px" />
+                                    <DynamicMenuStyle BackColor="#CCFFFF" />
+                                    <StaticSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicMenuItemStyle HorizontalPadding="10px" VerticalPadding="10px" BackColor="#CCFFFF" />
+                                    <Items>
+                                        <asp:MenuItem Text="電腦管理" Value="電腦管理">
+
+
+                                            <asp:MenuItem NavigateUrl="~/CreateComputerDetail.aspx" Text="新增電腦詳細資料" Value="新增電腦詳細資料"></asp:MenuItem>
+                                            <asp:MenuItem NavigateUrl="~/ComputerHardwareMatch.aspx" Text="新增電腦硬體" Value="新增電腦硬體"></asp:MenuItem>
+                                            <asp:MenuItem NavigateUrl="~/ComputerSoftwareMatch.aspx" Text="新增電腦授權" Value="新增電腦授權"></asp:MenuItem>
+                                        </asp:MenuItem>
+                                    </Items>
+
+                                </asp:Menu>
+                            </td>
+                            <td>
+                                <asp:Menu ID="Menu6" runat="server" DisappearAfter="100" Orientation="Horizontal">
+                                    <StaticMenuItemStyle HorizontalPadding="10px" VerticalPadding="2px" />
+                                    <DynamicMenuStyle BackColor="#CCFFFF" />
+                                    <StaticSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicMenuItemStyle HorizontalPadding="10px" VerticalPadding="10px" BackColor="#CCFFFF" />
+                                    <Items>
+                                        <asp:MenuItem Text="物料管理" Value="物料管理">
+
+                                            <asp:MenuItem NavigateUrl="~/CreateMaterialMaster.aspx" Text="新增物料基本資料" Value="新增物料基本資料"></asp:MenuItem>
+                                            <asp:MenuItem NavigateUrl="~/CreateMaterialDetail.aspx" Text="新增物料詳細資料" Value="新增物料詳細資料"></asp:MenuItem>
+                                             <asp:MenuItem NavigateUrl="~/ERPMaterialReport.aspx" Text="ERP物料盤點報表" Value="ERP物料盤點報表"></asp:MenuItem>
+                                             <asp:MenuItem NavigateUrl="~/SelfManage_Report.aspx" Text="自主管理室物料盤點報表" Value="自主管理室物料盤點報表"></asp:MenuItem>
+                                        </asp:MenuItem>
+                                    </Items>
+
+                                </asp:Menu>
+                            </td>
+
+                            <td>
+                                <asp:Menu ID="Menu3" runat="server" DisappearAfter="100" Orientation="Horizontal">
+                                    <StaticMenuItemStyle HorizontalPadding="10px" VerticalPadding="2px" />
+                                    <DynamicMenuStyle BackColor="#CCFFFF" />
+                                    <StaticSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicMenuItemStyle HorizontalPadding="10px" VerticalPadding="10px" BackColor="#CCFFFF" />
+                                    <Items>
+                                        <asp:MenuItem Text="軟體管理" Value="軟體管理">
+                                            <asp:MenuItem NavigateUrl="~/CreateSoftwareMaster.aspx" Text="新增軟體基本資料" Value="新增軟體基本資料"></asp:MenuItem>
+                                            <asp:MenuItem NavigateUrl="~/CreateSoftwareDetail.aspx" Text="新增軟體詳細資料" Value="新增軟體詳細資料"></asp:MenuItem>
+
+
+                                        </asp:MenuItem>
+                                    </Items>
+
+                                </asp:Menu>
+                            </td>
+                            <td>
+                                <asp:Menu ID="Menu1" runat="server" DisappearAfter="100" Orientation="Horizontal">
+                                    <StaticMenuItemStyle HorizontalPadding="10px" VerticalPadding="2px" />
+                                    <DynamicMenuStyle BackColor="#CCFFFF" />
+                                    <StaticSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicMenuItemStyle HorizontalPadding="10px" VerticalPadding="10px" BackColor="#CCFFFF" />
+                                    <Items>
+                                        <asp:MenuItem Text="儲位管理" Value="儲位管理">
+                                            <asp:MenuItem NavigateUrl="~/CreateStorageMaster.aspx" Text="新增儲位基本資料" Value="新增儲位基本資料"></asp:MenuItem>
+                                            <asp:MenuItem NavigateUrl="~/CreateStorageDetail.aspx" Text="新增儲位詳細資料" Value="新增儲位詳細資料"></asp:MenuItem>
+                                        </asp:MenuItem>
+                                    </Items>
+
+                                </asp:Menu>
+
+                            </td>
+                            <td>
+                                <asp:Menu ID="Menu2" runat="server" DisappearAfter="100" Orientation="Horizontal">
+                                    <StaticMenuItemStyle HorizontalPadding="10px" VerticalPadding="2px" />
+                                    <DynamicMenuStyle BackColor="#CCFFFF" />
+                                    <StaticSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicSelectedStyle BackColor="#CCFFFF" />
+                                    <DynamicMenuItemStyle HorizontalPadding="10px" VerticalPadding="10px" BackColor="#CCFFFF" />
+                                    <Items>
+                                       
+                                         <asp:MenuItem Text="角色管理" Value="角色管理">
+                                            <asp:MenuItem NavigateUrl="~/CreateCharacterMaster.aspx" Text="新增角色" Value="新增角色"></asp:MenuItem>
+                                            <asp:MenuItem NavigateUrl="~/CharacterMatch.aspx" Text="角色配對" Value="角色配對"></asp:MenuItem>
+                                     </asp:MenuItem>
+                                   
+                                    </Items>
+
+                                </asp:Menu>
+                            </td>
+
+
+
+
+
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="container body-content">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            </asp:ContentPlaceHolder>
+            <hr />
+            <footer>
+                <p>&copy; <%: DateTime.Now.Year %> - Y6P2</p>
+            </footer>
+        </div>
+
+
+
+
+    </form>
+</body>
+</html>

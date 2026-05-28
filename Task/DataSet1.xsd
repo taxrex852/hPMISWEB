@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSet1" targetNamespace="http://tempuri.org/DataSet1.xsd" xmlns:mstns="http://tempuri.org/DataSet1.xsd" xmlns="http://tempuri.org/DataSet1.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="Web.config" AppSettingsPropertyName="Y6P2_MaterialsConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="Y6P2_MaterialsConnectionString (Web.config)" ParameterPrefix="@" PropertyReference="AppConfig.System.Configuration.ConfigurationManager.0.ConnectionStrings.Y6P2_MaterialsConnectionString.ConnectionString" Provider="System.Data.SqlClient" />
+        </Connections>
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="DataSet1" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="DataSet1" msprop:Generator_UserDSName="DataSet1">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="TaskList_RPT" msprop:Generator_TableClassName="TaskList_RPTDataTable" msprop:Generator_TableVarName="tableTaskList_RPT" msprop:Generator_RowChangedName="TaskList_RPTRowChanged" msprop:Generator_TablePropName="TaskList_RPT" msprop:Generator_RowDeletingName="TaskList_RPTRowDeleting" msprop:Generator_RowChangingName="TaskList_RPTRowChanging" msprop:Generator_RowEvHandlerName="TaskList_RPTRowChangeEventHandler" msprop:Generator_RowDeletedName="TaskList_RPTRowDeleted" msprop:Generator_RowClassName="TaskList_RPTRow" msprop:Generator_UserTableName="TaskList_RPT" msprop:Generator_RowEvArgName="TaskList_RPTRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="employee_name" msprop:Generator_ColumnVarNameInTable="columnemployee_name" msprop:Generator_ColumnPropNameInRow="employee_name" msprop:Generator_ColumnPropNameInTable="employee_nameColumn" msprop:Generator_UserColumnName="employee_name" type="xs:string" minOccurs="0" />
+              <xs:element name="SystemName" msprop:Generator_ColumnVarNameInTable="columnSystemName" msprop:Generator_ColumnPropNameInRow="SystemName" msprop:Generator_ColumnPropNameInTable="SystemNameColumn" msprop:Generator_UserColumnName="SystemName" type="xs:string" minOccurs="0" />
+              <xs:element name="TaskDescription" msprop:Generator_ColumnVarNameInTable="columnTaskDescription" msprop:Generator_ColumnPropNameInRow="TaskDescription" msprop:Generator_ColumnPropNameInTable="TaskDescriptionColumn" msprop:Generator_UserColumnName="TaskDescription" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

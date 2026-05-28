@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ERP_Report_DataSet" targetNamespace="http://tempuri.org/ERP_Report_DataSet.xsd" xmlns:mstns="http://tempuri.org/ERP_Report_DataSet.xsd" xmlns="http://tempuri.org/ERP_Report_DataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="MySettings" AppSettingsPropertyName="Y6P2_MaterialsConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="Y6P2_MaterialsConnectionString (MySettings)" ParameterPrefix="@" PropertyReference="ApplicationSettings.WindowsApp1.My.MySettings.GlobalReference.Default.Y6P2_MaterialsConnectionString" Provider="System.Data.SqlClient" />
+        </Connections>
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="ERP_Report_DataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="ERP_Report_DataSet" msprop:Generator_UserDSName="ERP_Report_DataSet">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="ERP_Report_DataSet" msprop:Generator_TableClassName="ERP_Report_DataSetDataTable" msprop:Generator_TableVarName="tableERP_Report_DataSet" msprop:Generator_RowChangedName="ERP_Report_DataSetRowChanged" msprop:Generator_TablePropName="_ERP_Report_DataSet" msprop:Generator_RowDeletingName="ERP_Report_DataSetRowDeleting" msprop:Generator_RowChangingName="ERP_Report_DataSetRowChanging" msprop:Generator_RowEvHandlerName="ERP_Report_DataSetRowChangeEventHandler" msprop:Generator_RowDeletedName="ERP_Report_DataSetRowDeleted" msprop:Generator_RowClassName="ERP_Report_DataSetRow" msprop:Generator_UserTableName="ERP_Report_DataSet" msprop:Generator_RowEvArgName="ERP_Report_DataSetRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="material_name" msprop:Generator_ColumnVarNameInTable="columnmaterial_name" msprop:Generator_ColumnPropNameInRow="material_name" msprop:Generator_ColumnPropNameInTable="material_nameColumn" msprop:Generator_UserColumnName="material_name" type="xs:string" minOccurs="0" />
+              <xs:element name="material_unit" msprop:Generator_ColumnVarNameInTable="columnmaterial_unit" msprop:Generator_ColumnPropNameInRow="material_unit" msprop:Generator_ColumnPropNameInTable="material_unitColumn" msprop:Generator_UserColumnName="material_unit" type="xs:string" minOccurs="0" />
+              <xs:element name="safety_quantity" msprop:Generator_ColumnVarNameInTable="columnsafety_quantity" msprop:Generator_ColumnPropNameInRow="safety_quantity" msprop:Generator_ColumnPropNameInTable="safety_quantityColumn" msprop:Generator_UserColumnName="safety_quantity" type="xs:string" minOccurs="0" />
+              <xs:element name="material_ERP_no" msprop:Generator_ColumnVarNameInTable="columnmaterial_ERP_no" msprop:Generator_ColumnPropNameInRow="material_ERP_no" msprop:Generator_ColumnPropNameInTable="material_ERP_noColumn" msprop:Generator_UserColumnName="material_ERP_no" type="xs:string" minOccurs="0" />
+              <xs:element name="storage_id" msprop:Generator_ColumnVarNameInTable="columnstorage_id" msprop:Generator_ColumnPropNameInRow="storage_id" msprop:Generator_ColumnPropNameInTable="storage_idColumn" msprop:Generator_UserColumnName="storage_id" type="xs:string" minOccurs="0" />
+              <xs:element name="material_counter" msprop:Generator_ColumnVarNameInTable="columnmaterial_counter" msprop:Generator_ColumnPropNameInRow="material_counter" msprop:Generator_ColumnPropNameInTable="material_counterColumn" msprop:Generator_UserColumnName="material_counter" type="xs:string" minOccurs="0" />
+              <xs:element name="material_serial_zero" msprop:Generator_ColumnVarNameInTable="columnmaterial_serial_zero" msprop:Generator_ColumnPropNameInRow="material_serial_zero" msprop:Generator_ColumnPropNameInTable="material_serial_zeroColumn" msprop:Generator_UserColumnName="material_serial_zero" type="xs:string" minOccurs="0" />
+              <xs:element name="material_type" msprop:Generator_ColumnVarNameInTable="columnmaterial_type" msprop:Generator_ColumnPropNameInRow="material_type" msprop:Generator_ColumnPropNameInTable="material_typeColumn" msprop:Generator_UserColumnName="material_type" type="xs:string" minOccurs="0" />
+              <xs:element name="device_serial_no" msprop:Generator_ColumnVarNameInTable="columndevice_serial_no" msprop:Generator_ColumnPropNameInRow="device_serial_no" msprop:Generator_ColumnPropNameInTable="device_serial_noColumn" msprop:Generator_UserColumnName="device_serial_no" type="xs:string" minOccurs="0" />
+              <xs:element name="system_name" msprop:Generator_ColumnVarNameInTable="columnsystem_name" msprop:Generator_ColumnPropNameInRow="system_name" msprop:Generator_ColumnPropNameInTable="system_nameColumn" msprop:Generator_UserColumnName="system_name" type="xs:string" minOccurs="0" />
+              <xs:element name="employee_id" msprop:Generator_ColumnVarNameInTable="columnemployee_id" msprop:Generator_ColumnPropNameInRow="employee_id" msprop:Generator_ColumnPropNameInTable="employee_idColumn" msprop:Generator_UserColumnName="employee_id" type="xs:string" minOccurs="0" />
+              <xs:element name="storage_name" msprop:Generator_ColumnVarNameInTable="columnstorage_name" msprop:Generator_ColumnPropNameInRow="storage_name" msprop:Generator_ColumnPropNameInTable="storage_nameColumn" msprop:Generator_UserColumnName="storage_name" type="xs:string" minOccurs="0" />
+              <xs:element name="material_asset_no" msprop:Generator_ColumnVarNameInTable="columnmaterial_asset_no" msprop:Generator_ColumnPropNameInRow="material_asset_no" msprop:Generator_ColumnPropNameInTable="material_asset_noColumn" msprop:Generator_UserColumnName="material_asset_no" type="xs:string" minOccurs="0" />
+              <xs:element name="employee_name" msprop:Generator_ColumnVarNameInTable="columnemployee_name" msprop:Generator_ColumnPropNameInRow="employee_name" msprop:Generator_ColumnPropNameInTable="employee_nameColumn" msprop:Generator_UserColumnName="employee_name" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
