@@ -98,7 +98,7 @@
             color: #ffffff !important;
             text-align: center !important;
             vertical-align: middle !important;
-            padding: 8px 10px !important;
+            padding: 6px 8px !important;
             font-weight: 600;
             border: 1px solid #2c3e50 !important;
             white-space: nowrap;
@@ -106,7 +106,7 @@
         .bs5-table td {
             vertical-align: middle;
             text-align: center;
-            padding: 7px 10px;
+            padding: 5px 8px;
             border: 1px solid #dee2e6;
             white-space: nowrap;
             /* color 不設定，讓 VB RowDataBound 設的 ForeColor 從 <tr> 繼承 */
@@ -115,6 +115,29 @@
         .bs5-table tbody tr:nth-child(odd)  { background-color: #ffffff; }
         .bs5-table tbody tr:nth-child(even) { background-color: #f8f9fc; }
         .bs5-table tbody tr:hover           { background-color: #e9ecef; }
+
+        /* ---- 響應式斷點：當視窗寬度 ≤ 900px 時，三欄改為垂直堆疊 ---- */
+        @media (max-width: 900px) {
+            .flex-col-third {
+                flex: 1 1 100% !important;
+                min-width: 0 !important;
+                max-width: 100% !important;
+            }
+            .flex-col-left {
+                max-width: 100% !important;
+            }
+            .flex-col-right {
+                min-width: 0 !important;
+                max-width: 100% !important;
+            }
+        }
+        /* ---- 中型螢幕 (901px ~ 1200px)：三欄改為兩欄 + 一欄佈局 ---- */
+        @media (min-width: 901px) and (max-width: 1200px) {
+            .flex-col-third {
+                flex: 1 1 calc(50% - 20px) !important;
+                min-width: 0 !important;
+            }
+        }
 
         /* ---- 卡片內容 flex 佈局 (避開 diagram.css 覆蓋的 .row/.col) ---- */
         .card-body-inner { padding: 15px; display: block; }
@@ -125,10 +148,18 @@
             gap: 20px;
             align-items: flex-start;
             width: 100%;
+            box-sizing: border-box;
         }
-        .flex-col-left  { flex: 1 1 320px; min-width: 320px; max-width: 42%; }
-        .flex-col-right { flex: 2 1 420px; min-width: 420px; max-width: 100%; }
-        .flex-col-third { flex: 1 1 280px; min-width: 280px; max-width: 100%; overflow: visible; }
+        .flex-col-left  { flex: 1 1 280px; min-width: 260px; max-width: 42%; box-sizing: border-box; }
+        .flex-col-right { flex: 2 1 380px; min-width: 340px; max-width: 100%; box-sizing: border-box; overflow-x: auto; }
+        /* Card 2 三欄：以百分比 flex-basis 搭配 calc 自動均分，小螢幕時退回 100% */
+        .flex-col-third {
+            flex: 1 1 calc(33.333% - 20px);
+            min-width: 220px;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;   /* 欄位過多時允許欄內水平捲動 */
+        }
 
         /* ---- 儲量水位燈號 ---- */
         .limit-status-container { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 8px 0; flex-wrap: wrap; }
@@ -705,12 +736,13 @@
                 <span class="fs-4">📊 今日入儲 / 每日增減趨勢 / 今日消耗 即時資訊</span>
             </div>
             <div class="card-body-inner">
-                <div class="flex-row-layout">
+                <%-- 三欄並排：使用獨立 flex 容器，確保不同解析度下自動換行 --%>
+                <div class="flex-row-layout" style="gap: 15px;">
 
                     <%-- 左欄：今日入儲 --%>
                     <div class="flex-col-third">
-                        <div id="todayRcvChart" style="width: 100%; height: 260px;"></div>
-                        <div style="margin-top: 8px;">
+                        <div id="todayRcvChart" style="width: 100%; height: 240px; min-width: 0;"></div>
+                        <div style="margin-top: 8px; overflow-x: auto; width: 100%;">
                             <asp:GridView ID="GridView4" runat="server" DataSourceID="dsImport" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
                         </div>
@@ -718,8 +750,8 @@
 
                     <%-- 中欄：每日增減趨勢 --%>
                     <div class="flex-col-third">
-                        <div id="weeklyChart" style="width: 100%; height: 260px;"></div>
-                        <div style="margin-top: 8px;">
+                        <div id="weeklyChart" style="width: 100%; height: 240px; min-width: 0;"></div>
+                        <div style="margin-top: 8px; overflow-x: auto; width: 100%;">
                             <asp:GridView ID="GridView5" runat="server" DataSourceID="dsWeekly" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
                         </div>
@@ -727,8 +759,8 @@
 
                     <%-- 右欄：今日消耗 --%>
                     <div class="flex-col-third">
-                        <div id="todayUsedChart" style="width: 100%; height: 260px;"></div>
-                        <div style="margin-top: 8px;">
+                        <div id="todayUsedChart" style="width: 100%; height: 240px; min-width: 0;"></div>
+                        <div style="margin-top: 8px; overflow-x: auto; width: 100%;">
                             <asp:GridView ID="GridView6" runat="server" DataSourceID="dsExport" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
                         </div>
