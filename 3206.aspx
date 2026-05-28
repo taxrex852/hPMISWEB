@@ -1,81 +1,196 @@
-<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3206.aspx.vb" Inherits="hPMISWEB.HBM_Defect" %>
+Ôªø<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3206.aspx.vb" Inherits="hPMISWEB.HBM_Defect" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HBM_Defect</title>
-    <link rel="stylesheet" type="text/css" href="css\diagram.css" />
+    <link rel="stylesheet" href="libs/bootstrap.min.css" />
+
     <style type="text/css">
-        .auto-fit-table { width: auto !important; }
-        .auto-fit-table th, .auto-fit-table td { white-space: nowrap; padding: 8px 15px; }
+        body { background-color: #f8f9fc; padding-bottom: 20px; }
+
+        .main-content {
+            clear: both !important;
+            display: block !important;
+            position: relative;
+            padding-top: 20px;
+        }
+
+        .card-custom {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e3e6f0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: block !important;
+        }
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-card-body {
+            padding: 20px;
+            background-color: #ffffff;
+            display: block !important;
+            min-height: 420px;
+            width: 100%;
+        }
+
+        .table-responsive-custom {
+            max-height: 450px;
+            overflow-y: auto;
+            overflow-x: auto;
+            margin: 0;
+            background-color: #fff;
+        }
+
+        .custom-auto-table {
+            width: auto;
+            table-layout: auto !important;
+            white-space: nowrap;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 0;
+            margin: 0 auto;
+        }
+
+        .custom-auto-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #34495e !important;
+            color: white !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 12px 18px;
+            font-weight: 600;
+            border-bottom: 2px solid #233140 !important;
+        }
+
+        .table-header-dark th, .table-header-dark td {
+            background-color: #34495e !important;
+            color: #ffffff !important;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-align: center;
+            vertical-align: middle;
+            padding: 12px 18px;
+            font-weight: 600;
+            border-bottom: 2px solid #233140 !important;
+        }
+
+        .custom-auto-table tfoot td {
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            background-color: #eaecf4 !important;
+            color: #2d3748 !important;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-top: 2px solid #cbd5e1;
+        }
+
+        .custom-auto-table tbody td {
+            vertical-align: middle;
+            text-align: center;
+            padding: 10px 18px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+        }
+
+        .custom-auto-table tbody tr:nth-child(even) { background-color: #f8f9fc; }
+        .custom-auto-table tbody tr:hover { background-color: #e9ecef; }
+
+        .custom-auto-table tbody td:first-child {
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #f8f9fa;
+        }
     </style>
+
     <script type="text/javascript" src="libs/echarts.min.js"></script>
     <script type="text/javascript">
         document.addEventListener("DOMContentLoaded", function () {
-            function syncTableWidths() {
-                var dataTable = document.getElementById('<%= gvMonth.ClientID %>');
-                var headerTable = document.getElementById('tblMonthHeader');
-                var footerTable = document.getElementById('tblMonthFooter');
-                if (dataTable && dataTable.rows.length > 0 && headerTable && footerTable) {
-                    var dataCells = dataTable.rows[0].cells;
-                    var headerCells = headerTable.rows[0].cells;
-                    var footerCells = footerTable.rows[0].cells;
-                    for (var i = 0; i < headerCells.length; i++) {
-                        if (headerCells[i]) headerCells[i].style.width = 'auto';
-                        if (dataCells[i]) dataCells[i].style.width = 'auto';
-                        if (footerCells[i]) footerCells[i].style.width = 'auto';
+
+            // Êúà‰ªΩË°®Ê†ºÂêà‰Ωµ (thead / tfoot Ê≥®ÂÖ•)
+            try {
+                var gvMonth = document.getElementById('<%= gvMonth.ClientID %>');
+                var tblHeader = document.getElementById('tempMonthHeader');
+                var tblFooter = document.getElementById('tempMonthFooter');
+
+                if (gvMonth && tblHeader && tblFooter) {
+                    var theadRow = tblHeader.querySelector('tr');
+                    if (theadRow) {
+                        var thead = document.createElement('thead');
+                        thead.appendChild(theadRow);
+                        gvMonth.insertBefore(thead, gvMonth.firstChild);
                     }
-                    setTimeout(function () {
-                        for (var i = 0; i < headerCells.length; i++) {
-                            var hw = headerCells[i] ? headerCells[i].offsetWidth : 0;
-                            var dw = dataCells[i] ? dataCells[i].offsetWidth : 0;
-                            var fw = footerCells[i] ? footerCells[i].offsetWidth : 0;
-                            var maxWidth = Math.max(hw, dw, fw);
-                            if (headerCells[i]) { headerCells[i].style.width = maxWidth + 'px'; headerCells[i].style.minWidth = maxWidth + 'px'; }
-                            if (dataCells[i]) { dataCells[i].style.width = maxWidth + 'px'; dataCells[i].style.minWidth = maxWidth + 'px'; }
-                            if (footerCells[i]) { footerCells[i].style.width = maxWidth + 'px'; footerCells[i].style.minWidth = maxWidth + 'px'; }
-                        }
-                    }, 50);
+
+                    var tfootRow = tblFooter.querySelector('tr');
+                    if (tfootRow) {
+                        var tfoot = document.createElement('tfoot');
+                        tfoot.appendChild(tfootRow);
+                        gvMonth.appendChild(tfoot);
+                    }
+                    gvMonth.className = 'table custom-auto-table';
                 }
+            } catch (e) {
+                console.error("Ë°®Ê†ºÂêà‰ΩµÂ§±Êïó:", e);
             }
-            window.addEventListener('load', syncTableWidths);
-            window.addEventListener('resize', syncTableWidths);
 
-            if (typeof chartData === 'undefined') return;
+            // ECharts ÂàùÂßãÂåñ
+            try {
+                if (typeof chartData !== 'undefined') {
+                    var defectDom = document.getElementById('echartDefect');
+                    var defectChart = echarts.init(defectDom);
 
-            var defectChart = echarts.init(document.getElementById('echartDefect'));
-            defectChart.setOption({
-                backgroundColor: '#ffffff',
-                title: { text: '´¨ø˚Ø ≥¥≤Œ≠p¡Õ∂’ (MT)', left: 'center', textStyle: { fontSize: 16 } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                legend: { data: ['Ø ≥¥ Top 1', 'Ø ≥¥ Top 2', 'Ø ≥¥ Top 3', 'Ø ≥¥ Top 4', 'Ø ≥¥ Top 5'], bottom: 0 },
-                grid: { left: '8%', right: '5%', bottom: '15%', containLabel: true },
-                xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis }],
-                yAxis: [{ type: 'value', name: '≠´∂q (MT)', scale: true }],
-                series: [
-                    { name: 'Ø ≥¥ Top 1', type: 'line', smooth: true, data: chartData.d1 },
-                    { name: 'Ø ≥¥ Top 2', type: 'line', smooth: true, data: chartData.d2 },
-                    { name: 'Ø ≥¥ Top 3', type: 'line', smooth: true, data: chartData.d3 },
-                    { name: 'Ø ≥¥ Top 4', type: 'line', smooth: true, data: chartData.d4 },
-                    { name: 'Ø ≥¥ Top 5', type: 'line', smooth: true, data: chartData.d5 }
-                ]
-            });
-            window.addEventListener('resize', function () { defectChart.resize(); });
+                    defectChart.setOption({
+                        backgroundColor: 'transparent',
+                        title: { text: 'HBM Áº∫Èô∑ÊúàÁ¥ØË®àË∂®Âã¢ (MT)', left: 'center', textStyle: { color: '#2c3e50', fontSize: 15, fontWeight: 'bold' } },
+                        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                        legend: { data: ['Áº∫Èô∑ Top 1', 'Áº∫Èô∑ Top 2', 'Áº∫Èô∑ Top 3', 'Áº∫Èô∑ Top 4', 'Áº∫Èô∑ Top 5'], bottom: 0, icon: 'circle' },
+                        grid: { left: '8%', right: '5%', bottom: '15%', top: '15%', containLabel: true },
+                        xAxis: [{ type: 'category', boundaryGap: false, data: chartData.xAxis, axisLabel: { fontWeight: 'bold' } }],
+                        yAxis: [{ type: 'value', name: 'ÈáçÈáè (MT)', scale: true, splitLine: { lineStyle: { type: 'dashed', color: '#eaeaea' } } }],
+                        series: [
+                            { name: 'Áº∫Èô∑ Top 1', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d1 },
+                            { name: 'Áº∫Èô∑ Top 2', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d2 },
+                            { name: 'Áº∫Èô∑ Top 3', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d3 },
+                            { name: 'Áº∫Èô∑ Top 4', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d4 },
+                            { name: 'Áº∫Èô∑ Top 5', type: 'line', smooth: true, symbol: 'circle', symbolSize: 6, lineStyle: { width: 3 }, data: chartData.d5 }
+                        ]
+                    });
+
+                    window.addEventListener('resize', function () { defectChart.resize(); });
+                }
+            } catch (e) {
+                console.error("ECharts Áπ™Ë£ΩÂ§±Êïó:", e);
+            }
         });
     </script>
 </head>
+
 <body>
     <form id="form1" runat="server">
         <hPMISWEB:PageHeader ID="ph" runat="server" />
-        <div style="max-width: 1200px; width: 95%; margin: 20px auto; font-family: sans-serif;">
-               <div>
-                <div style="margin-bottom: 15px; font-weight: bold; color: #333;">
-                    ∏ÍÆ∆∞œ∂°°G<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label>
-                </div>
-                <div id="echartDefect" style="width: 100%; height: 400px;"></div>
-                <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:HBMPMISConnectionString %>" SelectCommand="WITH MonthlyDefect AS (
+        <a name="#Home"></a>
 
-    SELECT 
+        <div class="container-fluid main-content px-4">
+
+            <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:HBMPMISConnectionString %>" SelectCommand="WITH MonthlyDefect AS (
+    SELECT
         DATEADD(m, DATEDIFF(m, 0, boundle_date), 0) AS boundle_month,
         Defect_Code_of_This_Bundle AS def_code,
         bound_weight
@@ -85,20 +200,18 @@
       AND Defect_Code_of_This_Bundle IS NOT NULL
 ),
 RankedData AS (
-
-    SELECT 
+    SELECT
         boundle_month,
         def_code,
         CAST(ROUND(SUM(bound_weight) / 1000.0, 2) AS FLOAT) AS total_bound_weight,
         ROW_NUMBER() OVER (
-            PARTITION BY boundle_month 
+            PARTITION BY boundle_month
             ORDER BY CAST(ROUND(SUM(bound_weight) / 1000.0, 2) AS FLOAT) DESC
         ) AS rn
     FROM MonthlyDefect
     GROUP BY boundle_month, def_code
 )
-
-SELECT 
+SELECT
     boundle_month AS boundle_date,
     MAX(CASE WHEN rn = 1 THEN total_bound_weight END) AS def_top1,
     MAX(CASE WHEN rn = 2 THEN total_bound_weight END) AS def_top2,
@@ -108,56 +221,76 @@ SELECT
 FROM RankedData
 WHERE rn &lt;= 5
 GROUP BY boundle_month
-ORDER BY boundle_month;"></asp:SqlDataSource>
-            </div>
-            <div style="margin-bottom: 40px;">
-                <div style="margin-bottom: 10px;">
-                    <strong style="font-size: 16px;">´¨ø˚®C§ÈØ ≥¥≤Œ≠p</strong><br />
-                    <span style="font-size: 13px; color: #555;">®C§È0700/1500/2300∂i¶Ê∏ÍÆ∆ßÛ∑s°A®√©Û®C§È1500±N∏ÍÆ∆≠´∑sΩs±∆</span>
+ORDER BY boundle_month">
+            </asp:SqlDataSource>
+
+            <!-- Card 1ÔºöÁº∫Èô∑Ë∂®Âã¢Âúñ -->
+            <div class="card-custom mb-4 mt-2">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">&#128202; HBM Áº∫Èô∑ÊúàÁ¥ØË®àË∂®Âã¢</span>
+                    <span class="badge bg-warning text-dark fs-6 shadow-sm">Ë≥áÊñôÂçÄÈñìÔºö<asp:Label ID="LabelStartdate" runat="server"></asp:Label> ~ <asp:Label ID="LabelEnddate" runat="server"></asp:Label></span>
                 </div>
-                <div style="overflow-x: auto;">
-                    <asp:GridView ID="gvDaily" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None">
-                        <RowStyle CssClass="gvrs" /><HeaderStyle CssClass="gvhs" /><SelectedRowStyle CssClass="gvsrs" />
-                    </asp:GridView>
+                <div class="chart-card-body">
+                    <div id="echartDefect" style="width: 100%; height: 400px;"></div>
                 </div>
             </div>
 
-            <div style="margin-bottom: 40px;">
-                <div style="margin-bottom: 10px;">
-                    <strong style="font-size: 16px;">´¨ø˚∑Ì§ÎØ ≥¥≤Œ≠p</strong><br />
-                    <span style="font-size: 13px; color: #555;">∏ÍÆ∆©Û®C§È2300∂i¶ÊßÛ∑s°A®√©Û∑Ì§Î≤ƒ§@§—2300±N∏ÍÆ∆∂i¶Ê≠´æ„</span>
+            <!-- Card 2ÔºöÊØèÊó•Áº∫Èô∑Áµ±Ë®à -->
+            <div class="card-custom mb-4">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">&#128203; ËøëÊúüÊØèÊó•Áº∫Èô∑ÈáçÈáèÁ¥ØË®à</span>
                 </div>
-                <div style="overflow-x: auto; max-width: 100%; display: inline-block;">
-                    <table id="tblMonthHeader" border="0" cellpadding="0" cellspacing="0" class="auto-fit-table" style="border-collapse: collapse;">
-                        <tr>
-                            <td class="gvhs_data"></td>
-                            <td class="gvhs_data" style="text-align: center">Ø ≥¥ top (1)</td>
-                            <td class="gvhs_data" style="text-align: center">Ø ≥¥ top (2)</td>
-                            <td class="gvhs_data" style="text-align: center">Ø ≥¥ top (3)</td>
-                            <td class="gvhs_data" style="text-align: center">Ø ≥¥ top (4)</td>
-                            <td class="gvhs_data" style="text-align: center">Ø ≥¥ top (5)</td>
-                        </tr>
-                    </table>
-                    <asp:Panel ID="Panel1" runat="server" Height="200px" ScrollBars="Vertical">
-                        <asp:GridView ID="gvMonth" runat="server" CellSpacing="1" CssClass="gv auto-fit-table" GridLines="None" ShowHeader="False">
-                            <RowStyle CssClass="gvrs" /><SelectedRowStyle CssClass="gvsrs" />
+                <div class="card-body p-0">
+                    <div class="table-responsive-custom">
+                        <asp:GridView ID="gvDaily" runat="server" CssClass="table custom-auto-table" GridLines="None">
+                            <HeaderStyle CssClass="table-header-dark" Wrap="True" />
                         </asp:GridView>
-                    </asp:Panel>
-                    <table id="tblMonthFooter" border="0" cellpadding="0" cellspacing="0" class="auto-fit-table" style="border-collapse: collapse;">
-                        <tr>
-                            <td class="data"><asp:Label ID="lblMonth" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label>§Î≤Œ≠p</td>
-                            <td class="data"><asp:Label ID="lblDT1" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                            <td class="data"><asp:Label ID="lblDT2" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                            <td class="data"><asp:Label ID="lblDT3" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                            <td class="data"><asp:Label ID="lblDT4" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                            <td class="data"><asp:Label ID="lblDT5" runat="server" Text="N/A" CssClass="pmisdata"></asp:Label></td>
-                        </tr>
-                    </table>
+                    </div>
                 </div>
             </div>
 
-         
+            <!-- Card 3ÔºöÊúà‰ªΩÁº∫Èô∑Áµ±Ë®à -->
+            <div class="card-custom mb-5">
+                <div class="card-header-custom">
+                    <span class="fs-4" style="color: white !important;">&#128203; ËøëÊúüÊúà‰ªΩÁº∫Èô∑ÈáçÈáèÁ¥ØË®à</span>
+                </div>
+                <div class="card-body p-0">
+                    <div style="display: none;">
+                        <table id="tempMonthHeader">
+                            <tr>
+                                <th>Êúà‰ªΩ</th>
+                                <th>Áº∫Èô∑ Top (1)</th>
+                                <th>Áº∫Èô∑ Top (2)</th>
+                                <th>Áº∫Èô∑ Top (3)</th>
+                                <th>Áº∫Èô∑ Top (4)</th>
+                                <th>Áº∫Èô∑ Top (5)</th>
+                            </tr>
+                        </table>
+                        <table id="tempMonthFooter">
+                            <tr>
+                                <td><asp:Label ID="lblMonth" runat="server" Text="N/A"></asp:Label>ÊúàÁµ±Ë®à</td>
+                                <td><asp:Label ID="lblDT1" runat="server" Text="N/A"></asp:Label></td>
+                                <td><asp:Label ID="lblDT2" runat="server" Text="N/A"></asp:Label></td>
+                                <td><asp:Label ID="lblDT3" runat="server" Text="N/A"></asp:Label></td>
+                                <td><asp:Label ID="lblDT4" runat="server" Text="N/A"></asp:Label></td>
+                                <td><asp:Label ID="lblDT5" runat="server" Text="N/A"></asp:Label></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="table-responsive-custom">
+                        <asp:GridView ID="gvMonth" runat="server" CellSpacing="1" GridLines="None" ShowHeader="False">
+                            <RowStyle CssClass="gvrs" />
+                            <FooterStyle CssClass="gvfs" />
+                            <PagerStyle CssClass="gvps" />
+                            <SelectedRowStyle CssClass="gvsrs" />
+                            <EditRowStyle CssClass="gvers" />
+                        </asp:GridView>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </form>
+    <script src="libs/bootstrap.bundle.min.js"></script>
 </body>
 </html>

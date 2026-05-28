@@ -1,4 +1,5 @@
 ﻿Imports System.Data.SqlClient
+Imports System.Collections.Generic
 
 Partial Public Class _1TNRL_Defect
     Inherits System.Web.UI.Page
@@ -8,22 +9,47 @@ Partial Public Class _1TNRL_Defect
     Private chartDate As Date
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        Dim count1 As Integer = WebChart1.Chart.Series.Count
-        For i As Integer = 0 To count1 - 1
-            WebChart1.Chart.Series(i).CheckDataSource()
-            WebChart1.Chart.Series(i).RefreshSeries()
-        Next
         If Page.IsPostBack = False Then
-            '設定Title
             setTitle(Me, PAGE_ID)
+
             Dim args1 As New DataSourceSelectArguments
-            Dim DR1 As DataView = SqlDataSource1.Select(args1)
-            Dim count As Integer = DR1.Count
-            LabelStartdate.Text = Format(CDate(DR1(0)(0).ToString), "yyyy/MM")
-            LabelEnddate.Text = Format(CDate(DR1(count - 1)(0).ToString), "yyyy/MM")
+            Dim DR1 As DataView = CType(SqlDataSource1.Select(args1), DataView)
+
+            If DR1 IsNot Nothing AndAlso DR1.Count > 0 Then
+                Dim count As Integer = DR1.Count
+                LabelStartdate.Text = Format(CDate(DR1(0)("product_date").ToString()), "yyyy/MM")
+                LabelEnddate.Text = Format(CDate(DR1(count - 1)("product_date").ToString()), "yyyy/MM")
+
+                Dim xAxis As New List(Of String)()
+                Dim d1 As New List(Of Double)()
+                Dim d2 As New List(Of Double)()
+                Dim d3 As New List(Of Double)()
+                Dim d4 As New List(Of Double)()
+                Dim d5 As New List(Of Double)()
+
+                For i As Integer = 0 To count - 1
+                    xAxis.Add("'" & Convert.ToDateTime(DR1(i)("product_date")).ToString("yyyy/MM") & "'")
+                    d1.Add(If(IsDBNull(DR1(i)("def_top1")), 0, Convert.ToDouble(DR1(i)("def_top1"))))
+                    d2.Add(If(IsDBNull(DR1(i)("def_top2")), 0, Convert.ToDouble(DR1(i)("def_top2"))))
+                    d3.Add(If(IsDBNull(DR1(i)("def_top3")), 0, Convert.ToDouble(DR1(i)("def_top3"))))
+                    d4.Add(If(IsDBNull(DR1(i)("def_top4")), 0, Convert.ToDouble(DR1(i)("def_top4"))))
+                    d5.Add(If(IsDBNull(DR1(i)("def_top5")), 0, Convert.ToDouble(DR1(i)("def_top5"))))
+                Next
+
+                Dim script As String = "var chartData = {" &
+                    "xAxis: [" & String.Join(",", xAxis) & "]," &
+                    "d1: [" & String.Join(",", d1) & "]," &
+                    "d2: [" & String.Join(",", d2) & "]," &
+                    "d3: [" & String.Join(",", d3) & "]," &
+                    "d4: [" & String.Join(",", d4) & "]," &
+                    "d5: [" & String.Join(",", d5) & "]" &
+                "};"
+
+                ClientScript.RegisterStartupScript(Me.GetType(), "EChartsData", script, True)
+            End If
+
             Mainprocess()
         End If
-
     End Sub
 
     Private Sub TNRL1_Table()
