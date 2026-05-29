@@ -35,7 +35,7 @@
             flex-direction: row;
             gap: 20px;
             width: 100%;
-            max-width: 1400px;
+            max-width: 1600px;
             align-items: flex-start;
             justify-content: center;
         }
@@ -43,7 +43,7 @@
         /* ===== Map ===== */
         .map-wrapper {
             position: relative;
-            width: 720px;
+            width: 853px;
             flex-shrink: 0;
             background: #fff;
             border-radius: 12px;
@@ -53,8 +53,8 @@
             overflow: visible;
         }
         .map-wrapper img.factory-img {
-            width: 700px;
-            height: auto;
+            width: 837px;
+            height: 632px;
             display: block;
             border-radius: 6px;
         }
