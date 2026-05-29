@@ -782,7 +782,7 @@
                     <%-- 中欄：每日增減趨勢（給中欄更寬的 flex 比例，小字型縮排，確保 1920px 下免除 scrollbar） --%>
                     <div class="flex-col-third weekly-col">
                         <div id="weeklyChart" style="width: 100%; height: 240px; min-width: 0;"></div>
-                        <div class="table-wrap" style="margin-top: 8px; justify-content: flex-start;">
+                        <div class="table-wrap" style="margin-top: 8px;">
                             <%-- 中欄表格欄位多，justify-content 改 flex-start 讓表格靠左從頭顯示 --%>
                             <asp:GridView ID="GridView5" runat="server" DataSourceID="dsWeekly" GridLines="None" CssClass="bs5-table">
                             </asp:GridView>
