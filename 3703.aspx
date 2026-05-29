@@ -475,7 +475,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:432px;top:236px;">
+                        <div class="sensor-hotspot" style="left:418px;top:240px;">
                             <asp:Label ID="P_3GIA2105" runat="server" CssClass="sensor-dot" Text="27" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2136</div>
@@ -484,7 +484,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:432px;top:245px;">
+                        <div class="sensor-hotspot" style="left:444px;top:240px;">
                             <asp:Label ID="P_3GIA2106" runat="server" CssClass="sensor-dot" Text="28" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2137</div>
@@ -520,7 +520,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:434px;top:371px;">
+                        <div class="sensor-hotspot" style="left:420px;top:365px;">
                             <asp:Label ID="P_3GIA2004" runat="server" CssClass="sensor-dot" Text="32" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2141</div>
@@ -529,7 +529,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:435px;top:360px;">
+                        <div class="sensor-hotspot" style="left:446px;top:365px;">
                             <asp:Label ID="P_3GIA2005" runat="server" CssClass="sensor-dot" Text="33" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2142</div>
