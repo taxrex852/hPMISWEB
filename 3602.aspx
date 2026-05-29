@@ -1,4 +1,4 @@
-﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3602.aspx.vb" Inherits="hPMISWEB.HSM_Stock2" ContentType="text/html" ResponseEncoding="UTF-8" %>
+<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3602.aspx.vb" Inherits="hPMISWEB.HSM_Stock2" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -161,7 +161,44 @@
             color: #7a8395;
         }
         .zone-ok   { background: radial-gradient(circle at 35% 35%, #aee571, #5cb85c); }
-        .zone-err  { background: radial-gradient(circle at 35% 35%, #ff6b6b, #d9534f); }
+        .zone-err  {
+            background: radial-gradient(circle at 35% 35%, #ff6b6b, #d9534f);
+            /* 紅燈呼吸燈效果 */
+            animation: pulse-red 1.6s ease-in-out infinite;
+        }
+
+        /* ---- 紅色呼吸燈動畫：縮放 + 紅色光暈 ---- */
+        @keyframes pulse-red {
+            0%   {
+                transform: scale(1);
+                box-shadow:
+                    0 0  6px 1px rgba(217, 83, 79, 0.55),
+                    0 0 12px 3px rgba(217, 83, 79, 0.30);
+            }
+            50%  {
+                transform: scale(1.10);
+                box-shadow:
+                    0 0 14px 5px  rgba(217, 83, 79, 0.90),
+                    0 0 28px 10px rgba(217, 83, 79, 0.55),
+                    0 0 42px 16px rgba(255, 80, 60, 0.25);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow:
+                    0 0  6px 1px rgba(217, 83, 79, 0.55),
+                    0 0 12px 3px rgba(217, 83, 79, 0.30);
+            }
+        }
+
+        /* 說明區紅點也跟著呼吸 */
+        .limit-legend-dot.dot-err {
+            animation: pulse-red-dot 1.6s ease-in-out infinite;
+        }
+        @keyframes pulse-red-dot {
+            0%   { box-shadow: 0 0 2px 1px rgba(217, 83, 79, 0.40); }
+            50%  { box-shadow: 0 0 6px 3px rgba(217, 83, 79, 0.85); }
+            100% { box-shadow: 0 0 2px 1px rgba(217, 83, 79, 0.40); }
+        }
 
         /* ---- 燈號說明 ---- */
         .limit-legend {
@@ -328,7 +365,7 @@
                             <span>正常（低於門檻）</span>
                         </div>
                         <div class="limit-legend-item">
-                            <div class="limit-legend-dot" style="background:#d9534f;"></div>
+                            <div class="limit-legend-dot dot-err" style="background:#d9534f;"></div>
                             <span>超標（高於門檻）</span>
                         </div>
                     </div>
