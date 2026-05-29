@@ -276,6 +276,19 @@
             70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
+
+        /* ==========================================================================
+           🖱️ Card Hover → 地圖熱點凸顯
+           ========================================================================== */
+        .interactive-hotspot.card-highlighted .hotspot-overlay {
+            transform: scale(1.06);
+            box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.35), 0 0 24px rgba(37, 99, 235, 0.25);
+        }
+        [data-env="危險"].card-highlighted .hotspot-overlay,
+        [data-status="中斷"].card-highlighted .hotspot-overlay {
+            transform: scale(1.06);
+            box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.45), 0 0 24px rgba(239, 68, 68, 0.3) !important;
+        }
     </style>
 </head>
 <body>
@@ -293,9 +306,9 @@
                         <div class="map-wrapper">
                             <img src="images/Y6P2.jpg" id="IMG1" class="base-factory-png" alt="W4廠區圖" />
                             
-                            <div class="interactive-hotspot" 
+                            <div class="interactive-hotspot"
                                   style="top: 72.2%; left: 28.2%; width: 10.2%; height: 14.2%;"
-                                 data-status='<%= TextBox7.Text %>' data-env='<%= TextBox6.Text %>'>
+                                 data-zone="fce-hot" data-status='<%= TextBox7.Text %>' data-env='<%= TextBox6.Text %>'>
                                 <div class="hotspot-overlay"></div>
                                 <div class="modern-tooltip">
                                     <h3>熱軋加熱爐區域</h3>
@@ -305,9 +318,9 @@
                                 </div>
                             </div>
 
-                            <div class="interactive-hotspot" 
+                            <div class="interactive-hotspot"
                                      style="top: 42.8%; left: 17.8%; width: 10.5%; height: 12.3%;"
-                                 data-status='<%= TextBox14.Text %>' data-env='<%= TextBox13.Text %>'>
+                                 data-zone="fce-beam" data-status='<%= TextBox14.Text %>' data-env='<%= TextBox13.Text %>'>
                                 <div class="hotspot-overlay"></div>
                                 <div class="modern-tooltip">
                                     <h3>型鋼加熱爐區域</h3>
@@ -326,7 +339,7 @@
                                 <div class="legend-item"><span class="badge red">&ge; 35 ppm</span> 危險警報狀態 (紅框)</div>
                             </div>
 
-                            <div class="data-card" data-status='<%= TextBox7.Text %>' data-env='<%= TextBox6.Text %>'>
+                            <div class="data-card" data-zone="fce-hot" data-status='<%= TextBox7.Text %>' data-env='<%= TextBox6.Text %>'>
                                 <div class="card-header">熱軋加熱爐區域</div>
                                 <div class="metric-row">
                                     <span class="label">CO 偵測最大值</span>
@@ -342,7 +355,7 @@
                                 </div>
                             </div>
 
-                            <div class="data-card" data-status='<%= TextBox14.Text %>' data-env='<%= TextBox13.Text %>'>
+                            <div class="data-card" data-zone="fce-beam" data-status='<%= TextBox14.Text %>' data-env='<%= TextBox13.Text %>'>
                                 <div class="card-header">型鋼加熱爐區域</div>
                                 <div class="metric-row">
                                     <span class="label">CO 偵測最大值</span>
@@ -378,5 +391,26 @@
             </asp:UpdatePanel>
         </div>
     </form>
+
+    <script type="text/javascript">
+        (function () {
+            function wireCardHighlight() {
+                var cards = document.querySelectorAll('.data-card[data-zone]');
+                for (var i = 0; i < cards.length; i++) {
+                    (function (card) {
+                        var zone = card.getAttribute('data-zone');
+                        var hs = document.querySelector('.interactive-hotspot[data-zone="' + zone + '"]');
+                        if (!hs) return;
+                        card.addEventListener('mouseenter', function () { hs.classList.add('card-highlighted'); });
+                        card.addEventListener('mouseleave', function () { hs.classList.remove('card-highlighted'); });
+                    })(cards[i]);
+                }
+            }
+            if (typeof Sys !== 'undefined' && Sys.WebForms) {
+                Sys.WebForms.PageRequestManager.getInstance().add_endRequest(wireCardHighlight);
+            }
+            window.addEventListener('load', wireCardHighlight);
+        })();
+    </script>
 </body>
 </html>

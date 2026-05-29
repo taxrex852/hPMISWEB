@@ -51,6 +51,7 @@
             padding: 8px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border: 1px solid var(--border-color);
+            overflow: visible;
         }
         .map-wrapper img.factory-img {
             width: 584px;
@@ -76,28 +77,63 @@
             border-radius: 3px;
             box-sizing: border-box;
         }
+
+        /* ==========================================================================
+           現代化感測點 Tooltip（仿 3701 風格）
+           ========================================================================== */
         .sensor-tooltip {
             position: absolute;
-            bottom: 130%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(15,23,42,0.95);
-            color: #e2e8f0;
-            font-size: 0.73rem;
-            padding: 4px 10px;
-            border-radius: 5px;
-            white-space: nowrap;
+            top: 50%;
+            left: 130%;
+            transform: translateY(-50%) translateX(-8px);
+            background: rgba(15, 23, 42, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 10px 14px;
+            width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.2s ease;
-            z-index: 200;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
             pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            color: #e2e8f0;
         }
         .sensor-hotspot:hover .sensor-tooltip {
             opacity: 1;
             visibility: visible;
+            transform: translateY(-50%) translateX(0);
         }
+        /* 靠右側感測點：Tooltip 向左彈出 */
+        .sensor-hotspot.tip-left .sensor-tooltip {
+            left: auto;
+            right: 130%;
+            transform: translateY(-50%) translateX(8px);
+        }
+        .sensor-hotspot.tip-left:hover .sensor-tooltip {
+            transform: translateY(-50%) translateX(0);
+        }
+        .st-title {
+            font-size: 0.88rem;
+            font-weight: bold;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+            font-family: monospace;
+        }
+        .st-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            margin-bottom: 5px;
+        }
+        .st-row:last-child { margin-bottom: 0; }
+        .st-lbl { color: #94a3b8; }
+        .st-val { color: #38bdf8; font-weight: bold; }
+        .st-status { font-weight: bold; }
 
         /* ===== Right section (two sub-columns) ===== */
         .right-section {
@@ -223,139 +259,304 @@
                         <!-- #1FCE 感測器 1-10 -->
                         <div class="sensor-hotspot" style="left:367px;top:430px;">
                             <asp:Label ID="P_1GIA2001" runat="server" CssClass="sensor-dot" Text="1" />
-                            <div class="sensor-tooltip">1GIA2001：<asp:Label ID="V_1GIA2001" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2001</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2001" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:392px;top:422px;">
                             <asp:Label ID="P_1GIA2002" runat="server" CssClass="sensor-dot" Text="2" />
-                            <div class="sensor-tooltip">1GIA2002：<asp:Label ID="V_1GIA2002" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2002</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2002" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:367px;top:406px;">
                             <asp:Label ID="P_1GIA2101" runat="server" CssClass="sensor-dot" Text="3" />
-                            <div class="sensor-tooltip">1GIA2101：<asp:Label ID="V_1GIA2101" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2101</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2101" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:465px;top:406px;">
+                        <div class="sensor-hotspot tip-left" style="left:465px;top:406px;">
                             <asp:Label ID="P_1GIA2102" runat="server" CssClass="sensor-dot" Text="4" />
-                            <div class="sensor-tooltip">1GIA2102：<asp:Label ID="V_1GIA2102" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2102</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2102" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:367px;top:349px;">
                             <asp:Label ID="P_1GIA2103" runat="server" CssClass="sensor-dot" Text="5" />
-                            <div class="sensor-tooltip">1GIA2103：<asp:Label ID="V_1GIA2103" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2103</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2103" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:465px;top:349px;">
+                        <div class="sensor-hotspot tip-left" style="left:465px;top:349px;">
                             <asp:Label ID="P_1GIA2104" runat="server" CssClass="sensor-dot" Text="6" />
-                            <div class="sensor-tooltip">1GIA2104：<asp:Label ID="V_1GIA2104" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2104</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2104" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:367px;top:300px;">
                             <asp:Label ID="P_1GIA2105" runat="server" CssClass="sensor-dot" Text="7" />
-                            <div class="sensor-tooltip">1GIA2105：<asp:Label ID="V_1GIA2105" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2105</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2105" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:465px;top:300px;">
+                        <div class="sensor-hotspot tip-left" style="left:465px;top:300px;">
                             <asp:Label ID="P_1GIA2106" runat="server" CssClass="sensor-dot" Text="8" />
-                            <div class="sensor-tooltip">1GIA2106：<asp:Label ID="V_1GIA2106" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2106</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2106" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:367px;top:251px;">
                             <asp:Label ID="P_1GIA2107" runat="server" CssClass="sensor-dot" Text="9" />
-                            <div class="sensor-tooltip">1GIA2107：<asp:Label ID="V_1GIA2107" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2107</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2107" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:465px;top:251px;">
+                        <div class="sensor-hotspot tip-left" style="left:465px;top:251px;">
                             <asp:Label ID="P_1GIA2108" runat="server" CssClass="sensor-dot" Text="10" />
-                            <div class="sensor-tooltip">1GIA2108：<asp:Label ID="V_1GIA2108" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">1GIA2108</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2108" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
 
                         <!-- #2FCE 感測器 11-20 -->
                         <div class="sensor-hotspot" style="left:236px;top:430px;">
                             <asp:Label ID="P_2GIA2001" runat="server" CssClass="sensor-dot" Text="11" />
-                            <div class="sensor-tooltip">2GIA2001：<asp:Label ID="V_2GIA2001" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2001</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2001" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:270px;top:422px;">
                             <asp:Label ID="P_2GIA2002" runat="server" CssClass="sensor-dot" Text="12" />
-                            <div class="sensor-tooltip">2GIA2002：<asp:Label ID="V_2GIA2002" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2002</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2002" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:236px;top:406px;">
                             <asp:Label ID="P_2GIA2101" runat="server" CssClass="sensor-dot" Text="13" />
-                            <div class="sensor-tooltip">2GIA2101：<asp:Label ID="V_2GIA2101" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2101</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2101" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:334px;top:406px;">
                             <asp:Label ID="P_2GIA2102" runat="server" CssClass="sensor-dot" Text="14" />
-                            <div class="sensor-tooltip">2GIA2102：<asp:Label ID="V_2GIA2102" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2102</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2102" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:236px;top:349px;">
                             <asp:Label ID="P_2GIA2103" runat="server" CssClass="sensor-dot" Text="15" />
-                            <div class="sensor-tooltip">2GIA2103：<asp:Label ID="V_2GIA2103" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2103</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2103" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:334px;top:349px;">
                             <asp:Label ID="P_2GIA2104" runat="server" CssClass="sensor-dot" Text="16" />
-                            <div class="sensor-tooltip">2GIA2104：<asp:Label ID="V_2GIA2104" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2104</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2104" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:236px;top:300px;">
                             <asp:Label ID="P_2GIA2105" runat="server" CssClass="sensor-dot" Text="17" />
-                            <div class="sensor-tooltip">2GIA2105：<asp:Label ID="V_2GIA2105" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2105</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2105" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:334px;top:300px;">
                             <asp:Label ID="P_2GIA2106" runat="server" CssClass="sensor-dot" Text="18" />
-                            <div class="sensor-tooltip">2GIA2106：<asp:Label ID="V_2GIA2106" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2106</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2106" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:236px;top:251px;">
                             <asp:Label ID="P_2GIA2107" runat="server" CssClass="sensor-dot" Text="19" />
-                            <div class="sensor-tooltip">2GIA2107：<asp:Label ID="V_2GIA2107" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2107</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2107" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:334px;top:251px;">
                             <asp:Label ID="P_2GIA2108" runat="server" CssClass="sensor-dot" Text="20" />
-                            <div class="sensor-tooltip">2GIA2108：<asp:Label ID="V_2GIA2108" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">2GIA2108</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2108" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
 
                         <!-- #3FCE 感測器 21-33 -->
                         <div class="sensor-hotspot" style="left:97px;top:430px;">
                             <asp:Label ID="P_3GIA2001" runat="server" CssClass="sensor-dot" Text="21" />
-                            <div class="sensor-tooltip">3GIA2001：<asp:Label ID="V_3GIA2001" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2001</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2001" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:122px;top:422px;">
                             <asp:Label ID="P_3GIA2002" runat="server" CssClass="sensor-dot" Text="22" />
-                            <div class="sensor-tooltip">3GIA2002：<asp:Label ID="V_3GIA2002" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2002</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2002" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:97px;top:406px;">
                             <asp:Label ID="P_3GIA2101" runat="server" CssClass="sensor-dot" Text="23" />
-                            <div class="sensor-tooltip">3GIA2101：<asp:Label ID="V_3GIA2101" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2101</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2101" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:203px;top:406px;">
                             <asp:Label ID="P_3GIA2102" runat="server" CssClass="sensor-dot" Text="24" />
-                            <div class="sensor-tooltip">3GIA2102：<asp:Label ID="V_3GIA2102" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2102</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2102" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:97px;top:349px;">
                             <asp:Label ID="P_3GIA2103" runat="server" CssClass="sensor-dot" Text="25" />
-                            <div class="sensor-tooltip">3GIA2103：<asp:Label ID="V_3GIA2103" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2103</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2103" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:203px;top:349px;">
                             <asp:Label ID="P_3GIA2104" runat="server" CssClass="sensor-dot" Text="26" />
-                            <div class="sensor-tooltip">3GIA2104：<asp:Label ID="V_3GIA2104" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2104</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2104" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:97px;top:300px;">
                             <asp:Label ID="P_3GIA2105" runat="server" CssClass="sensor-dot" Text="27" />
-                            <div class="sensor-tooltip">3GIA2105：<asp:Label ID="V_3GIA2105" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2105</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2105" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:203px;top:300px;">
                             <asp:Label ID="P_3GIA2106" runat="server" CssClass="sensor-dot" Text="28" />
-                            <div class="sensor-tooltip">3GIA2106：<asp:Label ID="V_3GIA2106" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2106</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2106" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:97px;top:251px;">
                             <asp:Label ID="P_3GIA2107" runat="server" CssClass="sensor-dot" Text="29" />
-                            <div class="sensor-tooltip">3GIA2107：<asp:Label ID="V_3GIA2107" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2107</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2107" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:203px;top:251px;">
                             <asp:Label ID="P_3GIA2108" runat="server" CssClass="sensor-dot" Text="30" />
-                            <div class="sensor-tooltip">3GIA2108：<asp:Label ID="V_3GIA2108" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2108</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2108" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:162px;top:600px;">
                             <asp:Label ID="P_3GIA2003" runat="server" CssClass="sensor-dot" Text="31" />
-                            <div class="sensor-tooltip">3GIA2003：<asp:Label ID="V_3GIA2003" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2003</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2003" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                         <div class="sensor-hotspot" style="left:162px;top:218px;">
                             <asp:Label ID="P_3GIA2004" runat="server" CssClass="sensor-dot" Text="32" />
-                            <div class="sensor-tooltip">3GIA2004：<asp:Label ID="V_3GIA2004" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2004</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2004" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:523px;top:463px;">
+                        <div class="sensor-hotspot tip-left" style="left:523px;top:463px;">
                             <asp:Label ID="P_3GIA2005" runat="server" CssClass="sensor-dot" Text="33" />
-                            <div class="sensor-tooltip">3GIA2005：<asp:Label ID="V_3GIA2005" runat="server" Text="N/A" /> ppm</div>
+                            <div class="sensor-tooltip">
+                                <div class="st-title">3GIA2005</div>
+                                <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2005" runat="server" Text="N/A" /> ppm</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
+                            </div>
                         </div>
                     </div>
 
@@ -693,7 +894,7 @@
             });
         }
 
-        /* 呼吸燈：依 VB 後端設定的 BackColor 決定動畫 class */
+        /* 依感測點背景色套用呼吸燈 class，並更新 Tooltip 狀態文字 */
         function applyBreathingEffect() {
             var targets = document.querySelectorAll('.sensor-dot, .s-badge');
             for (var i = 0; i < targets.length; i++) {
@@ -708,16 +909,40 @@
             }
         }
 
+        /* 根據感測點顏色更新 Tooltip 狀態列 */
+        function updateTooltipStatus() {
+            var hotspots = document.querySelectorAll('.sensor-hotspot');
+            for (var i = 0; i < hotspots.length; i++) {
+                var hs = hotspots[i];
+                var dot = hs.querySelector('.sensor-dot');
+                var statusEl = hs.querySelector('.st-status');
+                if (!dot || !statusEl) continue;
+                var bg = window.getComputedStyle(dot).backgroundColor;
+                if (bg === 'rgb(255, 0, 0)') {
+                    statusEl.textContent = '危險警報';
+                    statusEl.style.color = '#ef4444';
+                } else if (bg === 'rgb(255, 255, 0)') {
+                    statusEl.textContent = '注意狀態';
+                    statusEl.style.color = '#f59e0b';
+                } else {
+                    statusEl.textContent = '安全狀態';
+                    statusEl.style.color = '#38bdf8';
+                }
+            }
+        }
+
         if (typeof Sys !== 'undefined' && Sys.WebForms) {
             Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function() {
                 initWindChart();
                 applyBreathingEffect();
+                updateTooltipStatus();
             });
         }
 
         window.addEventListener('load', function() {
             initWindChart();
             applyBreathingEffect();
+            updateTooltipStatus();
         });
     </script>
 </form>
