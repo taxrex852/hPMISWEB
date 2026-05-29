@@ -1,4 +1,4 @@
-<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3602.aspx.vb" Inherits="hPMISWEB.HSM_Stock2" ContentType="text/html" ResponseEncoding="UTF-8" %>
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3602.aspx.vb" Inherits="hPMISWEB.HSM_Stock2" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -163,11 +163,11 @@
         .zone-ok   { background: radial-gradient(circle at 35% 35%, #aee571, #5cb85c); }
         .zone-err  {
             background: radial-gradient(circle at 35% 35%, #ff6b6b, #d9534f);
-            /* 紅燈呼吸燈效果 */
+            /* Red breathing light effect */
             animation: pulse-red 1.6s ease-in-out infinite;
         }
 
-        /* ---- 紅色呼吸燈動畫：縮放 + 紅色光暈 ---- */
+        /* ---- Red breathing animation: scale + red glow ---- */
         @keyframes pulse-red {
             0%   {
                 transform: scale(1);
@@ -190,7 +190,7 @@
             }
         }
 
-        /* 說明區紅點也跟著呼吸 */
+        /* Legend red dot also breathes */
         .limit-legend-dot.dot-err {
             animation: pulse-red-dot 1.6s ease-in-out infinite;
         }
@@ -200,7 +200,7 @@
             100% { box-shadow: 0 0 2px 1px rgba(217, 83, 79, 0.40); }
         }
 
-        /* ---- 燈號說明 ---- */
+        /* ---- Light legend ---- */
         .limit-legend {
             display: flex;
             flex-direction: column;
