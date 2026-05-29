@@ -85,7 +85,7 @@
         #box-Y4        { background-color: rgba(0, 0, 255, 0.3);   top: 25%; left: 61%; width: 23%; height: 16%; }
         #box-HC保溫坑  { background-color: rgba(0, 0, 0, 0.5);     top: 56%; left: 16%; width: 11%; height: 9%;  z-index: 21; }
 
-        /* ---- Bootstrap 5 風格資料表格 ---- */
+     
         .bs5-table {
             width: 100%;
             table-layout: auto;
