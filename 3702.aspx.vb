@@ -21,11 +21,6 @@ Partial Public Class _HSM3702
 
 
     Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
-        Dim count1 As Integer = WebChart1.Chart.Series.Count
-        For i As Integer = 0 To count1 - 1
-            WebChart1.Chart.Series(i).CheckDataSource()
-            WebChart1.Chart.Series(i).RefreshSeries()
-        Next
         If Page.IsPostBack = False Then
             '設定Title
             setTitle(Me, PAGE_ID)

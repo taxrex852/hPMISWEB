@@ -1,1116 +1,635 @@
 ﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3702.aspx.vb" Inherits="hPMISWEB._HSM3702" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
-<%@ Register assembly="TeeChart" namespace="Steema.TeeChart.Web" tagprefix="tchart" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" >
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-<meta http-equiv ="refresh" content ="60"/>
     <title>加熱爐固定式CO偵測圖</title>
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    
-<script language="javascript" type="text/javascript">
-// <!CDATA[
-
-function IMG1_onclick() {
-
-}
-<!--
-function MM_findObj(n, d) { //v4.01
- var p,i,x; if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
- d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
- if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
- for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
- if(!x && d.getElementById) x=d.getElementById(n); return x;
-}
-function MM_showHideLayers() { //v6.0
-  var i,p,v,obj,args=MM_showHideLayers.arguments;
-  for (i=0; i<(args.length-2); i+=3) if ((obj=MM_findObj(args[i]))!=null) { v=args[i+2];
-    if (obj.style) { obj=obj.style; v=(v=='show')?'visible':(v=='hide')?'hidden':v; }
-    obj.visibility=v; }
-}
-
-</script>
-
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
+    <script src="libs/echarts.min.js" type="text/javascript"></script>
     <style type="text/css">
-        .auto-style1 {
-            font-size: small;
+        /* ==========================================================================
+           Modern dashboard style (3701 style) - white clean design
+           ========================================================================== */
+        :root {
+            --bg-light: #ffffff;
+            --card-bg: #f8fafc;
+            --border-color: #cbd5e1;
+            --text-main: #334155;
+            --text-muted: #64748b;
         }
-        .auto-style2 {
-            width: 603px;
-            height: 676px;
-            vertical-align: top;
-            font-size: small;
-            font-family: 微軟正黑體;
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            font-family: "Helvetica Neue", Helvetica, "Microsoft JhengHei", sans-serif;
+            margin: 0;
+            padding: 20px;
         }
-        .auto-style3 {
-            font-family: 微軟正黑體;
+        .page-center-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            margin-top: 20px;
         }
-        .auto-style4 {
-            font-size: small;
-            font-family: 微軟正黑體;
+        .dashboard-container {
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            width: 100%;
+            max-width: 1060px;
+            align-items: flex-start;
         }
-        .auto-style5 {
-            font-family: 微軟正黑體;
-            font-weight: normal;
+        .map-wrapper {
+            position: relative;
+            width: 576px;
+            flex-shrink: 0;
+            background: #fff;
+            border-radius: 12px;
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid var(--border-color);
         }
-        .auto-style6 {
-            font-weight: normal;
+        .map-wrapper img.factory-img {
+            width: 560px;
+            height: auto;
+            display: block;
+            border-radius: 6px;
         }
+        .sensor-hotspot {
+            position: absolute;
+            cursor: pointer;
+            z-index: 5;
+        }
+        .sensor-dot {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            font-size: 8px;
+            font-weight: bold;
+            border: 1px solid #555;
+            border-radius: 2px;
+            box-sizing: border-box;
+        }
+        .sensor-tooltip {
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15,23,42,0.95);
+            color: #e2e8f0;
+            font-size: 0.73rem;
+            padding: 4px 10px;
+            border-radius: 5px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 200;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .sensor-hotspot:hover .sensor-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        .side-panel {
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .data-card, .info-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 14px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .card-header {
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .metric-row:last-child { margin-bottom: 0; }
+        .lbl { color: var(--text-muted); font-size: 0.85rem; }
+        .sensor-tbl { width: 100%; border-collapse: collapse; }
+        .sensor-tbl td { padding: 1px 3px; font-size: 0.76rem; vertical-align: middle; }
+        .s-badge {
+            display: inline-block;
+            width: 18px; height: 18px; line-height: 18px;
+            text-align: center; font-size: 8px; font-weight: bold;
+            border: 1px solid #888; border-radius: 2px;
+        }
+        .s-name { color: #f97316; font-family: monospace; }
+        .s-val { font-weight: bold; }
+        .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 0.8rem; color: var(--text-muted); }
+        .bdg { padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 0.7rem; }
+        .bdg-b { background: rgba(37,99,235,0.1); color: #2563eb; border: 1px solid rgba(37,99,235,0.3); }
+        .bdg-y { background: rgba(217,119,6,0.1); color: #d97706; border: 1px solid rgba(217,119,6,0.3); }
+        .bdg-r { background: rgba(239,68,68,0.1); color: #dc2626; border: 1px solid rgba(239,68,68,0.3); }
+        #wind-echart { width: 210px; height: 210px; margin: 4px auto 0; display: block; }
+        .time-row { font-size: 0.76rem; margin-bottom: 3px; display: flex; justify-content: space-between; }
+        .time-lbl { color: var(--text-muted); }
+        .time-val { color: #2563eb; font-size: 0.74rem; }
     </style>
 </head>
-
 <body>
-    <form id="form1" runat="server">
-    <hPMISWEB:PageHeader ID="ph" runat ="server" />
-        <br />
-        <br />
-        
-    <div>
-        <asp:UpdatePanel ID="UpdatePanel1" runat="server"  UpdateMode="Conditional">
+<form id="form1" runat="server">
+    <hPMISWEB:PageHeader ID="ph" runat="server" />
+    <div class="page-center-wrapper">
+        <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
             <ContentTemplate>
-                <span class="auto-style4">&nbsp;</span><asp:Timer ID="Timer1" runat="server" Interval="10000">
-                </asp:Timer>
-               
-                 <div id="D_1GIA2001" class ="auto-style4" style="position:absolute; left: 368px; width: 40px; top: 560px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_1GIA2001','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2001','','hide')">
-                <asp:Label ID="P_1GIA2001" runat="server" Text="1" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_1GIA2001" class="auto-style4"
-    style="position:absolute; left:368px; top:592px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>1GIA2001
-     <asp:Label ID="V_1GIA2001" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                
-          
-           <div id="D_1GIA2104" class ="auto-style4" style="position:absolute; left: 464px; width: 40px; top: 480px; height: 40px;"
-                      onmouseover="MM_showHideLayers('S_1GIA2104','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2104','','hide')">
-                        <asp:Label ID="P_1GIA2104" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="6" Width="16px" BackColor="Yellow"></asp:Label></div>
-                              <div id="S_1GIA2104" class="auto-style4"
-    style="position:absolute; left:488px; top:448px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; z-index: 1;z-index: 1;"><p>1GIA2104
-     <asp:Label ID="V_1GIA2104" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                    <div id="D_1GIA2103" class ="auto-style4" style="position:absolute; left: 368px; width: 40px; top: 480px; height: 40px;"
-                      onmouseover="MM_showHideLayers('S_1GIA2103','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2103','','hide')">
-                        <asp:Label ID="P_1GIA2103" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="5" Width="16px" BackColor="Yellow"></asp:Label></div>
-                            <div id="S_1GIA2103" class="auto-style4"
-    style="position:absolute; left:392px; top:448px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>1GIA2103
-     <asp:Label ID="V_1GIA2103" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-          
-          
-                    <div id="D_2GIA2101" class ="auto-style4" style="position:absolute; left: 240px; width: 40px; top: 536px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_2GIA2101','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2101','','hide')">
-                        <asp:Label ID="P_2GIA2101" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                            text-align: center" Text="13" Width="16px" BackColor="Yellow"></asp:Label></div>
-                             <div id="S_2GIA2101" class="auto-style4"
-    style="position:absolute; left:144px; top:504px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2101
-     <asp:Label ID="V_2GIA2101" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                    <div id="D_2GIA2108" class ="auto-style4" style="position:absolute; left: 336px; width: 40px; top: 384px; height: 40px;"
-                      onmouseover="MM_showHideLayers('S_2GIA2108','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2108','','hide')">
-                        <asp:Label ID="P_2GIA2108" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="20" Width="16px" BackColor="Yellow"></asp:Label></div>
-                            <div id="S_2GIA2108" class="auto-style4"
-    style="position:absolute; left:272px; top:320px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2108
-     <asp:Label ID="V_2GIA2108" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                    <div id="D_2GIA2107" class ="auto-style4" style="position:absolute; left: 240px; width: 40px; top: 384px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_2GIA2107','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2107','','hide')">
-                        <asp:Label ID="P_2GIA2107" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="19" Width="16px" BackColor="Yellow"></asp:Label></div>
-                            <div id="S_2GIA2107" class="auto-style4"
-    style="position:absolute; left:144px; top:352px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; z-index: 1;z-index: 1;"><p>2GIA2107
-     <asp:Label ID="V_2GIA2107" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                    <div id="D_2GIA2105" class ="auto-style4" style="position:absolute; left: 240px; width: 40px; top: 432px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_2GIA2105','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2105','','hide')">
-                        <asp:Label ID="P_2GIA2105" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="17" Width="16px" BackColor="Yellow"></asp:Label></div>
-                            <div id="S_2GIA2105" class="auto-style4"
-    style="position:absolute; left:144px; top:400px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2105
-     <asp:Label ID="V_2GIA2105" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-            <div id="D_3GIA2001" class ="auto-style4" style="position:absolute; left: 104px; width: 40px; top: 560px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2001','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2001','','hide')">
-                <asp:Label ID="P_3GIA2001" runat="server" Text="21" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2001" class="auto-style4"
-    style="position:absolute; left:8px; top:560px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2001
-     <asp:Label ID="V_3GIA2001" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-  
-    <div id="D_3GIA2002" class ="auto-style4" style="position:absolute; left: 128px; width: 40px; top: 552px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2002','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2002','','hide')">
-                <asp:Label ID="P_3GIA2002" runat="server" Text="22" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2002" class="auto-style4"
-    style="position:absolute; left:128px; top:576px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2002
-     <asp:Label ID="V_3GIA2002" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-           <div id="D_3GIA2101" class ="auto-style4" style="position:absolute; left: 104px; width: 40px; top: 536px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2101','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2101','','hide')">
-                <asp:Label ID="P_3GIA2101" runat="server" Text="23" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2101" class="auto-style4"
-    style="position:absolute; left:104px; top:592px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2101
-     <asp:Label ID="V_3GIA2101" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-          <div id="D_3GIA2102" class ="auto-style4" style="position:absolute; left: 208px; width: 40px; top: 536px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2102','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2102','','hide')">
-                <asp:Label ID="P_3GIA2102" runat="server" Text="24" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2102" class="auto-style4"
-    style="position:absolute; left:144px; top:560px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2102
-     <asp:Label ID="V_3GIA2102" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-            <div id="D_3GIA2103" class ="auto-style4" style="position:absolute; left: 104px; width: 40px; top: 480px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2103','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2103','','hide')">
-                <asp:Label ID="P_3GIA2103" runat="server" Text="25" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2103" class="auto-style4"
-    style="position:absolute; left:8px; top:480px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2103
-     <asp:Label ID="V_3GIA2103" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-         
-           <div id="D_3GIA2104" class ="auto-style4" style="position:absolute; left: 208px; width: 40px; top: 480px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2104','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2104','','hide')">
-                <asp:Label ID="P_3GIA2104" runat="server" Text="26" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2104" class="auto-style4"
-    style="position:absolute; left:112px; top:480px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2104
-     <asp:Label ID="V_3GIA2104" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-         
-          <div id="D_3GIA2105" class ="auto-style4" style="position:absolute; left: 104px; width: 40px; top: 432px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2105','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2105','','hide')">
-                <asp:Label ID="P_3GIA2105" runat="server" Text="27" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2105" class="auto-style4"
-    style="position:absolute; left:8px; top:432px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2105
-     <asp:Label ID="V_3GIA2105" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-         
-          <div id="D_3GIA2106" class ="auto-style4" style="position:absolute; left: 208px; width: 40px; top: 432px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2106','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2106','','hide')">
-                <asp:Label ID="P_3GIA2106" runat="server" Text="28" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2106" class="auto-style4"
-    style="position:absolute; left:112px; top:432px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2106
-     <asp:Label ID="V_3GIA2106" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-         
-           <div id="D_3GIA2107" class ="auto-style4" style="position:absolute; left: 104px; width: 40px; top: 384px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2107','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2107','','hide')">
-                <asp:Label ID="P_3GIA2107" runat="server" Text="29" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2107" class="auto-style4"
-    style="position:absolute; left:8px; top:384px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2107
-     <asp:Label ID="V_3GIA2107" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-         
-              <div id="D_3GIA2108" class ="auto-style4" style="position:absolute; left: 208px; width: 40px; top: 384px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2108','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2108','','hide')">
-                <asp:Label ID="P_3GIA2108" runat="server" Text="30" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2108" class="auto-style4"
-    style="position:absolute; left:112px; top:384px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2108
-     <asp:Label ID="V_3GIA2108" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-          
-                    <div id="D_2GIA2002" class ="auto-style4" style="position:absolute; left: 272px; width: 40px; top: 552px; height: 40px;"
-                    onmouseover="MM_showHideLayers('S_2GIA2002','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2002','','hide')">
-                        <asp:Label ID="P_2GIA2002" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="12" Width="16px" BackColor="Yellow"></asp:Label></div>
-                             <div id="S_2GIA2002" class="auto-style4"
-    style="position:absolute; left:272px; top:584px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2002
-     <asp:Label ID="V_2GIA2002" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                    <div id="D_2GIA2001" class ="auto-style4" style="position:absolute; left: 240px; width: 40px; top: 560px; height: 40px;"
-                    onmouseover="MM_showHideLayers('S_2GIA2001','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2001','','hide')">
-                        <asp:Label ID="P_2GIA2001" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="11" Width="16px" BackColor="Yellow"></asp:Label></div>
-                             <div id="S_2GIA2001" class="auto-style4"
-    style="position:absolute; left:240px; top:592px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2001
-     <asp:Label ID="V_2GIA2001" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                             <div id="D_1GIA2002" class ="auto-style4" style="position:absolute; left: 392px; width: 40px; top: 552px; height: 40px;"
-                              onmouseover="MM_showHideLayers('S_1GIA2002','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2002','','hide')">
-                    <asp:Label ID="P_1GIA2002" runat="server" Height="16px" Style="border-right: thin solid;
-                        border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                         text-align: center" Text="2" Width="16px" BackColor="Yellow"></asp:Label></div>
-                        <div id="S_1GIA2002" class="auto-style4"
-    style="position:absolute; left:392px; top:584px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>1GIA2002
-     <asp:Label ID="V_1GIA2002" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-           <div id="D_1GIA2102" class ="auto-style4" style="position:absolute; left: 464px; width: 40px; top: 536px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_1GIA2102','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2102','','hide')">
-                        <asp:Label ID="P_1GIA2102" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="4" Width="16px" BackColor="Yellow"></asp:Label></div>
-                             <div id="S_1GIA2102" class="auto-style4"
-    style="position:absolute; left:488px; top:504px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; z-index: 1;"><p>1GIA2102
-     <asp:Label ID="V_1GIA2102" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                        <div id="D_1GIA2101" class ="auto-style4" style="position:absolute; left: 368px; width: 40px; top: 536px; height: 40px;"
-                         onmouseover="MM_showHideLayers('S_1GIA2101','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2101','','hide')">
-                            <asp:Label ID="P_1GIA2101" runat="server" Height="16px" Style="border-right: thin solid;
-                                border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                                 text-align: center" Text="3" Width="16px" BackColor="Yellow"></asp:Label></div>
-                           <div id="S_1GIA2101" class="auto-style4"
-    style="position:absolute; left:392px; top:504px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>1GIA2101
-     <asp:Label ID="V_1GIA2101" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-                        
-                   
-                   
-          
-                    <div id="D_2GIA2103" class ="auto-style4" style="position:absolute; left: 240px; width: 40px; top: 480px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_2GIA2103','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2103','','hide')">
-                        <asp:Label ID="P_2GIA2103" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="15" Width="16px" BackColor="Yellow"></asp:Label></div>
-                            <div id="S_2GIA2103" class="auto-style4"
-    style="position:absolute; left:144px; top:448px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2103
-     <asp:Label ID="V_2GIA2103" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-                    <div id="D_1GIA2106" class ="auto-style4" style="position:absolute; left: 464px; width: 40px; top: 432px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_1GIA2106','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2106','','hide')">
-                        <asp:Label ID="P_1GIA2106" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="8" Width="16px" BackColor="Yellow"></asp:Label></div>
-                             <div id="S_1GIA2106" class="auto-style4"
-    style="position:absolute; left:488px; top:400px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; z-index: 1;"><p>1GIA2106
-     <asp:Label ID="V_1GIA2106" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-                            
-                    <div id="D_1GIA2105" class ="auto-style4" style="position:absolute; left: 368px; width: 40px; top: 432px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_1GIA2105','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2105','','hide')">
-                        <asp:Label ID="P_1GIA2105" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="7" Width="16px" BackColor="Yellow"></asp:Label></div>
-                             <div id="S_1GIA2105" class="auto-style4"
-    style="position:absolute; left:392px; top:400px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; z-index: 1;" onclick="return S_1GIA2105_onclick()"><p>1GIA2105
-     <asp:Label ID="V_1GIA2105" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-                            
-                    
-                    <div id="D_1GIA2108" class ="auto-style4" style="position:absolute; left: 464px; width: 40px; top: 384px; height: 40px;"
-                    onmouseover="MM_showHideLayers('S_1GIA2108','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2108','','hide')">
-                        <asp:Label ID="P_1GIA2108" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="10" Width="16px" BackColor="Yellow"></asp:Label></div>
-                            <div id="S_1GIA2108" class="auto-style4"
-    style="position:absolute; left:488px; top:352px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; z-index: 1;"><p>1GIA2108
-     <asp:Label ID="V_1GIA2108" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-                            
-                    <div id="D_2GIA2104" class ="auto-style4" style="position:absolute; left: 336px; width: 40px; top: 480px; height: 40px;"
-                    onmouseover="MM_showHideLayers('S_2GIA2104','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2104','','hide')"> 
-                        <asp:Label ID="P_2GIA2104" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="16" Width="16px" BackColor="Yellow"></asp:Label></div>
-                             <div id="S_2GIA2104" class="auto-style4"
-    style="position:absolute; left:248px; top:448px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2104
-     <asp:Label ID="V_2GIA2104" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-                            
-                   
-                            
-                    <div id="D_2GIA2106" class ="auto-style4" style="position:absolute; left: 336px; width: 40px; top: 432px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_2GIA2106','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2106','','hide')">
-                        <asp:Label ID="P_2GIA2106" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="18" Width="16px" BackColor="Yellow"></asp:Label></div>
-                              <div id="S_2GIA2106" class="auto-style4"
-    style="position:absolute; left:248px; top:400px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2106
-     <asp:Label ID="V_2GIA2106" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-          
-           <div id="D_2GIA2102" class ="auto-style4" style="position:absolute; left: 336px; width: 40px; top: 536px; height: 40px;"
-                     onmouseover="MM_showHideLayers('S_2GIA2102','','show')" 
-           onmouseout="MM_showHideLayers('S_2GIA2102','','hide')">
-                        <asp:Label ID="P_2GIA2102" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="14" Width="16px" BackColor="Yellow"></asp:Label></div>
-                               <div id="S_2GIA2102" class="auto-style4"
-    style="position:absolute; left:248px; top:504px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>2GIA2102
-     <asp:Label ID="V_2GIA2102" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-                     
-              <div id="D_1GIA2107" class ="auto-style4" style="position:absolute; left: 368px; width: 40px; top: 384px; height: 40px;"
-                 onmouseover="MM_showHideLayers('S_1GIA2107','','show')" 
-           onmouseout="MM_showHideLayers('S_1GIA2107','','hide')">
-                        <asp:Label ID="P_1GIA2107" runat="server" Height="16px" Style="border-right: thin solid;
-                            border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid;
-                             text-align: center" Text="9" Width="16px" BackColor="Yellow"></asp:Label></div>
-                            <div id="S_1GIA2107" class="auto-style4"
-    style="position:absolute; left:368px; top:320px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left;z-index: 1;"><p>1GIA2107
-     <asp:Label ID="V_1GIA2107" runat="server" ForeColor="Blue" 
-          Style="text-align: center" Text="N/A"></asp:Label>ppm</p></div>
-         
-          <div id="D_3GIA2003" class ="auto-style4" style="position:absolute; left: 168px; width: 40px; top: 728px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2003','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2003','','hide')">
-                <asp:Label ID="P_3GIA2003" runat="server" Text="31" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2003" class="auto-style4"
-    style="position:absolute; left:72px; top:728px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2003
-     <asp:Label ID="V_3GIA2003" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-         
-           <div id="D_3GIA2004" class ="auto-style4" style="position:absolute; left: 168px; width: 40px; top: 352px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2004','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2004','','hide')">
-                <asp:Label ID="P_3GIA2004" runat="server" Text="32" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2004" class="auto-style4"
-    style="position:absolute; left:72px; top:320px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps;z-index: 1;"><p>3GIA2004
-     <asp:Label ID="V_3GIA2004" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
-         
-                  <div id="D_3GIA2005" class ="auto-style4" style="position:absolute; left: 520px; width: 40px; top: 592px; height: 40px;" 
-                 onmouseover="MM_showHideLayers('S_3GIA2005','','show')" 
-           onmouseout="MM_showHideLayers('S_3GIA2005','','hide')">
-                <asp:Label ID="P_3GIA2005" runat="server" Text="33" 
-                style="border-right: thin solid; border-top: thin solid; vertical-align: middle; border-left: thin solid; border-bottom: thin solid; 
-               text-align: center" Height="16px" Width="16px" BackColor="Yellow"></asp:Label></div>
-                <div id="S_3GIA2005" class="auto-style4"
-    style="position:absolute; left:424px; top:592px; width:85px; height:50px; 
-    background-color: #ffff00; border-right: black thin solid; border-top: black thin solid; visibility: 
-    hidden; border-left: black thin solid; border-bottom: black thin solid; 
-    vertical-align: top; text-align: left; font-variant: small-caps; z-index: 1;"><p>3GIA2005
-     <asp:Label ID="V_3GIA2005" runat="server" ForeColor="Blue" Style="text-align: center"
-         Text="N/A"></asp:Label>ppm</p></div>
- 
-        <table style="width: 968px">
-            <tr>
-                <td style="width: 10px; height: 676px;">
-                </td>
-                <td class="auto-style2">
-<img src="images/FCE.JPG" usemap="#Map" style="width: 560px; border-top-style: none; border-right-style: none; border-left-style: none; border-bottom-style: none; vertical-align: top;" id="IMG1" onclick="return IMG1_onclick()" /><br />
-                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                    &nbsp;<table style="width: 472px">
-                    <%--    <tr>
-                            <td style="width: 193px; height: 136px;">
-                    <asp:Image ID="Image1" runat="server" ImageUrl="~/images/North.JPG" /></td>
-                            <td style="width: 280px; height: 136px">
-                  
-                       
-        <input id="wind_direction_E" runat="server" enableviewstate="true" name="wind_direction_E" type="hidden" />
-                                <tchart:WebChart ID="WebChart2" runat="server" AutoPostback="False" Config="AAEAAAD/////AQAAAAAAAAAMAgAAAFFUZWVDaGFydCwgVmVyc2lvbj00LjEuMjAxOC41MDQyLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTljODEyNjI3NmM3N2JkYjcMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTdGVlbWEuVGVlQ2hhcnQuQ2hhcnQtAAAADC5DYW5jZWxNb3VzZQ0uQ3VycmVudFRoZW1lEC5DdXN0b21DaGFydFJlY3QPLkxlZ2VuZC5WaXNpYmxlDS5IZWFkZXIuTGluZXMQLkFzcGVjdC5Sb3RhdGlvbhUuQXNwZWN0LlJvdGF0aW9uRmxvYXQRLkFzcGVjdC5FbGV2YXRpb24WLkFzcGVjdC5FbGV2YXRpb25GbG9hdBIuQXNwZWN0Lk9ydGhvZ29uYWwZLkFzcGVjdC5Db2xvclBhbGV0dGVJbmRleBMuQXNwZWN0LlBlcnNwZWN0aXZlDi5Bc3BlY3QuVmlldzNECFNlcmllcy4wFS5TZXJpZXMuMC5CcnVzaC5Db2xvchYuU2VyaWVzLjAuQ2lyY2xlTGFiZWxzHC5TZXJpZXMuMC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4wLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMC5Sb3RhdGlvbkFuZ2xlJC5TZXJpZXMuMC5GcmFtZS5GcmFtZUVsZW1lbnRQZXJjZW50cxcuU2VyaWVzLjAuRnJhbWUuQ2lyY2xlZCwuU2VyaWVzLjAuRnJhbWUuT3V0ZXJCYW5kLkdyYWRpZW50LlVzZU1pZGRsZRwuU2VyaWVzLjAuVW5pcXVlQ3VzdG9tUmFkaXVzFy5TZXJpZXMuMC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMC5YVmFsdWVzLkRhdGFNZW1iZXIXLlNlcmllcy4wLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4wLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4wLllWYWx1ZXMuQ291bnQcLlNlcmllcy4wLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjAuQ29sb3JFYWNoDy5TZXJpZXMuMC5Db2xvcg8uU2VyaWVzLjAuVGl0bGUdLlNlcmllcy4wLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zGS5BeGVzLkxlZnQuTGFiZWxzLlZpc2libGUYLkF4ZXMuVG9wLkxhYmVscy5WaXNpYmxlGi5BeGVzLlJpZ2h0LkxhYmVscy5WaXNpYmxlGy5BeGVzLkJvdHRvbS5MYWJlbHMuVmlzaWJsZQ8uQXhlcy5BdXRvbWF0aWMABAAABgAAAAAAAAAAAQQAAAQEAAcAAAAHAAEEBwABAAQBAAAAAAQEAAAAAAABGVN0ZWVtYS5UZWVDaGFydC5UaGVtZVR5cGUCAAAAAQEIBggGAQgIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAgGAQEBBgglU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAABAQEBAQIAAAAABfz///8ZU3RlZW1hLlRlZUNoYXJ0LlRoZW1lVHlwZQEAAAAHdmFsdWVfXwAIAgAAAAAAAAAAAAkFAAAAaAEAAAAAAAAAgHZAOwEAAAAAAAAAsHNAAAAAAAAAAAAAAAYGAAAAH1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuV2luZFJvc2UF+f///xRTeXN0ZW0uRHJhd2luZy5Db2xvcgQAAAAEbmFtZQV2YWx1ZQprbm93bkNvbG9yBXN0YXRlAQAAAAkHBwMAAAAKAAD//wAAAAAAAAIAAQAAAAAAAAAABfj///8nU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5Qb2ludGVyU2l6ZVVuaXRzAQAAAAd2YWx1ZV9fAAgCAAAAAAAAAAH3////+f///woAAAAAAAAAAAAAAABaAAAACQoAAAABAAEJCwAAAAIAAAAGDAAAABNXaW5kX2RpcmVjdGlvbl9wb3MyBfP///8lU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgEAAAAHdmFsdWVfXwAIAgAAAAEAAAAJDgAAAAIAAAAGDwAAAA9XaW5kX1NwZWVkX3BvczIAAfD////5////CgAA//8AAAAAAAACAAYRAAAACumiqOWQkeWcljEAAAAAAAAAAAAAABRAAAAAAAAAIEAF7v///yRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQBAAAAB3ZhbHVlX18ACAIAAAAAAAAABe3///8VU3lzdGVtLkRyYXdpbmcuUG9pbnRGAgAAAAF4AXkAAAsLAwAAAAAAAAAAAAAAAAAAAAERBQAAAAEAAAAGFAAAAAAPCgAAAAMAAAAGAAAAAAAAOUAAAAAAAABOQAAAAAAAAC5ADwsAAAACAAAABgAAAAAAAAAAAAAAAAAQdUAPDgAAAAIAAAAGAAAAAAAAAAAAAAAAABB1QAs=" DataSourceID="SqlDataSource1" GetChartFile="GetChart.aspx" Height="325px" LastFileName="" TempChart="Session" Width="429px" />
-                                <br />
-                                <asp:Label ID="Label23" runat="server" BackColor="#FFC080" Style="border-right: 1px solid;
-                                    border-top: 1px solid; font-weight: bold; border-left: 1px solid; border-bottom: 1px solid"
-                                    Text="熱軋主電氣室南棟"></asp:Label><br />
-                                <asp:Label ID="Wind_S_E_L" runat="server" BackColor="Yellow" Style="border-right: 1px solid;
-                                    border-top: 1px solid; font-weight: bold; border-left: 1px solid; border-bottom: 1px solid"
-                                    Text="風速："></asp:Label>&nbsp;
-                                <asp:Label ID="Val_W_E_S" runat="server" ForeColor="Lime"
-                                        Style="font-weight: bold" Text="N/A"></asp:Label>
-                                <asp:Label ID="Label25" runat="server" Style="font-weight: bold" Text="m/s"></asp:Label></td>
-                            <td style="width: 1526px; height: 136px;"><br />
-                                <br />
-                                </td>
-                        </tr>--%>
-                    </table>
-                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
-                <%--<td style="width: 293px; height: 536px" align="left">
-                </td>--%>
-               
-                <td style="height: 676px; vertical-align: top; width: 340px;">
-                    <table style="width: 344px">
-                        <tr>
-                            <td style="width: 14px">
-                            </td>
-                            <td style="width: 281px">
-     
-                                <tchart:WebChart ID="WebChart1" runat="server" AutoPostback="False" Config="AAEAAAD/////AQAAAAAAAAAMAgAAAFFUZWVDaGFydCwgVmVyc2lvbj00LjEuMjAxOC41MDQyLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTljODEyNjI3NmM3N2JkYjcMAwAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTdGVlbWEuVGVlQ2hhcnQuQ2hhcnQtAAAADC5DYW5jZWxNb3VzZQ0uQ3VycmVudFRoZW1lEC5DdXN0b21DaGFydFJlY3QPLkxlZ2VuZC5WaXNpYmxlDS5IZWFkZXIuTGluZXMQLkFzcGVjdC5Sb3RhdGlvbhUuQXNwZWN0LlJvdGF0aW9uRmxvYXQRLkFzcGVjdC5FbGV2YXRpb24WLkFzcGVjdC5FbGV2YXRpb25GbG9hdBIuQXNwZWN0Lk9ydGhvZ29uYWwZLkFzcGVjdC5Db2xvclBhbGV0dGVJbmRleBMuQXNwZWN0LlBlcnNwZWN0aXZlDi5Bc3BlY3QuVmlldzNECFNlcmllcy4wFS5TZXJpZXMuMC5CcnVzaC5Db2xvchYuU2VyaWVzLjAuQ2lyY2xlTGFiZWxzHC5TZXJpZXMuMC5Qb2ludGVyLlNpemVEb3VibGUbLlNlcmllcy4wLlBvaW50ZXIuU2l6ZVVuaXRzHS5TZXJpZXMuMC5Qb2ludGVyLkJydXNoLkNvbG9yFy5TZXJpZXMuMC5Sb3RhdGlvbkFuZ2xlJC5TZXJpZXMuMC5GcmFtZS5GcmFtZUVsZW1lbnRQZXJjZW50cxcuU2VyaWVzLjAuRnJhbWUuQ2lyY2xlZCwuU2VyaWVzLjAuRnJhbWUuT3V0ZXJCYW5kLkdyYWRpZW50LlVzZU1pZGRsZRwuU2VyaWVzLjAuVW5pcXVlQ3VzdG9tUmFkaXVzFy5TZXJpZXMuMC5YVmFsdWVzLlZhbHVlFy5TZXJpZXMuMC5YVmFsdWVzLkNvdW50HC5TZXJpZXMuMC5YVmFsdWVzLkRhdGFNZW1iZXIXLlNlcmllcy4wLlhWYWx1ZXMuT3JkZXIXLlNlcmllcy4wLllWYWx1ZXMuVmFsdWUXLlNlcmllcy4wLllWYWx1ZXMuQ291bnQcLlNlcmllcy4wLllWYWx1ZXMuRGF0YU1lbWJlchMuU2VyaWVzLjAuQ29sb3JFYWNoDy5TZXJpZXMuMC5Db2xvcg8uU2VyaWVzLjAuVGl0bGUdLlNlcmllcy4wLlVzZUV4dGVuZGVkTnVtUmFuZ2UhLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuTWFyZ2luKC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLlBvaW50ZXJIZWlnaHQnLlNlcmllcy4wLk1hcmtzLlRhaWxQYXJhbXMuUG9pbnRlcldpZHRoIC5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkFsaWduKS5TZXJpZXMuMC5NYXJrcy5UYWlsUGFyYW1zLkN1c3RvbVBvaW50UG9zGS5BeGVzLkxlZnQuTGFiZWxzLlZpc2libGUYLkF4ZXMuVG9wLkxhYmVscy5WaXNpYmxlGi5BeGVzLlJpZ2h0LkxhYmVscy5WaXNpYmxlGy5BeGVzLkJvdHRvbS5MYWJlbHMuVmlzaWJsZQ8uQXhlcy5BdXRvbWF0aWMABAAABgAAAAAAAAAAAQQAAAQEAAcAAAAHAAEEBwABAAQBAAAAAAQEAAAAAAABGVN0ZWVtYS5UZWVDaGFydC5UaGVtZVR5cGUCAAAAAQEIBggGAQgIARRTeXN0ZW0uRHJhd2luZy5Db2xvcgMAAAABBidTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlBvaW50ZXJTaXplVW5pdHMCAAAAFFN5c3RlbS5EcmF3aW5nLkNvbG9yAwAAAAgGAQEBBgglU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgIAAAAGCAEUU3lzdGVtLkRyYXdpbmcuQ29sb3IDAAAAAQsGBiRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQCAAAAFVN5c3RlbS5EcmF3aW5nLlBvaW50RgMAAAABAQEBAQIAAAAABfz///8ZU3RlZW1hLlRlZUNoYXJ0LlRoZW1lVHlwZQEAAAAHdmFsdWVfXwAIAgAAAAAAAAAAAAkFAAAAaAEAAAAAAAAAgHZAOwEAAAAAAAAAsHNAAAAAAAAAAAAAAAYGAAAAH1N0ZWVtYS5UZWVDaGFydC5TdHlsZXMuV2luZFJvc2UF+f///xRTeXN0ZW0uRHJhd2luZy5Db2xvcgQAAAAEbmFtZQV2YWx1ZQprbm93bkNvbG9yBXN0YXRlAQAAAAkHBwMAAAAKAAD//wAAAAAAAAIAAQAAAAAAAAAABfj///8nU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5Qb2ludGVyU2l6ZVVuaXRzAQAAAAd2YWx1ZV9fAAgCAAAAAAAAAAH3////+f///woAAAAAAAAAAAAAAABaAAAACQoAAAABAAEJCwAAAAIAAAAGDAAAABNXaW5kX2RpcmVjdGlvbl9wb3MxBfP///8lU3RlZW1hLlRlZUNoYXJ0LlN0eWxlcy5WYWx1ZUxpc3RPcmRlcgEAAAAHdmFsdWVfXwAIAgAAAAEAAAAJDgAAAAIAAAAGDwAAAA9XaW5kX1NwZWVkX3BvczEAAfD////5////CgAA//8AAAAAAAACAAYRAAAACumiqOWQkeWcljEAAAAAAAAAAAAAABRAAAAAAAAAIEAF7v///yRTdGVlbWEuVGVlQ2hhcnQuU3R5bGVzLlRhaWxBbGlnbm1lbnQBAAAAB3ZhbHVlX18ACAIAAAAAAAAABe3///8VU3lzdGVtLkRyYXdpbmcuUG9pbnRGAgAAAAF4AXkAAAsLAwAAAAAAAAAAAAAAAAAAAAERBQAAAAEAAAAGFAAAAAAPCgAAAAMAAAAGAAAAAAAAOUAAAAAAAABOQAAAAAAAAC5ADwsAAAACAAAABgAAAAAAAAAAAAAAAACAZEAPDgAAAAIAAAAGAAAAAAAAAAAAAAAAAIBkQAs=" GetChartFile="GetChart.aspx" Height="300px" LastFileName="" TempChart="Session" Width="300px" DataSourceID="SqlDataSource1" CssClass="auto-style4" />
-                                <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:PMISConnectionString %>" SelectCommand="select * from (
-(SELECT TOP(1) Wind_direction as Wind_Speed_pos1,Wind_direction as Wind_direction_pos1
-                                FROM Wind 
-                                Where Position=1
-                               ORDER BY sys_process_date DESC) as a 
-cross join 
-(SELECT TOP(1) Wind_direction as Wind_Speed_pos2,Wind_direction as Wind_direction_pos2
-                                FROM Wind 
-                                Where Position=2
-                               ORDER BY sys_process_date DESC) as b)
-Union
-( select 0 as Wind_Speed_pos1,0 as Wind_direction_pos1,0 as Wind_Speed_pos2,0 as Wind_direction_pos2)
-order by Wind_Speed_pos1"></asp:SqlDataSource>
-                                <input id="wind_direction_W" runat="server" enableviewstate="true" name="wind_direction_W" type="hidden" class="auto-style4" />&nbsp;<span class="auto-style1"><span class="auto-style3"><br />
-                                <asp:Label ID="Label20" runat="server" BackColor="#FFC080" Style="border: 1px solid black;" Text="熱軋大樓"></asp:Label>
-                                <br />
-                                <asp:Label ID="Wind_S_W_L" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px;" Text="風速："></asp:Label>
-                                &nbsp;
-                                <asp:Label ID="Val_W_W_S" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                <asp:Label ID="Label22" runat="server" ForeColor="Black" Text="m/s"></asp:Label>
-                                <br />
-                                <br />
-                                </span></span>
-                            </td>
-                            <td style="width: 73px">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 14px">
-                            </td>
-                            <td style="font-weight: bold; width: 281px; background-color: #ffff33" class="auto-style1">
-                                <span class="auto-style6"><span class="auto-style3">加熱爐固定式CO偵測最大值：</span><asp:Label ID="Total_CO" runat="server" CssClass="auto-style3" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span><span class="auto-style5">ppm</span></td>
-                            <td style="width: 73px">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 14px">
-                            </td>
-                            <td style="width: 281px">
-                            </td>
-                            <td style="width: 73px">
-                            </td>
-                        </tr>
-                    </table>
-                    <table style="width: 368px; text-align: left;">
-                        <tr>
-                            <td style="width: 30px;text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_01" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="1" Width="24px" ForeColor="ControlText"></asp:Label></td>
-                            <td style="width: 130px; height: 20px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L1" runat="server" Style="color: #ff9933; text-align: left;" Text="1G1A2001" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V1" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px; height: 20px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label5" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_02" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="2" Width="24px" ForeColor="Black"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L2" runat="server" Style="color: #ff9933" Text="1G1A2002" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V2" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label6" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                        <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_03" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="3" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L3" runat="server" Style="color: #ff9933" Text="1G1A2101" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V3" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label14" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                        <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_04" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="4" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L4" runat="server" Style="color: #ff9933" Text="1G1A2102" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V4" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label19" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                        <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_05" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="5" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L5" runat="server" Style="color: #ff9933" Text="1G1A2103" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V5" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label24" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_06" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="6" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L6" runat="server" Style="color: #ff9933" Text="1G1A2104" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V6" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label29" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_07" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="7" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L7" runat="server" Style="color: #ff9933" Text="1G1A2105" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V7" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label34" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_08" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="8" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L8" runat="server" Style="color: #ff9933" Text="1G1A2106" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V8" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label39" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_09" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="9" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L9" runat="server" Style="color: #ff9933" Text="1G1A2107" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V9" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label54" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_10" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="10" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L10" runat="server" Style="color: #ff9933" Text="1G1A2108" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V10" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label59" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_11" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="11" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L11" runat="server" Style="color: #ff9933" Text="2G1A2001" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V11" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label64" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_12" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="12" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L12" runat="server" Style="color: #ff9933" Text="2G1A2002" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V12" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label69" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_13" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="13" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L13" runat="server" Style="color: #ff9933" Text="2G1A2101" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V13" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label74" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_14" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="14" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L14" runat="server" Style="color: #ff9933" Text="2G1A2102" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V14" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label79" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_15" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="15" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L15" runat="server" Style="color: #ff9933" Text="2G1A2103" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V15" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label84" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_16" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="16" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L16" runat="server" Style="color: #ff9933" Text="2G1A2104" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V16" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label89" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_17" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="17" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L17" runat="server" Style="color: #ff9933" Text="2G1A2105" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V17" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label94" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_18" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="18" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L18" runat="server" Style="color: #ff9933" Text="2G1A2106" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V18" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label99" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_19" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="19" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L19" runat="server" Style="color: #ff9933" Text="2G1A2107" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V19" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label104" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                         <tr>
-                           <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_20" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="20" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L20" runat="server" Style="color: #ff9933" Text="2G1A2108" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V20" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<span class="auto-style3"><asp:Label ID="Label109" runat="server" CssClass="auto-style1" Text="ppm"></asp:Label>
-                                <span class="auto-style1">&nbsp; </span></span>
-                                </td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px;text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_21" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="21" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; height: 23px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L21" runat="server" Style="color: #ff9933" Text="3G1A2001" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V21" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px; height: 23px">
-                                &nbsp;<asp:Label ID="Label2" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_22" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="22" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L22" runat="server" Style="color: #ff9933" Text="3G1A2002" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V22" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label4" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px;text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_23" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="23" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; height: 23px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L23" runat="server" Style="color: #ff9933" Text="3G1A2101" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V23" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px; height: 23px">
-                                &nbsp;<asp:Label ID="Label7" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_24" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="24" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L24" runat="server" Style="color: #ff9933" Text="3G1A2102" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V24" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label8" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_25" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="25" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L25" runat="server" Style="color: #ff9933" Text="3G1A2103" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V25" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label9" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_26" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="26" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L26" runat="server" Style="color: #ff9933" Text="3G1A2104" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V26" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label10" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_27" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="27" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L27" runat="server" Style="color: #ff9933" Text="3G1A2105" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V27" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label11" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_28" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="28" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L28" runat="server" Style="color: #ff9933" Text="3G1A2106" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V28" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label12" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_29" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="29" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L29" runat="server" Style="color: #ff9933" Text="3G1A2107" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V29" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label13" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px;text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_30" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="30" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; height: 21px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L30" runat="server" Style="color: #ff9933" Text="3G1A2108" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V30" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px; height: 21px">
-                                &nbsp;<asp:Label ID="Label15" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px;text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_31" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="31" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; height: 22px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L31" runat="server" Style="color: #ff9933" Text="3G1A2003" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V31" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px; height: 22px">
-                                &nbsp;<asp:Label ID="Label16" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_32" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="32" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L21L32" runat="server" Style="color: #ff9933" Text="3G1A2004" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V32" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px">
-                                &nbsp;<asp:Label ID="Label17" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 30px; text-align: center" class="auto-style4">
-                                <asp:Label ID="IT_33" runat="server" BackColor="Yellow" Style="border-style: solid; border-color: inherit; border-width: 1px; text-align: center" Text="33" Width="24px"></asp:Label></td>
-                            <td style="width: 130px; height: 21px; text-align: left" class="auto-style3">
-                                <asp:Label ID="L33" runat="server" Style="color: #ff9933" Text="3G1A2005" CssClass="auto-style1"></asp:Label>
-                                <span class="auto-style1">&nbsp;
-                                <asp:Label ID="V33" runat="server" ForeColor="Lime" Text="N/A"></asp:Label>
-                                </span></td>
-                            <td style="width: 160px; height: 21px">
-                                &nbsp;<asp:Label ID="Label18" runat="server" Text="ppm" CssClass="auto-style4"></asp:Label></td>
-                        </tr>
-                        
-                        
-                    </table>
-                    <span class="auto-style3">
-                    <br class="auto-style1" />
-                    <span class="auto-style1">&nbsp; &nbsp;&nbsp; </span>
-                     <asp:Label ID="Label23" runat="server" Font-Bold="True" Font-Size="Small" ForeColor="Black" CssClass="auto-style13">CO偵測值說明：</asp:Label><br class="auto-style13" />
-                                <asp:Label ID="Label25" runat="server" Font-Bold="True" Font-Size="Small"
-                                    ForeColor="blue" CssClass="auto-style13">[ 藍色：< 35 ppm | </asp:Label>
-                                <asp:Label ID="Label26" runat="server" Font-Bold="True" Font-Size="Small"
-                                    ForeColor="red" CssClass="auto-style13">紅色：>= 35 ppm ]</asp:Label><br class="auto-style13" />
-                    <span class="auto-style1">
-                    <br />
-                    <br />
-                    &nbsp; &nbsp; &nbsp;</span><asp:Label ID="Label49" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="#0000C0" Text="資料更新時間："></asp:Label>
-                    <span class="auto-style1">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br /> &nbsp; &nbsp; &nbsp;</span><asp:Label ID="Fn1" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="Black">#1 FCE：</asp:Label>
-                    <asp:Label ID="Last_time_1" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="#0000C0"></asp:Label>
-                    <br class="auto-style1" />
-                    <span class="auto-style1">&nbsp; &nbsp;&nbsp; </span>
-                    <asp:Label ID="Fn2" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="Black">#2 FCE：</asp:Label>
-                    <asp:Label ID="Last_time_2" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="#0000C0"></asp:Label>
-                    <br class="auto-style1" />
-                    <span class="auto-style1">&nbsp; &nbsp;&nbsp; </span>
-                    <asp:Label ID="Label3" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="Black">#3 FCE：</asp:Label>
-                    <asp:Label ID="Last_time_3" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="#0000C0"></asp:Label>
-                    <br class="auto-style1" />
-                    <span class="auto-style1">&nbsp; &nbsp;&nbsp; </span>
-                    <asp:Label ID="Label1" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="Black">風速計(W)：</asp:Label>
-                    <asp:Label ID="Last_time_4" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="#0000C0"></asp:Label>
-                    <br class="auto-style1" />
-                    <span class="auto-style1">&nbsp; &nbsp;&nbsp; </span>
-                <%--    <asp:Label ID="Label21" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="Black">風速計(E)：</asp:Label>
-                    <asp:Label ID="Last_time_5" runat="server" CssClass="auto-style1" Font-Bold="True" Font-Size="Small" ForeColor="#0000C0"></asp:Label>
-                    <span class="auto-style1">&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;<br /> &nbsp; &nbsp; &nbsp;--%>
-                    <br />
-                    &nbsp; &nbsp; &nbsp;
-                    <br />
-                    &nbsp; &nbsp; &nbsp;
-                    <br />
-                    <br />
-                    <br />
-                    </span></span>
-                    </td>
+                <asp:Timer ID="Timer1" runat="server" Interval="60000"></asp:Timer>
+                <input id="wind_direction_W" runat="server" enableviewstate="true" name="wind_direction_W" type="hidden" />
 
-            </tr>
-            <tr>
-                <td style="width: 10px">
-                </td>
-                <td style="width: 603px">
-                </td>
-                <td style="width: 340px">
-                </td>
+                <div class="dashboard-container">
 
-            </tr>
-            <caption class="auto-style4">
-                &nbsp;
-            </caption>
-        </table>
-        
-          </ContentTemplate>
+                    <!-- Left: factory map with 33 sensor hotspots -->
+                    <div class="map-wrapper">
+                        <img src="images/FCE.JPG" class="factory-img" alt="加熱爐廠區圖" />
+
+                        <!-- #1FCE sensors 1-10 -->
+                        <div class="sensor-hotspot" style="left:358px;top:420px;">
+                            <asp:Label ID="P_1GIA2001" runat="server" CssClass="sensor-dot" Text="1" />
+                            <div class="sensor-tooltip">1GIA2001：<asp:Label ID="V_1GIA2001" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:382px;top:412px;">
+                            <asp:Label ID="P_1GIA2002" runat="server" CssClass="sensor-dot" Text="2" />
+                            <div class="sensor-tooltip">1GIA2002：<asp:Label ID="V_1GIA2002" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:358px;top:396px;">
+                            <asp:Label ID="P_1GIA2101" runat="server" CssClass="sensor-dot" Text="3" />
+                            <div class="sensor-tooltip">1GIA2101：<asp:Label ID="V_1GIA2101" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:454px;top:396px;">
+                            <asp:Label ID="P_1GIA2102" runat="server" CssClass="sensor-dot" Text="4" />
+                            <div class="sensor-tooltip">1GIA2102：<asp:Label ID="V_1GIA2102" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:358px;top:340px;">
+                            <asp:Label ID="P_1GIA2103" runat="server" CssClass="sensor-dot" Text="5" />
+                            <div class="sensor-tooltip">1GIA2103：<asp:Label ID="V_1GIA2103" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:454px;top:340px;">
+                            <asp:Label ID="P_1GIA2104" runat="server" CssClass="sensor-dot" Text="6" />
+                            <div class="sensor-tooltip">1GIA2104：<asp:Label ID="V_1GIA2104" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:358px;top:292px;">
+                            <asp:Label ID="P_1GIA2105" runat="server" CssClass="sensor-dot" Text="7" />
+                            <div class="sensor-tooltip">1GIA2105：<asp:Label ID="V_1GIA2105" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:454px;top:292px;">
+                            <asp:Label ID="P_1GIA2106" runat="server" CssClass="sensor-dot" Text="8" />
+                            <div class="sensor-tooltip">1GIA2106：<asp:Label ID="V_1GIA2106" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:358px;top:244px;">
+                            <asp:Label ID="P_1GIA2107" runat="server" CssClass="sensor-dot" Text="9" />
+                            <div class="sensor-tooltip">1GIA2107：<asp:Label ID="V_1GIA2107" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:454px;top:244px;">
+                            <asp:Label ID="P_1GIA2108" runat="server" CssClass="sensor-dot" Text="10" />
+                            <div class="sensor-tooltip">1GIA2108：<asp:Label ID="V_1GIA2108" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+
+                        <!-- #2FCE sensors 11-20 -->
+                        <div class="sensor-hotspot" style="left:230px;top:420px;">
+                            <asp:Label ID="P_2GIA2001" runat="server" CssClass="sensor-dot" Text="11" />
+                            <div class="sensor-tooltip">2GIA2001：<asp:Label ID="V_2GIA2001" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:262px;top:412px;">
+                            <asp:Label ID="P_2GIA2002" runat="server" CssClass="sensor-dot" Text="12" />
+                            <div class="sensor-tooltip">2GIA2002：<asp:Label ID="V_2GIA2002" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:230px;top:396px;">
+                            <asp:Label ID="P_2GIA2101" runat="server" CssClass="sensor-dot" Text="13" />
+                            <div class="sensor-tooltip">2GIA2101：<asp:Label ID="V_2GIA2101" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:326px;top:396px;">
+                            <asp:Label ID="P_2GIA2102" runat="server" CssClass="sensor-dot" Text="14" />
+                            <div class="sensor-tooltip">2GIA2102：<asp:Label ID="V_2GIA2102" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:230px;top:340px;">
+                            <asp:Label ID="P_2GIA2103" runat="server" CssClass="sensor-dot" Text="15" />
+                            <div class="sensor-tooltip">2GIA2103：<asp:Label ID="V_2GIA2103" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:326px;top:340px;">
+                            <asp:Label ID="P_2GIA2104" runat="server" CssClass="sensor-dot" Text="16" />
+                            <div class="sensor-tooltip">2GIA2104：<asp:Label ID="V_2GIA2104" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:230px;top:292px;">
+                            <asp:Label ID="P_2GIA2105" runat="server" CssClass="sensor-dot" Text="17" />
+                            <div class="sensor-tooltip">2GIA2105：<asp:Label ID="V_2GIA2105" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:326px;top:292px;">
+                            <asp:Label ID="P_2GIA2106" runat="server" CssClass="sensor-dot" Text="18" />
+                            <div class="sensor-tooltip">2GIA2106：<asp:Label ID="V_2GIA2106" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:230px;top:244px;">
+                            <asp:Label ID="P_2GIA2107" runat="server" CssClass="sensor-dot" Text="19" />
+                            <div class="sensor-tooltip">2GIA2107：<asp:Label ID="V_2GIA2107" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:326px;top:244px;">
+                            <asp:Label ID="P_2GIA2108" runat="server" CssClass="sensor-dot" Text="20" />
+                            <div class="sensor-tooltip">2GIA2108：<asp:Label ID="V_2GIA2108" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+
+                        <!-- #3FCE sensors 21-33 -->
+                        <div class="sensor-hotspot" style="left:94px;top:420px;">
+                            <asp:Label ID="P_3GIA2001" runat="server" CssClass="sensor-dot" Text="21" />
+                            <div class="sensor-tooltip">3GIA2001：<asp:Label ID="V_3GIA2001" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:118px;top:412px;">
+                            <asp:Label ID="P_3GIA2002" runat="server" CssClass="sensor-dot" Text="22" />
+                            <div class="sensor-tooltip">3GIA2002：<asp:Label ID="V_3GIA2002" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:94px;top:396px;">
+                            <asp:Label ID="P_3GIA2101" runat="server" CssClass="sensor-dot" Text="23" />
+                            <div class="sensor-tooltip">3GIA2101：<asp:Label ID="V_3GIA2101" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:198px;top:396px;">
+                            <asp:Label ID="P_3GIA2102" runat="server" CssClass="sensor-dot" Text="24" />
+                            <div class="sensor-tooltip">3GIA2102：<asp:Label ID="V_3GIA2102" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:94px;top:340px;">
+                            <asp:Label ID="P_3GIA2103" runat="server" CssClass="sensor-dot" Text="25" />
+                            <div class="sensor-tooltip">3GIA2103：<asp:Label ID="V_3GIA2103" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:198px;top:340px;">
+                            <asp:Label ID="P_3GIA2104" runat="server" CssClass="sensor-dot" Text="26" />
+                            <div class="sensor-tooltip">3GIA2104：<asp:Label ID="V_3GIA2104" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:94px;top:292px;">
+                            <asp:Label ID="P_3GIA2105" runat="server" CssClass="sensor-dot" Text="27" />
+                            <div class="sensor-tooltip">3GIA2105：<asp:Label ID="V_3GIA2105" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:198px;top:292px;">
+                            <asp:Label ID="P_3GIA2106" runat="server" CssClass="sensor-dot" Text="28" />
+                            <div class="sensor-tooltip">3GIA2106：<asp:Label ID="V_3GIA2106" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:94px;top:244px;">
+                            <asp:Label ID="P_3GIA2107" runat="server" CssClass="sensor-dot" Text="29" />
+                            <div class="sensor-tooltip">3GIA2107：<asp:Label ID="V_3GIA2107" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:198px;top:244px;">
+                            <asp:Label ID="P_3GIA2108" runat="server" CssClass="sensor-dot" Text="30" />
+                            <div class="sensor-tooltip">3GIA2108：<asp:Label ID="V_3GIA2108" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:158px;top:588px;">
+                            <asp:Label ID="P_3GIA2003" runat="server" CssClass="sensor-dot" Text="31" />
+                            <div class="sensor-tooltip">3GIA2003：<asp:Label ID="V_3GIA2003" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:158px;top:212px;">
+                            <asp:Label ID="P_3GIA2004" runat="server" CssClass="sensor-dot" Text="32" />
+                            <div class="sensor-tooltip">3GIA2004：<asp:Label ID="V_3GIA2004" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                        <div class="sensor-hotspot" style="left:510px;top:452px;">
+                            <asp:Label ID="P_3GIA2005" runat="server" CssClass="sensor-dot" Text="33" />
+                            <div class="sensor-tooltip">3GIA2005：<asp:Label ID="V_3GIA2005" runat="server" Text="N/A" /> ppm</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: side panel -->
+                    <div class="side-panel">
+
+                        <!-- CO max value card -->
+                        <div class="data-card">
+                            <div class="card-header">CO 偵測最大值</div>
+                            <div style="text-align:center; font-size:1.8rem; font-weight:bold; padding:8px 0;">
+                                <asp:Label ID="Total_CO" runat="server" Text="N/A" />
+                                <span style="font-size:0.9rem; font-weight:normal; color:var(--text-muted);">&#160;ppm</span>
+                            </div>
+                        </div>
+
+                        <!-- Wind gauge card (ECharts compass) -->
+                        <div class="data-card">
+                            <div class="card-header">風速計 &#8212; <asp:Label ID="Label20" runat="server" Text="熱軋大樓" /></div>
+                            <div id="wind-echart"></div>
+                            <div class="metric-row" style="margin-top:4px;">
+                                <asp:Label ID="Wind_S_W_L" runat="server" CssClass="lbl" Text="風速：" />
+                                <span style="font-weight:bold;">
+                                    <asp:Label ID="Val_W_W_S" runat="server" Text="N/A" />&#160;<asp:Label ID="Label22" runat="server" Text="m/s" />
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- #1FCE sensor list -->
+                        <div class="data-card">
+                            <div class="card-header">#1 加熱爐 (FCE) 感測器</div>
+                            <table class="sensor-tbl">
+                                <tr>
+                                    <td><asp:Label ID="IT_01" runat="server" CssClass="s-badge" Text="1" /></td>
+                                    <td><asp:Label ID="L1" runat="server" CssClass="s-name" Text="1G1A2001" /></td>
+                                    <td class="s-val"><asp:Label ID="V1" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td style="width:6px;"></td>
+                                    <td><asp:Label ID="IT_02" runat="server" CssClass="s-badge" Text="2" /></td>
+                                    <td><asp:Label ID="L2" runat="server" CssClass="s-name" Text="1G1A2002" /></td>
+                                    <td class="s-val"><asp:Label ID="V2" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_03" runat="server" CssClass="s-badge" Text="3" /></td>
+                                    <td><asp:Label ID="L3" runat="server" CssClass="s-name" Text="1G1A2101" /></td>
+                                    <td class="s-val"><asp:Label ID="V3" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_04" runat="server" CssClass="s-badge" Text="4" /></td>
+                                    <td><asp:Label ID="L4" runat="server" CssClass="s-name" Text="1G1A2102" /></td>
+                                    <td class="s-val"><asp:Label ID="V4" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_05" runat="server" CssClass="s-badge" Text="5" /></td>
+                                    <td><asp:Label ID="L5" runat="server" CssClass="s-name" Text="1G1A2103" /></td>
+                                    <td class="s-val"><asp:Label ID="V5" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_06" runat="server" CssClass="s-badge" Text="6" /></td>
+                                    <td><asp:Label ID="L6" runat="server" CssClass="s-name" Text="1G1A2104" /></td>
+                                    <td class="s-val"><asp:Label ID="V6" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_07" runat="server" CssClass="s-badge" Text="7" /></td>
+                                    <td><asp:Label ID="L7" runat="server" CssClass="s-name" Text="1G1A2105" /></td>
+                                    <td class="s-val"><asp:Label ID="V7" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_08" runat="server" CssClass="s-badge" Text="8" /></td>
+                                    <td><asp:Label ID="L8" runat="server" CssClass="s-name" Text="1G1A2106" /></td>
+                                    <td class="s-val"><asp:Label ID="V8" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_09" runat="server" CssClass="s-badge" Text="9" /></td>
+                                    <td><asp:Label ID="L9" runat="server" CssClass="s-name" Text="1G1A2107" /></td>
+                                    <td class="s-val"><asp:Label ID="V9" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_10" runat="server" CssClass="s-badge" Text="10" /></td>
+                                    <td><asp:Label ID="L10" runat="server" CssClass="s-name" Text="1G1A2108" /></td>
+                                    <td class="s-val"><asp:Label ID="V10" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- #2FCE sensor list -->
+                        <div class="data-card">
+                            <div class="card-header">#2 加熱爐 (FCE) 感測器</div>
+                            <table class="sensor-tbl">
+                                <tr>
+                                    <td><asp:Label ID="IT_11" runat="server" CssClass="s-badge" Text="11" /></td>
+                                    <td><asp:Label ID="L11" runat="server" CssClass="s-name" Text="2G1A2001" /></td>
+                                    <td class="s-val"><asp:Label ID="V11" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td style="width:6px;"></td>
+                                    <td><asp:Label ID="IT_12" runat="server" CssClass="s-badge" Text="12" /></td>
+                                    <td><asp:Label ID="L12" runat="server" CssClass="s-name" Text="2G1A2002" /></td>
+                                    <td class="s-val"><asp:Label ID="V12" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_13" runat="server" CssClass="s-badge" Text="13" /></td>
+                                    <td><asp:Label ID="L13" runat="server" CssClass="s-name" Text="2G1A2101" /></td>
+                                    <td class="s-val"><asp:Label ID="V13" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_14" runat="server" CssClass="s-badge" Text="14" /></td>
+                                    <td><asp:Label ID="L14" runat="server" CssClass="s-name" Text="2G1A2102" /></td>
+                                    <td class="s-val"><asp:Label ID="V14" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_15" runat="server" CssClass="s-badge" Text="15" /></td>
+                                    <td><asp:Label ID="L15" runat="server" CssClass="s-name" Text="2G1A2103" /></td>
+                                    <td class="s-val"><asp:Label ID="V15" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_16" runat="server" CssClass="s-badge" Text="16" /></td>
+                                    <td><asp:Label ID="L16" runat="server" CssClass="s-name" Text="2G1A2104" /></td>
+                                    <td class="s-val"><asp:Label ID="V16" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_17" runat="server" CssClass="s-badge" Text="17" /></td>
+                                    <td><asp:Label ID="L17" runat="server" CssClass="s-name" Text="2G1A2105" /></td>
+                                    <td class="s-val"><asp:Label ID="V17" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_18" runat="server" CssClass="s-badge" Text="18" /></td>
+                                    <td><asp:Label ID="L18" runat="server" CssClass="s-name" Text="2G1A2106" /></td>
+                                    <td class="s-val"><asp:Label ID="V18" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_19" runat="server" CssClass="s-badge" Text="19" /></td>
+                                    <td><asp:Label ID="L19" runat="server" CssClass="s-name" Text="2G1A2107" /></td>
+                                    <td class="s-val"><asp:Label ID="V19" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_20" runat="server" CssClass="s-badge" Text="20" /></td>
+                                    <td><asp:Label ID="L20" runat="server" CssClass="s-name" Text="2G1A2108" /></td>
+                                    <td class="s-val"><asp:Label ID="V20" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- #3FCE sensor list -->
+                        <div class="data-card">
+                            <div class="card-header">#3 加熱爐 (FCE) 感測器</div>
+                            <table class="sensor-tbl">
+                                <tr>
+                                    <td><asp:Label ID="IT_21" runat="server" CssClass="s-badge" Text="21" /></td>
+                                    <td><asp:Label ID="L21" runat="server" CssClass="s-name" Text="3G1A2001" /></td>
+                                    <td class="s-val"><asp:Label ID="V21" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td style="width:6px;"></td>
+                                    <td><asp:Label ID="IT_22" runat="server" CssClass="s-badge" Text="22" /></td>
+                                    <td><asp:Label ID="L22" runat="server" CssClass="s-name" Text="3G1A2002" /></td>
+                                    <td class="s-val"><asp:Label ID="V22" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_23" runat="server" CssClass="s-badge" Text="23" /></td>
+                                    <td><asp:Label ID="L23" runat="server" CssClass="s-name" Text="3G1A2101" /></td>
+                                    <td class="s-val"><asp:Label ID="V23" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_24" runat="server" CssClass="s-badge" Text="24" /></td>
+                                    <td><asp:Label ID="L24" runat="server" CssClass="s-name" Text="3G1A2102" /></td>
+                                    <td class="s-val"><asp:Label ID="V24" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_25" runat="server" CssClass="s-badge" Text="25" /></td>
+                                    <td><asp:Label ID="L25" runat="server" CssClass="s-name" Text="3G1A2103" /></td>
+                                    <td class="s-val"><asp:Label ID="V25" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_26" runat="server" CssClass="s-badge" Text="26" /></td>
+                                    <td><asp:Label ID="L26" runat="server" CssClass="s-name" Text="3G1A2104" /></td>
+                                    <td class="s-val"><asp:Label ID="V26" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_27" runat="server" CssClass="s-badge" Text="27" /></td>
+                                    <td><asp:Label ID="L27" runat="server" CssClass="s-name" Text="3G1A2105" /></td>
+                                    <td class="s-val"><asp:Label ID="V27" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_28" runat="server" CssClass="s-badge" Text="28" /></td>
+                                    <td><asp:Label ID="L28" runat="server" CssClass="s-name" Text="3G1A2106" /></td>
+                                    <td class="s-val"><asp:Label ID="V28" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_29" runat="server" CssClass="s-badge" Text="29" /></td>
+                                    <td><asp:Label ID="L29" runat="server" CssClass="s-name" Text="3G1A2107" /></td>
+                                    <td class="s-val"><asp:Label ID="V29" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_30" runat="server" CssClass="s-badge" Text="30" /></td>
+                                    <td><asp:Label ID="L30" runat="server" CssClass="s-name" Text="3G1A2108" /></td>
+                                    <td class="s-val"><asp:Label ID="V30" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_31" runat="server" CssClass="s-badge" Text="31" /></td>
+                                    <td><asp:Label ID="L31" runat="server" CssClass="s-name" Text="3G1A2003" /></td>
+                                    <td class="s-val"><asp:Label ID="V31" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td>
+                                    <td><asp:Label ID="IT_32" runat="server" CssClass="s-badge" Text="32" /></td>
+                                    <td><asp:Label ID="L21L32" runat="server" CssClass="s-name" Text="3G1A2004" /></td>
+                                    <td class="s-val"><asp:Label ID="V32" runat="server" Text="N/A" /></td><td>ppm</td>
+                                </tr>
+                                <tr>
+                                    <td><asp:Label ID="IT_33" runat="server" CssClass="s-badge" Text="33" /></td>
+                                    <td><asp:Label ID="L33" runat="server" CssClass="s-name" Text="3G1A2005" /></td>
+                                    <td class="s-val"><asp:Label ID="V33" runat="server" Text="N/A" /></td><td>ppm</td>
+                                    <td></td><td colspan="4"></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Data update timestamps -->
+                        <div class="info-card">
+                            <div class="card-header"><asp:Label ID="Label49" runat="server" Text="資料更新時間" /></div>
+                            <div class="time-row">
+                                <span class="time-lbl"><asp:Label ID="Fn1" runat="server" Text="#1 FCE：" /></span>
+                                <asp:Label ID="Last_time_1" runat="server" CssClass="time-val" />
+                            </div>
+                            <div class="time-row">
+                                <span class="time-lbl"><asp:Label ID="Fn2" runat="server" Text="#2 FCE：" /></span>
+                                <asp:Label ID="Last_time_2" runat="server" CssClass="time-val" />
+                            </div>
+                            <div class="time-row">
+                                <span class="time-lbl"><asp:Label ID="Label3" runat="server" Text="#3 FCE：" /></span>
+                                <asp:Label ID="Last_time_3" runat="server" CssClass="time-val" />
+                            </div>
+                            <div class="time-row">
+                                <span class="time-lbl"><asp:Label ID="Label1" runat="server" Text="風速計(W)：" /></span>
+                                <asp:Label ID="Last_time_4" runat="server" CssClass="time-val" />
+                            </div>
+                        </div>
+
+                        <!-- CO status legend -->
+                        <div class="info-card">
+                            <div class="legend-row"><span class="bdg bdg-b">&lt; 35 ppm</span><asp:Label ID="Label25" runat="server" Text="安全狀態" /></div>
+                            <div class="legend-row"><span class="bdg bdg-y">35 ~ 75 ppm</span><asp:Label ID="Label26" runat="server" Text="注意狀態" /></div>
+                            <div class="legend-row"><span class="bdg bdg-r">&gt; 75 ppm</span><asp:Label ID="Label23" runat="server" Text="危險警報" /></div>
+                        </div>
+
+                        <!-- Hidden ppm unit labels kept for designer.vb compatibility -->
+                        <div style="display:none;">
+                            <asp:Label ID="Label5" runat="server" Text="ppm" />
+                            <asp:Label ID="Label6" runat="server" Text="ppm" />
+                            <asp:Label ID="Label14" runat="server" Text="ppm" />
+                            <asp:Label ID="Label19" runat="server" Text="ppm" />
+                            <asp:Label ID="Label24" runat="server" Text="ppm" />
+                            <asp:Label ID="Label29" runat="server" Text="ppm" />
+                            <asp:Label ID="Label34" runat="server" Text="ppm" />
+                            <asp:Label ID="Label39" runat="server" Text="ppm" />
+                            <asp:Label ID="Label54" runat="server" Text="ppm" />
+                            <asp:Label ID="Label59" runat="server" Text="ppm" />
+                            <asp:Label ID="Label64" runat="server" Text="ppm" />
+                            <asp:Label ID="Label69" runat="server" Text="ppm" />
+                            <asp:Label ID="Label74" runat="server" Text="ppm" />
+                            <asp:Label ID="Label79" runat="server" Text="ppm" />
+                            <asp:Label ID="Label84" runat="server" Text="ppm" />
+                            <asp:Label ID="Label89" runat="server" Text="ppm" />
+                            <asp:Label ID="Label94" runat="server" Text="ppm" />
+                            <asp:Label ID="Label99" runat="server" Text="ppm" />
+                            <asp:Label ID="Label104" runat="server" Text="ppm" />
+                            <asp:Label ID="Label109" runat="server" Text="ppm" />
+                            <asp:Label ID="Label2" runat="server" Text="ppm" />
+                            <asp:Label ID="Label4" runat="server" Text="ppm" />
+                            <asp:Label ID="Label7" runat="server" Text="ppm" />
+                            <asp:Label ID="Label8" runat="server" Text="ppm" />
+                            <asp:Label ID="Label9" runat="server" Text="ppm" />
+                            <asp:Label ID="Label10" runat="server" Text="ppm" />
+                            <asp:Label ID="Label11" runat="server" Text="ppm" />
+                            <asp:Label ID="Label12" runat="server" Text="ppm" />
+                            <asp:Label ID="Label13" runat="server" Text="ppm" />
+                            <asp:Label ID="Label15" runat="server" Text="ppm" />
+                            <asp:Label ID="Label16" runat="server" Text="ppm" />
+                            <asp:Label ID="Label17" runat="server" Text="ppm" />
+                            <asp:Label ID="Label18" runat="server" Text="ppm" />
+                        </div>
+
+                    </div>
+                </div>
+            </ContentTemplate>
         </asp:UpdatePanel>
-     </div>   
-    </form>
+    </div>
+
+    <!-- ECharts wind compass gauge (outside UpdatePanel to persist across partial refresh) -->
+    <script type="text/javascript">
+        var windChart = null;
+
+        function getWindDir() {
+            var hf = document.getElementById('<%= wind_direction_W.ClientID %>');
+            if (!hf || hf.value === '') return 0;
+            var raw = parseFloat(hf.value);
+            if (isNaN(raw)) return 0;
+            // VB stores Wind_direction * (-1), reverse to get actual bearing
+            var dir = -raw;
+            dir = ((dir % 360) + 360) % 360;
+            return dir;
+        }
+
+        function initWindChart() {
+            var container = document.getElementById('wind-echart');
+            if (!container || typeof echarts === 'undefined') return;
+            var existing = echarts.getInstanceByDom(container);
+            if (existing) { existing.dispose(); }
+            windChart = echarts.init(container);
+            windChart.setOption({
+                backgroundColor: 'transparent',
+                series: [{
+                    type: 'gauge',
+                    radius: '88%',
+                    startAngle: 90,
+                    endAngle: -270,
+                    clockwise: true,
+                    min: 0,
+                    max: 360,
+                    splitNumber: 8,
+                    axisLine: { lineStyle: { width: 3, color: [[1, '#cbd5e1']] } },
+                    splitLine: { length: 14, lineStyle: { color: '#94a3b8', width: 2 } },
+                    axisTick: { length: 7, lineStyle: { color: '#94a3b8' } },
+                    axisLabel: {
+                        color: '#334155',
+                        fontSize: 11,
+                        formatter: function(v) {
+                            var m = {0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'};
+                            return m[v] !== undefined ? m[v] : '';
+                        }
+                    },
+                    pointer: { length: '68%', width: 5, itemStyle: { color: '#ef4444' } },
+                    anchor: {
+                        show: true, size: 10,
+                        itemStyle: { color: '#2563eb', borderColor: '#1d4ed8', borderWidth: 2 }
+                    },
+                    detail: { show: false },
+                    title: { show: false },
+                    data: [{ value: getWindDir() }]
+                }]
+            });
+        }
+
+        // Re-init after UpdatePanel partial refresh (DOM is replaced)
+        if (typeof Sys !== 'undefined' && Sys.WebForms) {
+            Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function() {
+                initWindChart();
+            });
+        }
+
+        window.addEventListener('load', function() { initWindChart(); });
+    </script>
+</form>
 </body>
 </html>
+

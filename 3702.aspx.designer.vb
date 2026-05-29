@@ -644,24 +644,6 @@ Partial Public Class _HSM3702
     Protected WithEvents V_3GIA2005 As Global.System.Web.UI.WebControls.Label
     
     '''<summary>
-    '''WebChart1 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents WebChart1 As Global.Steema.TeeChart.Web.WebChart
-    
-    '''<summary>
-    '''SqlDataSource1 控制項。
-    '''</summary>
-    '''<remarks>
-    '''自動產生的欄位。
-    '''若要修改，請將欄位宣告從設計工具檔案移到程式碼後置檔案。
-    '''</remarks>
-    Protected WithEvents SqlDataSource1 As Global.System.Web.UI.WebControls.SqlDataSource
-    
-    '''<summary>
     '''wind_direction_W 控制項。
     '''</summary>
     '''<remarks>
