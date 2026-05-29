@@ -164,7 +164,7 @@
         .zone-err  {
             background: radial-gradient(circle at 35% 35%, #ff6b6b, #d9534f);
             /* Red breathing light effect */
-            animation: pulse-red 1.6s ease-in-out infinite;
+            animation: pulse-red 3s ease-in-out infinite;
         }
 
         /* ---- Red breathing animation: scale + red glow ---- */
@@ -172,32 +172,31 @@
             0%   {
                 transform: scale(1);
                 box-shadow:
-                    0 0  6px 1px rgba(217, 83, 79, 0.55),
-                    0 0 12px 3px rgba(217, 83, 79, 0.30);
+                    0 0  4px 1px rgba(217, 83, 79, 0.35),
+                    0 0  8px 2px rgba(217, 83, 79, 0.18);
             }
             50%  {
-                transform: scale(1.10);
+                transform: scale(1.05);
                 box-shadow:
-                    0 0 14px 5px  rgba(217, 83, 79, 0.90),
-                    0 0 28px 10px rgba(217, 83, 79, 0.55),
-                    0 0 42px 16px rgba(255, 80, 60, 0.25);
+                    0 0  8px 3px rgba(217, 83, 79, 0.65),
+                    0 0 18px 7px rgba(217, 83, 79, 0.32);
             }
             100% {
                 transform: scale(1);
                 box-shadow:
-                    0 0  6px 1px rgba(217, 83, 79, 0.55),
-                    0 0 12px 3px rgba(217, 83, 79, 0.30);
+                    0 0  4px 1px rgba(217, 83, 79, 0.35),
+                    0 0  8px 2px rgba(217, 83, 79, 0.18);
             }
         }
 
         /* Legend red dot also breathes */
         .limit-legend-dot.dot-err {
-            animation: pulse-red-dot 1.6s ease-in-out infinite;
+            animation: pulse-red-dot 3s ease-in-out infinite;
         }
         @keyframes pulse-red-dot {
-            0%   { box-shadow: 0 0 2px 1px rgba(217, 83, 79, 0.40); }
-            50%  { box-shadow: 0 0 6px 3px rgba(217, 83, 79, 0.85); }
-            100% { box-shadow: 0 0 2px 1px rgba(217, 83, 79, 0.40); }
+            0%   { box-shadow: 0 0 1px 1px rgba(217, 83, 79, 0.25); }
+            50%  { box-shadow: 0 0 4px 2px rgba(217, 83, 79, 0.55); }
+            100% { box-shadow: 0 0 1px 1px rgba(217, 83, 79, 0.25); }
         }
 
         /* ---- Light legend ---- */
