@@ -132,28 +132,19 @@
             justify-content: center;    /* 表格置中對齊 ECharts */
         }
 
-        /* ---- 中欄「每日增減量」表格專屬樣式：縮小字型與內距，確保 1920px 下免除 scrollbar ---- */
-        /* 22吋 1920x1080：中欄可用寬度約 680px，很日期欄 + 2固定欄序約 620px，此樣式确保剛好容納 */
-        .weekly-col .bs5-table {
-            font-size: 7.5pt !important;  /* 全局表格為 9pt，中欄雘小为 7.5pt */
-        }
-        .weekly-col .bs5-table th {
-            padding: 4px 5px !important;  /* 原為 6px 8px，縮小讓日期欄更緊湊 */
-            font-size: 7.5pt !important;
-        }
-        .weekly-col .bs5-table td {
-            padding: 3px 5px !important;  /* 原為 5px 8px，縮小讓日期欄更緊湊 */
-            font-size: 7.5pt !important;
-        }
-        /* 中欄占更大比例：在三欄並排中讓中欄坯出更寬空間不被拉平 */
+        /* ---- 中欄「每日增減量」寬度優先策略：以佔比換取更多欄寬，不縮小字型 ---- */
+        /* 22吋 1920px：中欄約 840px，9pt 字型 + 原始 padding 的 7~8 日期欄約需 680px，有餘裕 */
+        /* 19吋 1366px：中欄約 600px，仍可容納大部分情況，極少數多欄時才出現 scrollbar  */
         .weekly-col {
-            flex: 2 1 calc(40% - 20px) !important;  /* 占比左右欄的兩倍 */
+            flex: 2.5 1 calc(45% - 20px) !important; /* 佔三欄中最大份額 */
             min-width: 300px !important;
+            box-sizing: border-box;
         }
-        /* 左右欄小一點，讓出空間給中欄 */
+        /* 左右欄略縮，讓出寬度給中欄 */
         .rcv-col, .used-col {
-            flex: 1 1 calc(28% - 20px) !important;
-            min-width: 180px !important;
+            flex: 1 1 calc(24% - 20px) !important;
+            min-width: 160px !important;
+            box-sizing: border-box;
         }
 
         /* ---- 響應式斷點：當視窗寬度 ≤ 900px 時，三欄改為垂直堆疊 ---- */
