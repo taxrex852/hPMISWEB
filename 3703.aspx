@@ -242,7 +242,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2110</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2001" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -251,7 +251,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2111</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2002" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -260,7 +260,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2112</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2101" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -269,7 +269,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2113</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2102" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -278,7 +278,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2114</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2103" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -287,7 +287,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2115</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2104" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -296,7 +296,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2116</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2105" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -305,7 +305,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2117</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2106" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -314,7 +314,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2118</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2107" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -323,7 +323,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2119</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_1GIA2108" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#1 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -334,7 +334,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2120</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2001" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -343,7 +343,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2121</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2002" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -352,7 +352,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2122</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2101" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -361,7 +361,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2123</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2102" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -370,7 +370,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2124</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2103" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -379,7 +379,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2125</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2104" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -388,7 +388,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2126</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2105" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -397,7 +397,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2127</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2106" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -406,7 +406,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2128</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2107" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -415,7 +415,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2129</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_2GIA2108" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#2 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -426,7 +426,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2130</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2001" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -435,7 +435,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2131</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2002" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -444,7 +444,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2132</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2101" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -453,7 +453,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2133</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2102" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -462,7 +462,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2134</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2103" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -471,7 +471,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2135</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2104" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -480,7 +480,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2136</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2105" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -489,7 +489,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2137</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2106" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -498,7 +498,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2138</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2107" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -507,7 +507,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2139</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2108" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -516,7 +516,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2140</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2003" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -525,7 +525,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2141</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2004" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -534,7 +534,7 @@
                             <div class="sensor-tooltip">
                                 <div class="st-title">AT-2142</div>
                                 <div class="st-row"><span class="st-lbl">CO 濃度</span><span class="st-val"><asp:Label ID="V_3GIA2005" runat="server" Text="N/A" /> ppm</span></div>
-                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">#3 HBM FCE</span></div>
+                                <div class="st-row"><span class="st-lbl">所屬爐組</span><span class="st-val">HBM FCE</span></div>
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
@@ -553,9 +553,9 @@
                                 </div>
                             </div>
 
-                            <!-- #1 HBM FCE 感測器 -->
+                            <!-- HBM FCE 感測器 (AT-2110 ~ AT-2142) -->
                             <div class="data-card">
-                                <div class="card-header">#1 HBM FCE 感測器</div>
+                                <div class="card-header">HBM FCE 感測器</div>
                                 <table class="sensor-tbl">
                                     <tr>
                                         <td><asp:Label ID="IT_01" runat="server" CssClass="s-badge" Text="1" /></td>
@@ -602,13 +602,7 @@
                                         <td><asp:Label ID="L10" runat="server" CssClass="s-name" Text="AT-2119" /></td>
                                         <td class="s-val"><asp:Label ID="V10" runat="server" Text="N/A" /></td><td>ppm</td>
                                     </tr>
-                                </table>
-                            </div>
-
-                            <!-- #2 HBM FCE 感測器 -->
-                            <div class="data-card">
-                                <div class="card-header">#2 HBM FCE 感測器</div>
-                                <table class="sensor-tbl">
+                                    <tr><td colspan="9"><hr style="border:none;border-top:1px solid #e2e8f0;margin:3px 0;" /></td></tr>
                                     <tr>
                                         <td><asp:Label ID="IT_11" runat="server" CssClass="s-badge" Text="11" /></td>
                                         <td><asp:Label ID="L11" runat="server" CssClass="s-name" Text="AT-2120" /></td>
@@ -654,13 +648,7 @@
                                         <td><asp:Label ID="L20" runat="server" CssClass="s-name" Text="AT-2129" /></td>
                                         <td class="s-val"><asp:Label ID="V20" runat="server" Text="N/A" /></td><td>ppm</td>
                                     </tr>
-                                </table>
-                            </div>
-
-                            <!-- #3 HBM FCE 感測器 -->
-                            <div class="data-card">
-                                <div class="card-header">#3 HBM FCE 感測器</div>
-                                <table class="sensor-tbl">
+                                    <tr><td colspan="9"><hr style="border:none;border-top:1px solid #e2e8f0;margin:3px 0;" /></td></tr>
                                     <tr>
                                         <td><asp:Label ID="IT_21" runat="server" CssClass="s-badge" Text="21" /></td>
                                         <td><asp:Label ID="L21" runat="server" CssClass="s-name" Text="AT-2130" /></td>
@@ -732,7 +720,7 @@
                             <div class="info-card">
                                 <div class="card-header"><asp:Label ID="Label49" runat="server" Text="資料更新時間" /></div>
                                 <div class="time-row">
-                                    <span class="time-lbl"><asp:Label ID="Fn1" runat="server" Text="HBM FCE：" /></span>
+                                    <span class="time-lbl"><asp:Label ID="Fn1" runat="server" Text="HBM FCE CO 偵測：" /></span>
                                     <asp:Label ID="Last_time_1" runat="server" CssClass="time-val" />
                                 </div>
                             </div>
