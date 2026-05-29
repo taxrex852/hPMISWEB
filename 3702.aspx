@@ -64,6 +64,9 @@
             cursor: pointer;
             z-index: 5;
         }
+        .sensor-hotspot:hover {
+            z-index: 1000;
+        }
         .sensor-dot {
             display: inline-block;
             width: 22px;
