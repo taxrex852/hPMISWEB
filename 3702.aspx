@@ -229,6 +229,21 @@
         .time-lbl { color: var(--text-muted); }
         .time-val { color: #2563eb; font-size: 0.73rem; }
 
+        /* ===== Wind gauge floating tooltip ===== */
+        .wind-floating-tooltip {
+            position: fixed;
+            background: rgba(15, 23, 42, 0.97);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 10px 14px;
+            width: 205px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            display: none;
+            z-index: 9999;
+            pointer-events: none;
+            color: #e2e8f0;
+        }
+
         /* ===== Breathing light animation ===== */
         @keyframes pulse-danger {
             0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.8); }
@@ -843,6 +858,15 @@
         </asp:UpdatePanel>
     </div>
 
+    <!-- 風速計浮動 Tooltip（UpdatePanel 外，固定於 body，不受 AJAX 更新影響）-->
+    <div class="wind-floating-tooltip" id="windFloatingTooltip">
+        <div class="st-title" id="wft-title">風速計</div>
+        <div class="st-row"><span class="st-lbl">風向角度</span><span class="st-val" id="wft-deg">--°</span></div>
+        <div class="st-row"><span class="st-lbl">風向方位</span><span class="st-val" id="wft-compass">--</span></div>
+        <div class="st-row"><span class="st-lbl">風速</span><span class="st-val" id="wft-speed">-- m/s</span></div>
+        <div class="st-row"><span class="st-lbl">等級</span><span class="st-val" id="wft-level">--</span></div>
+    </div>
+
     <!-- ECharts 風速計（UpdatePanel 外，避免局部更新後消失）-->
     <script type="text/javascript">
         var windChart = null;
@@ -934,11 +958,74 @@
             }
         }
 
+        /* ===== 風速計 Tooltip 邏輯 ===== */
+        function degToCompassName(deg) {
+            var dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+            var idx = Math.round(((deg % 360) + 360) % 360 / 22.5) % 16;
+            return dirs[idx];
+        }
+
+        function refreshWindTooltipContent() {
+            var hf = document.getElementById('<%= wind_direction_W.ClientID %>');
+            var raw = (hf && hf.value !== '') ? parseFloat(hf.value) : NaN;
+            var displayDeg = isNaN(raw) ? 0 : ((-raw % 360) + 360) % 360;
+
+            var speedEl = document.getElementById('<%= Val_W_W_S.ClientID %>');
+            var speed = speedEl ? (speedEl.innerText || speedEl.textContent || '--').trim() : '--';
+
+            var levelEl = document.getElementById('<%= Wind_S_W_L.ClientID %>');
+            var level = levelEl ? (levelEl.innerText || levelEl.textContent || '--').trim() : '--';
+
+            var locEl = document.getElementById('<%= Label20.ClientID %>');
+            var loc = locEl ? (locEl.innerText || locEl.textContent || '熱軋大樓').trim() : '熱軋大樓';
+
+            var titleEl = document.getElementById('wft-title');
+            if (titleEl) titleEl.textContent = '風速計 — ' + loc;
+            var degEl = document.getElementById('wft-deg');
+            if (degEl) degEl.textContent = displayDeg.toFixed(1) + '°';
+            var compassEl = document.getElementById('wft-compass');
+            if (compassEl) compassEl.textContent = degToCompassName(displayDeg);
+            var speedTEl = document.getElementById('wft-speed');
+            if (speedTEl) speedTEl.textContent = speed + ' m/s';
+            var levelTEl = document.getElementById('wft-level');
+            if (levelTEl) levelTEl.textContent = level;
+        }
+
+        /* 用事件委派綁定於 document，UpdatePanel 更新後仍有效 */
+        var _windTipActive = false;
+        document.addEventListener('mousemove', function(e) {
+            var chartEl = document.getElementById('wind-echart');
+            var tipEl = document.getElementById('windFloatingTooltip');
+            if (!chartEl || !tipEl) return;
+
+            var rect = chartEl.getBoundingClientRect();
+            var inside = e.clientX >= rect.left && e.clientX <= rect.right &&
+                         e.clientY >= rect.top  && e.clientY <= rect.bottom;
+
+            if (inside) {
+                if (!_windTipActive) {
+                    refreshWindTooltipContent();
+                    _windTipActive = true;
+                }
+                tipEl.style.display = 'block';
+                /* 避免 tooltip 超出視窗右緣 */
+                var tipW = 220;
+                var left = e.clientX + 16;
+                if (left + tipW > window.innerWidth) { left = e.clientX - tipW - 10; }
+                tipEl.style.left = left + 'px';
+                tipEl.style.top  = (e.clientY - 10) + 'px';
+            } else {
+                if (_windTipActive) { _windTipActive = false; }
+                tipEl.style.display = 'none';
+            }
+        });
+
         if (typeof Sys !== 'undefined' && Sys.WebForms) {
             Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function() {
                 initWindChart();
                 applyBreathingEffect();
                 updateTooltipStatus();
+                _windTipActive = false; /* 資料更新後重置，下次 hover 重抓最新值 */
             });
         }
 
