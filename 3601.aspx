@@ -132,9 +132,33 @@
             justify-content: center;    /* 表格置中對齊 ECharts */
         }
 
+        /* ---- 中欄「每日增減量」表格專屬樣式：縮小字型與內距，確保 1920px 下免除 scrollbar ---- */
+        /* 22吋 1920x1080：中欄可用寬度約 680px，很日期欄 + 2固定欄序約 620px，此樣式确保剛好容納 */
+        .weekly-col .bs5-table {
+            font-size: 7.5pt !important;  /* 全局表格為 9pt，中欄雘小为 7.5pt */
+        }
+        .weekly-col .bs5-table th {
+            padding: 4px 5px !important;  /* 原為 6px 8px，縮小讓日期欄更緊湊 */
+            font-size: 7.5pt !important;
+        }
+        .weekly-col .bs5-table td {
+            padding: 3px 5px !important;  /* 原為 5px 8px，縮小讓日期欄更緊湊 */
+            font-size: 7.5pt !important;
+        }
+        /* 中欄占更大比例：在三欄並排中讓中欄坯出更寬空間不被拉平 */
+        .weekly-col {
+            flex: 2 1 calc(40% - 20px) !important;  /* 占比左右欄的兩倍 */
+            min-width: 300px !important;
+        }
+        /* 左右欄小一點，讓出空間給中欄 */
+        .rcv-col, .used-col {
+            flex: 1 1 calc(28% - 20px) !important;
+            min-width: 180px !important;
+        }
+
         /* ---- 響應式斷點：當視窗寬度 ≤ 900px 時，三欄改為垂直堆疊 ---- */
         @media (max-width: 900px) {
-            .flex-col-third {
+            .flex-col-third, .weekly-col, .rcv-col, .used-col {
                 flex: 1 1 100% !important;
                 min-width: 0 !important;
                 max-width: 100% !important;
@@ -149,7 +173,7 @@
         }
         /* ---- 中型螢幕 (901px ~ 1200px)：三欄改為兩欄 + 一欄佈局 ---- */
         @media (min-width: 901px) and (max-width: 1200px) {
-            .flex-col-third {
+            .flex-col-third, .weekly-col, .rcv-col, .used-col {
                 flex: 1 1 calc(50% - 20px) !important;
                 min-width: 0 !important;
             }
@@ -756,7 +780,7 @@
                 <div class="flex-row-layout" style="gap: 15px;">
 
                     <%-- 左欄：今日入儲（兩欄表格，自適應寬度置中對齊圖表） --%>
-                    <div class="flex-col-third">
+                    <div class="flex-col-third rcv-col">
                         <div id="todayRcvChart" style="width: 100%; height: 240px; min-width: 0;"></div>
                         <div class="table-wrap" style="margin-top: 8px;">
                             <asp:GridView ID="GridView4" runat="server" DataSourceID="dsImport" GridLines="None" CssClass="bs5-table">
@@ -764,8 +788,8 @@
                         </div>
                     </div>
 
-                    <%-- 中欄：每日增減趨勢（多欄表格，水平捲動確保 header 完整顯示） --%>
-                    <div class="flex-col-third">
+                    <%-- 中欄：每日增減趨勢（給中欄更寬的 flex 比例，小字型縮排，確保 1920px 下免除 scrollbar） --%>
+                    <div class="flex-col-third weekly-col">
                         <div id="weeklyChart" style="width: 100%; height: 240px; min-width: 0;"></div>
                         <div class="table-wrap" style="margin-top: 8px; justify-content: flex-start;">
                             <%-- 中欄表格欄位多，justify-content 改 flex-start 讓表格靠左從頭顯示 --%>
@@ -775,7 +799,7 @@
                     </div>
 
                     <%-- 右欄：今日消耗（兩欄表格，自適應寬度置中對齊圖表） --%>
-                    <div class="flex-col-third">
+                    <div class="flex-col-third used-col">
                         <div id="todayUsedChart" style="width: 100%; height: 240px; min-width: 0;"></div>
                         <div class="table-wrap" style="margin-top: 8px;">
                             <asp:GridView ID="GridView6" runat="server" DataSourceID="dsExport" GridLines="None" CssClass="bs5-table">
