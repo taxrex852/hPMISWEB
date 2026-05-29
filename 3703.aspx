@@ -237,7 +237,7 @@
                         <img src="images/HBMFCE_3.jpg" class="factory-img" alt="HBM加熱爐廠區圖" />
 
                         <!-- #1 HBM FCE 感測器 1-10 -->
-                        <div class="sensor-hotspot tip-left" style="left:628px;top:76px;">
+                        <div class="sensor-hotspot tip-left" style="left:646px;top:91px;">
                             <asp:Label ID="P_1GIA2001" runat="server" CssClass="sensor-dot" Text="1" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2001</div>
@@ -246,7 +246,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:532px;top:106px;">
+                        <div class="sensor-hotspot tip-left" style="left:613px;top:91px;">
                             <asp:Label ID="P_1GIA2002" runat="server" CssClass="sensor-dot" Text="2" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2002</div>
@@ -255,7 +255,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:499px;top:365px;">
+                        <div class="sensor-hotspot tip-left" style="left:462px;top:392px;">
                             <asp:Label ID="P_1GIA2101" runat="server" CssClass="sensor-dot" Text="3" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2101</div>
@@ -264,7 +264,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:390px;top:411px;">
+                        <div class="sensor-hotspot" style="left:439px;top:422px;">
                             <asp:Label ID="P_1GIA2102" runat="server" CssClass="sensor-dot" Text="4" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2102</div>
@@ -273,7 +273,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:495px;top:378px;">
+                        <div class="sensor-hotspot tip-left" style="left:475px;top:402px;">
                             <asp:Label ID="P_1GIA2103" runat="server" CssClass="sensor-dot" Text="5" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2103</div>
@@ -282,7 +282,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:465px;top:407px;">
+                        <div class="sensor-hotspot tip-left" style="left:459px;top:408px;">
                             <asp:Label ID="P_1GIA2104" runat="server" CssClass="sensor-dot" Text="6" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2104</div>
@@ -291,7 +291,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:499px;top:390px;">
+                        <div class="sensor-hotspot tip-left" style="left:475px;top:412px;">
                             <asp:Label ID="P_1GIA2105" runat="server" CssClass="sensor-dot" Text="7" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2105</div>
@@ -300,7 +300,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:490px;top:403px;">
+                        <div class="sensor-hotspot tip-left" style="left:475px;top:422px;">
                             <asp:Label ID="P_1GIA2106" runat="server" CssClass="sensor-dot" Text="8" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2106</div>
@@ -309,7 +309,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:319px;top:407px;">
+                        <div class="sensor-hotspot" style="left:395px;top:380px;">
                             <asp:Label ID="P_1GIA2107" runat="server" CssClass="sensor-dot" Text="9" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2107</div>
@@ -318,7 +318,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:499px;top:311px;">
+                        <div class="sensor-hotspot tip-left" style="left:429px;top:368px;">
                             <asp:Label ID="P_1GIA2108" runat="server" CssClass="sensor-dot" Text="10" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">1GIA2108</div>
@@ -329,7 +329,7 @@
                         </div>
 
                         <!-- #2 HBM FCE 感測器 11-20 -->
-                        <div class="sensor-hotspot" style="left:378px;top:135px;">
+                        <div class="sensor-hotspot" style="left:435px;top:201px;">
                             <asp:Label ID="P_2GIA2001" runat="server" CssClass="sensor-dot" Text="11" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2001</div>
@@ -338,7 +338,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:499px;top:352px;">
+                        <div class="sensor-hotspot tip-left" style="left:425px;top:385px;">
                             <asp:Label ID="P_2GIA2002" runat="server" CssClass="sensor-dot" Text="12" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2002</div>
@@ -347,7 +347,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:365px;top:102px;">
+                        <div class="sensor-hotspot" style="left:408px;top:201px;">
                             <asp:Label ID="P_2GIA2101" runat="server" CssClass="sensor-dot" Text="13" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2101</div>
@@ -356,7 +356,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:407px;top:68px;">
+                        <div class="sensor-hotspot" style="left:489px;top:201px;">
                             <asp:Label ID="P_2GIA2102" runat="server" CssClass="sensor-dot" Text="14" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2102</div>
@@ -365,7 +365,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:357px;top:444px;">
+                        <div class="sensor-hotspot" style="left:422px;top:402px;">
                             <asp:Label ID="P_2GIA2103" runat="server" CssClass="sensor-dot" Text="15" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2103</div>
@@ -374,7 +374,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:219px;top:424px;">
+                        <div class="sensor-hotspot" style="left:321px;top:385px;">
                             <asp:Label ID="P_2GIA2104" runat="server" CssClass="sensor-dot" Text="16" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2104</div>
@@ -383,7 +383,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:26px;top:168px;">
+                        <div class="sensor-hotspot" style="left:44px;top:235px;">
                             <asp:Label ID="P_2GIA2105" runat="server" CssClass="sensor-dot" Text="17" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2105</div>
@@ -392,7 +392,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:495px;top:340px;">
+                        <div class="sensor-hotspot tip-left" style="left:418px;top:375px;">
                             <asp:Label ID="P_2GIA2106" runat="server" CssClass="sensor-dot" Text="18" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2106</div>
@@ -401,7 +401,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:369px;top:114px;">
+                        <div class="sensor-hotspot" style="left:422px;top:201px;">
                             <asp:Label ID="P_2GIA2107" runat="server" CssClass="sensor-dot" Text="19" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2107</div>
@@ -410,7 +410,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:256px;top:97px;">
+                        <div class="sensor-hotspot" style="left:355px;top:171px;">
                             <asp:Label ID="P_2GIA2108" runat="server" CssClass="sensor-dot" Text="20" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">2GIA2108</div>
@@ -421,7 +421,7 @@
                         </div>
 
                         <!-- #3 HBM FCE 感測器 21-33 -->
-                        <div class="sensor-hotspot" style="left:177px;top:419px;">
+                        <div class="sensor-hotspot" style="left:255px;top:352px;">
                             <asp:Label ID="P_3GIA2001" runat="server" CssClass="sensor-dot" Text="21" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2001</div>
@@ -430,7 +430,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:227px;top:440px;">
+                        <div class="sensor-hotspot" style="left:328px;top:375px;">
                             <asp:Label ID="P_3GIA2002" runat="server" CssClass="sensor-dot" Text="22" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2002</div>
@@ -439,7 +439,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:306px;top:152px;">
+                        <div class="sensor-hotspot" style="left:362px;top:245px;">
                             <asp:Label ID="P_3GIA2101" runat="server" CssClass="sensor-dot" Text="23" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2101</div>
@@ -448,7 +448,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:202px;top:148px;">
+                        <div class="sensor-hotspot" style="left:308px;top:208px;">
                             <asp:Label ID="P_3GIA2102" runat="server" CssClass="sensor-dot" Text="24" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2102</div>
@@ -457,7 +457,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:185px;top:114px;">
+                        <div class="sensor-hotspot" style="left:318px;top:208px;">
                             <asp:Label ID="P_3GIA2103" runat="server" CssClass="sensor-dot" Text="25" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2103</div>
@@ -466,7 +466,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:607px;top:189px;">
+                        <div class="sensor-hotspot tip-left" style="left:516px;top:235px;">
                             <asp:Label ID="P_3GIA2104" runat="server" CssClass="sensor-dot" Text="26" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2104</div>
@@ -475,7 +475,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:599px;top:210px;">
+                        <div class="sensor-hotspot tip-left" style="left:482px;top:228px;">
                             <asp:Label ID="P_3GIA2105" runat="server" CssClass="sensor-dot" Text="27" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2105</div>
@@ -484,7 +484,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:623px;top:210px;">
+                        <div class="sensor-hotspot tip-left" style="left:506px;top:228px;">
                             <asp:Label ID="P_3GIA2106" runat="server" CssClass="sensor-dot" Text="28" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2106</div>
@@ -493,7 +493,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:106px;top:419px;">
+                        <div class="sensor-hotspot" style="left:208px;top:332px;">
                             <asp:Label ID="P_3GIA2107" runat="server" CssClass="sensor-dot" Text="29" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2107</div>
@@ -502,7 +502,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot" style="left:210px;top:357px;">
+                        <div class="sensor-hotspot" style="left:305px;top:358px;">
                             <asp:Label ID="P_3GIA2108" runat="server" CssClass="sensor-dot" Text="30" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2108</div>
@@ -511,7 +511,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:578px;top:286px;">
+                        <div class="sensor-hotspot tip-left" style="left:485px;top:298px;">
                             <asp:Label ID="P_3GIA2003" runat="server" CssClass="sensor-dot" Text="31" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2003</div>
@@ -520,7 +520,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:658px;top:260px;">
+                        <div class="sensor-hotspot tip-left" style="left:629px;top:285px;">
                             <asp:Label ID="P_3GIA2004" runat="server" CssClass="sensor-dot" Text="32" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2004</div>
@@ -529,7 +529,7 @@
                                 <div class="st-row"><span class="st-lbl">狀態</span><span class="st-status">--</span></div>
                             </div>
                         </div>
-                        <div class="sensor-hotspot tip-left" style="left:682px;top:260px;">
+                        <div class="sensor-hotspot tip-left" style="left:653px;top:285px;">
                             <asp:Label ID="P_3GIA2005" runat="server" CssClass="sensor-dot" Text="33" />
                             <div class="sensor-tooltip">
                                 <div class="st-title">3GIA2005</div>
