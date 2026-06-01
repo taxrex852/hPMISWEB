@@ -3,282 +3,347 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml" >
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title></title>
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <style type="text/css">
-        .auto-style1 {
-            left: 712px;
-            position: absolute;
-            top: 899px;
-            z-index: 110;
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>3091 工業級網路拓撲監控</title>
+    <!-- D3.js v7 -->
+    <script src="/libs/d3.min.js"></script>
+    <style>
+        body {
+            background: #f1f5f9;
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
         }
-        .auto-style4 {
-            left: 829px;
-            position: absolute;
-            top: 850px;
-            height: 50px;
-            z-index: 119;
+
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #fff;
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
         }
-        .auto-style11 {
-            z-index: 125;
-            left: 794px;
-            position: absolute;
-            top: 1104px;
-            right: 422px;
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
-        .auto-style14 {
-            left: 748px;
-            position: absolute;
-            top: 847px;
-            height: 50px;
-            z-index: 119;
+        .last-update {
+            font-size: 13px;
+            color: #94a3b8;
         }
-        .auto-style15 {
-            z-index: 122;
-            left: 714px;
-            position: absolute;
-            top: 1060px;
+
+        /* 拓撲圖容器 */
+        #topologyChart {
+            width: 100%;
+            height: calc(100vh - 100px);
+            background: #f8fafc;
+            /* 重要：position 需設為 relative，使 tooltip absolute 定位正確 */
+            position: relative;
+            overflow: hidden;
         }
-        .auto-style16 {
-            z-index: 124;
-            left: 872px;
-            position: absolute;
-            top: 1059px;
+
+        /* 連接線 - 正常狀態 */
+        .link {
+            fill: none;
+            stroke: #94a3b8;
+            stroke-width: 2px;
         }
-        .auto-style21 {
-            left: 750px;
-            width: 252px;
-            position: absolute;
-            top: 848px;
-            z-index: 109;
-            height: 3px;
+        /* 連接線 - 斷線狀態（虛線紅色流動） */
+        .link.offline-link {
+            stroke: #ef4444;
+            stroke-width: 1.5px;
+            stroke-dasharray: 6, 4;
+            animation: flow 1s linear infinite;
         }
-        .auto-style25 {
-            z-index: 122;
-            left: 787px;
-            position: absolute;
-            top: 1060px;
+
+        /* 節點樣式 */
+        .node rect {
+            fill: #ffffff;
+            stroke: #94a3b8;
+            stroke-width: 2px;
+            transition: all 0.4s ease;
         }
-        .auto-style26 {
-            left: 791px;
-            position: absolute;
-            top: 900px;
-            z-index: 110;
+        .node text {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            fill: #334155;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
         }
-        .auto-style27 {
-            left: 872px;
-            position: absolute;
-            top: 900px;
-            z-index: 112;
+
+        /* 節點狀態：正常（綠色外框與發光） */
+        .node.online rect {
+            stroke: #10b981;
+            fill: #f0fdf4;
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
         }
-        .auto-style29 {
-            z-index: 125;
-            left: 714px;
-            position: absolute;
-            top: 1085px;
-            right: 500px;
+
+        /* 節點狀態：異常（紅色外框、紅字與呼吸吸附效果） */
+        .node.offline rect {
+            stroke: #ef4444;
+            fill: #fef2f2;
+            animation: pulse-red 0.8s infinite alternate;
         }
-        .auto-style30 {
-            left: 908px;
-            position: absolute;
-            top: 849px;
-            height: 50px;
-            z-index: 119;
+        .node.offline text {
+            fill: #b91c1c;
         }
-        .auto-style31 {
-            z-index: 125;
-            left: 871px;
-            position: absolute;
-            top: 1086px;
-            right: 345px;
+
+        /* 動畫定義 */
+        @keyframes flow {
+            from { stroke-dashoffset: 10; }
+            to   { stroke-dashoffset: 0; }
+        }
+        @keyframes pulse-red {
+            0%   { filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5)); }
+            100% { filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)); }
+        }
+
+        /* =====================================================
+           Tooltip 樣式
+           position: fixed → 以瀏覽器可視區為基準，
+           配合 event.clientX / event.clientY 計算位置，
+           完全不受父容器 transform / scroll 影響。
+        ===================================================== */
+        #tooltip {
+            position: fixed;
+            padding: 10px 14px;
+            font-size: 13px;
+            line-height: 1.6;
+            background: rgba(15, 23, 42, 0.92);
+            color: #fff;
+            border-radius: 6px;
+            pointer-events: none;   /* 滑鼠穿透，不影響操作 */
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 9999;
+            white-space: nowrap;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
+    <!-- Tooltip 放在 body 最外層，避免被任何容器裁切 -->
+    <div id="tooltip"></div>
+
     <form id="form1" runat="server">
         <hPMISWEB:PageHeader ID="ph" runat="server" />
-        <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
-            <ContentTemplate>
-                <asp:Timer ID="Timer1" runat="server" OnTick="Timer1_Tick"></asp:Timer>
-                &nbsp;
-                <asp:Label ID="lblCymc_t" runat="server" Style="z-index: 125; left: 8px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblFce_t" runat="server" Style="z-index: 125; left: 88px; position: absolute;
-                    top: 808px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblHrfspc_t" runat="server" Style="z-index: 125; left: 184px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblTg_t" runat="server" Style="z-index: 125; left: 272px; position: absolute;
-                    top: 808px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblMil_t" runat="server" Style="z-index: 125; left: 360px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblSPC_t" runat="server" Style="z-index: 125; left: 448px; position: absolute;
-                    top: 808px" Text="N/A"></asp:Label>
-<%--                <asp:Label ID="lblSqc_t" runat="server" Style="z-index: 125; left: 472px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>--%>
-                <asp:Label ID="lblSymc_t" runat="server" Style="z-index: 125; left: 536px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblHrs_t" runat="server" Style="z-index: 125; left: 632px; position: absolute;
-                    top: 808px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblTnrl1_t" runat="server" Style="z-index: 125; left: 712px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblTnrl2_t" runat="server" Style="z-index: 125; left: 800px; position: absolute;
-                    top: 808px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblPymc_t" runat="server" Style="z-index: 125; left: 888px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>
-           
-                <asp:Label ID="lblIpmis_t" runat="server" Style="z-index: 125; left: 144px; position: absolute;
-                    top: 512px" Text="N/A"></asp:Label>
 
-              
-                <asp:Image ID="imgFCE" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 104px; position: absolute; top: 600px; z-index: 102;" Width="70px" />
-                <asp:Image ID="imgCYMC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg" Style="left: 16px; position: absolute; top: 600px; z-index: 101;" Width="70px" />
-                <asp:Image ID="imgHRFSPC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 192px; position: absolute; top: 600px; z-index: 103;" Width="70px" />
-                <asp:Image ID="imgTG" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 280px; position: absolute; top: 600px; z-index: 104;" Width="70px" />
-                <asp:Image ID="imgMIL" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 368px; position: absolute; top: 600px; z-index: 105;" Width="70px" />   
-                <asp:Image ID="imgSPC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 456px; position: absolute; top: 600px; z-index: 106;" Width="70px" />
-<%--                <asp:Image ID="imgSQC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 464px; position: absolute; top: 600px; z-index: 107;" Width="70px" />--%>
-                <asp:Image ID="imgSYMC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 544px; position: absolute; top: 600px; z-index: 108;" Width="70px" />
-                <asp:Image ID="imgHRS" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 632px; position: absolute; top: 600px; z-index: 109;" Width="70px" />
-                <asp:Image ID="imgTNRL1" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 720px; position: absolute; top: 600px; z-index: 110;" Width="70px" />   
-                <asp:Image ID="imgTNRL2" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 808px; position: absolute; top: 600px; z-index: 111;" Width="70px" />
-                <asp:Image ID="imgPYMC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 896px; position: absolute; top: 600px; z-index: 112;" Width="70px" />   
-                <asp:Image ID="imgDYMC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg" Width="70px" CssClass="auto-style27" />
-                <asp:Image ID="imgiPMIS" runat="server" Height="125px" ImageUrl="~/images/pc_pmis_normal.jpg"
-                    Style="left: 141px; position: absolute; top: 361px; z-index: 113;" />    
-                <asp:Image ID="imghPMIS" runat="server" Height="125px" ImageUrl="~/images/pc_pmis_normal.jpg"
-                    Style="left: 411px; position: absolute; top: 360px; z-index: 114;" />
-                <%--<asp:Image ID="imgsPMIS" runat="server" Height="125px" ImageUrl="~/images/pc_pmis_normal.jpg"
-                    Style="left: 681px; position: absolute; top: 361px; z-index: 115;" />--%>
-                <asp:Image ID="imgHOST" runat="server" Height="140px" ImageUrl="~/images/pc_host_normal.jpg"
-                    Style="left: 409px; position: absolute; top: 157px; z-index: 116;" />         &nbsp;
-                <asp:Label ID="lblCYMC" runat="server" Font-Bold="True" Style="left: 16px;
-                    position: absolute; top: 760px; z-index: 118;" Text="CYMC" ForeColor="Blue"></asp:Label>    
-                <asp:Label ID="lblFCE" runat="server" Font-Bold="True" Style="left: 112px;
-                    position: absolute; top: 760px; z-index: 119;" Text="FCE" ForeColor="Blue"></asp:Label>
-                <asp:Label ID="lblHRFSPC" runat="server" Font-Bold="True" Style="left: 192px;
-                    position: absolute; top: 760px; z-index: 120;" Text="HRFSPC" ForeColor="Blue"></asp:Label>
-                <asp:Label ID="lblHRS" runat="server" Font-Bold="True" Style="left: 640px; 
-                    position: absolute; top: 760px; z-index: 121;" Text="HRS"  ForeColor="Blue"></asp:Label>   
-                <asp:Label ID="lblMIL" runat="server" Font-Bold="True" Style="left: 376px;
-                    position: absolute; top: 760px; z-index: 122;" Text="MIL" ForeColor="Blue"></asp:Label>     
-                <asp:Label ID="lblSPC" runat="server" Font-Bold="True" Style="left: 464px;
-                    position: absolute; top: 760px; z-index: 123;" Text="SPC" ForeColor="Blue"></asp:Label>                 
-                <%--<asp:Label ID="lblSQC" runat="server" Font-Bold="True" Style="left: 472px;
-                    position: absolute; top: 760px; z-index: 124;" Text="SQC" ForeColor="Blue"></asp:Label>--%>
-                <asp:Label ID="lblSYMC" runat="server" Font-Bold="True" Style="left: 544px;
-                    position: absolute; top: 760px; z-index: 120;" Text="SYMC" ForeColor="Blue"></asp:Label>
-                <asp:Label ID="lblTG" runat="server" Font-Bold="True" Style="left: 288px; 
-                    position: absolute; top: 760px; z-index: 121;" Text="TG"  ForeColor="Blue"></asp:Label>   
-                <asp:Label ID="lblTNRL1" runat="server" Font-Bold="True" Style="left: 720px;
-                    position: absolute; top: 760px; z-index: 122;" Text="TNRL1" ForeColor="Blue"></asp:Label>     
-                <asp:Label ID="lblTNRL2" runat="server" Font-Bold="True" Style="left: 808px;
-                    position: absolute; top: 760px; z-index: 123;" Text="TNRL2" ForeColor="Blue"></asp:Label>                 
-                <asp:Label ID="lblPYMC" runat="server" Font-Bold="True" Style="left: 896px;
-                    position: absolute; top: 760px; z-index: 124;" Text="PYMC" ForeColor="Blue"></asp:Label>
-                <asp:Label ID="lblDYMC" runat="server" Font-Bold="True" ForeColor="Blue" Text="DYMC" CssClass="auto-style16"></asp:Label>
-                <asp:Label ID="lblHPMIS" runat="server" Font-Bold="True" Style="left: 454px;
-                    position: absolute; top: 489px; z-index: 126;" Text="hPMIS" ForeColor="Blue"></asp:Label>
-                <%--<asp:Label ID="lblsPMIS" runat="server" Font-Bold="True" Style="left: 722px; 
-                    position: absolute; top: 489px; z-index: 127;" Text="sPMIS" ForeColor="Blue"></asp:Label>--%>                   
-                <asp:Label ID="lblIPMIS" runat="server" Font-Bold="True" Style="left: 176px;
-                    position: absolute; top: 488px; z-index: 128;" Text="iPMIS" ForeColor="Blue"></asp:Label>
-                <asp:Label ID="lblHOST" runat="server" Font-Bold="True" Style="left: 453px; 
-                    position: absolute; top: 298px; z-index: 129;" Text="HOST" ForeColor="Blue"></asp:Label>    
-                <asp:Image ID="imgTNRL3" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg" Width="70px" CssClass="auto-style26" />  
-              <asp:Label ID="lblTNRL3" runat="server" Font-Bold="True" ForeColor="Blue" Text="TNRL3" CssClass="auto-style25"></asp:Label>
-                <asp:Label ID="lblTNRL3_t" runat="server" Text="N/A" CssClass="auto-style11"></asp:Label>
-                <asp:Label ID="lblDymc_t" runat="server" Text="N/A" CssClass="auto-style31"></asp:Label>
-                 <asp:Image ID="imgTNRL4" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg" Width="70px" CssClass="auto-style1" />
-                <asp:Label ID="lblTNRL4" runat="server" Font-Bold="True" ForeColor="Blue" Text="TNRL4" CssClass="auto-style15"></asp:Label>
-                <asp:Label ID="lblTNRL4_t" runat="server" Text="N/A" CssClass="auto-style29"></asp:Label>
+        <div class="header">
+            <h1>3091 / 工業級網路拓撲監控 (D3.js 樹狀架構)</h1>
+            <div class="last-update">
+                上次巡檢時間：<span id="lblTime">同步中...</span>
+            </div>
+        </div>
 
-                <asp:Image ID="imgUDC" runat="server" Height="125px" ImageUrl="~/images/pc_pmis_normal.jpg"
-                    Style="left: 680px; position: absolute; top: 360px; z-index: 113;" />
-                <asp:Label ID="lblUDC" runat="server" Font-Bold="True" ForeColor="Blue" Style="z-index: 128;
-                    left: 720px; position: absolute; top: 488px" Text="UDC"></asp:Label>
-                <asp:Label ID="lblUDC_t" runat="server" Style="z-index: 125; left: 696px; position: absolute;
-                    top: 512px" Text="N/A"></asp:Label>
-
-                    
-            </ContentTemplate>
-        </asp:UpdatePanel>
-        <img src="images/status.jpg" style="left: 820px; position: absolute; top: 140px;
-            z-index: 114;" height="90" width="90" />
-        <table style="left: 760px; position: absolute; top: 160px; z-index: 115;">
-            <tr>
-                <td>
-                    Online:</td>
-            </tr>
-            <tr>
-                <td>
-                    <br/>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Offline:</td>
-            </tr>
-        </table>
-        <img src="images/line_vertical.jpg" style="left: 496px; position: absolute; top: 552px;
-            height: 50px; z-index: 117;" width="3" />
-        &nbsp;
-        <img src="images/line_vertical.jpg" style="left: 760px; position: absolute; top: 552px;
-            height: 50px; z-index: 119;" width="3" />
-        &nbsp;
-        <img src="images/line_vertical.jpg" style="left: 51px; position: absolute; top: 550px;
-            height: 50px; z-index: 100;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 144px; position: absolute; top: 552px;
-            height: 50px; z-index: 101;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 232px; position: absolute; top: 552px;
-            height: 50px; z-index: 116;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 320px; position: absolute; top: 552px;
-            height: 50px; z-index: 103;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 408px; position: absolute; top: 552px;
-            height: 50px; z-index: 104;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 576px; position: absolute; top: 550px;
-            height: 50px; z-index: 105;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 672px; position: absolute; top: 552px;
-            height: 50px; z-index: 106;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 848px; position: absolute; top: 552px;
-            height: 50px; z-index: 107;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 936px; position: absolute; top: 552px;
-            height: 50px; z-index: 108;" width="3" />
-        <img src="images/line_horizontal.jpg" style="left: 53px; width: 950px; position: absolute;
-            top: 549px; z-index: 109; height: 3px;" />
-        <img src="images/line_vertical.jpg" style="left: 470px; width: 3px; position: absolute;
-            top: 315px; height: 41px; z-index: 110;" id="IMG1" />
-<%--        <img src="images/line_horizontal.jpg" style="left: 536px; width: 144px; position: absolute;
-            top: 464px; z-index: 111;" height="3" />--%>
-        <img src="images/line_horizontal.jpg" style="left: 265px; width: 144px; position: absolute;
-            top: 464px; z-index: 112;" height="3" />
-        <img src="images/line_vertical.jpg" style="left: 473px; position: absolute; top: 512px;
-            height: 40px; z-index: 113;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 1000px; position: absolute; top: 552px;
-            height: 300px; z-index: 108;" width="3" />
-        <img src="images/line_horizontal.jpg" class="auto-style21" />&nbsp;
-        <img src="images/line_vertical.jpg" width="3" class="auto-style4" />
-           <img src="images/line_vertical.jpg" width="3" class="auto-style30" />
-        <img src="images/line_vertical.jpg" width="3" class="auto-style14" />&nbsp;
+        <div id="topologyChart"></div>
     </form>
+
+    <script>
+        // =========================================================
+        // 1. 定義多層式樹狀結構（完全符合 HOST -> HPMIS -> 15個現場設備）
+        // =========================================================
+        const fieldNodes = [
+            "CYMC", "FCE", "HRFSPC", "HRS", "MIL",
+            "PYMC", "SPC", "SYMC", "TG",
+            "TNRL1", "TNRL2", "TNRL3", "TNRL4",
+            "DYMC", "HBMMIL"
+        ];
+
+        const treeData = {
+            id: "HOST",
+            name: "HOST",
+            children: [
+                {
+                    id: "HPMIS",
+                    name: "HPMIS",
+                    children: fieldNodes.map(name => ({ id: name, name: name }))
+                }
+            ]
+        };
+
+        // =========================================================
+        // 2. 設定 D3 畫布與響應式 viewBox
+        //    加大 svgWidth 讓第三階層有足夠空間分散
+        // =========================================================
+        const svgWidth  = 1600;   // 加大寬度，讓 15 個節點有空間分散
+        const svgHeight = 550;
+        const rectW = 82;
+        const rectH = 34;
+        const PADDING_X = 80;    // 左右邊界留白，避免節點被截切
+
+        const chartDiv = document.getElementById("topologyChart");
+
+        const svg = d3.select("#topologyChart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .style("width", "100%")
+            .style("height", "100%");
+
+        // 支援滑鼠滾輪縮放與拖曳
+        const g = svg.append("g");
+        const zoom = d3.zoom()
+            .scaleExtent([0.4, 3])
+            .on("zoom", (event) => g.attr("transform", event.transform));
+        svg.call(zoom);
+        // 預設縮放位置微調（稍微向下平移，留出標題空間）
+        svg.call(zoom.transform, d3.zoomIdentity.translate(0, 30).scale(1));
+
+        // =========================================================
+        // 3. 建立樹狀佈局（Tree Layout）
+        //    留出 PADDING_X 讓最左/最右節點不被截切
+        // =========================================================
+        const treeLayout = d3.tree().size([svgWidth - PADDING_X * 2, svgHeight - 140]);
+        const root = d3.hierarchy(treeData);
+        treeLayout(root);
+
+        // 將所有節點的 x 平移 PADDING_X，使左右對稱置中
+        root.descendants().forEach(d => { d.x += PADDING_X; });
+
+        // =========================================================
+        // 4. 繪製連接線（Links），使用平滑貝茲曲線
+        // =========================================================
+        g.selectAll(".link")
+            .data(root.links())
+            .enter().append("path")
+            .attr("class", d => `link link-${d.target.data.id}`)
+            .attr("d", d3.linkVertical()
+                .x(d => d.x)
+                .y(d => d.y)
+            );
+
+        // =========================================================
+        // 5. 繪製節點（Nodes）
+        //    Tooltip 改用 event.clientX / clientY（相對視窗），
+        //    搭配 position: fixed，確保不受容器 scroll/transform 影響
+        // =========================================================
+        const tooltip = d3.select("#tooltip");
+
+        const node = g.selectAll(".node")
+            .data(root.descendants())
+            .enter().append("g")
+            .attr("class", d => `node node-${d.data.id}`)
+            .attr("transform", d => `translate(${d.x},${d.y})`)
+            .on("mouseover", function(event, d) {
+                // 根據狀態碼組合顯示文字
+                let statusText;
+                if (d.data.status === 'N') {
+                    statusText = '✅ 正常 (Online)';
+                } else if (d.data.status === 'E') {
+                    statusText = '❌ 異常 (Offline)';
+                } else {
+                    statusText = '⏳ 未知';
+                }
+
+                tooltip
+                    .html(`<strong>${d.data.id}</strong><br/>狀態：${statusText}`)
+                    .style("opacity", 1);
+
+                // 使用 clientX/clientY（相對於視窗），
+                // tooltip 使用 position:fixed，位置完全精準
+                positionTooltip(event);
+            })
+            .on("mousemove", function(event) {
+                // 滑鼠移動時持續更新位置，確保 tooltip 跟隨游標
+                positionTooltip(event);
+            })
+            .on("mouseout", function() {
+                tooltip.style("opacity", 0);
+            });
+
+        // Tooltip 定位函式：顯示在滑鼠右方 15px
+        function positionTooltip(event) {
+            const offsetX = 15;  // 滑鼠右方偏移
+            const offsetY = -10; // 微微向上對齊游標中心
+
+            // 取得 tooltip 的實際寬高，避免超出視窗右側
+            const tipNode = document.getElementById("tooltip");
+            const tipW = tipNode.offsetWidth;
+            const tipH = tipNode.offsetHeight;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            let left = event.clientX + offsetX;
+            let top  = event.clientY + offsetY;
+
+            // 如果右側放不下，改顯示在滑鼠左方
+            if (left + tipW > vw - 10) {
+                left = event.clientX - tipW - offsetX;
+            }
+            // 如果底部放不下，向上調整
+            if (top + tipH > vh - 10) {
+                top = vh - tipH - 10;
+            }
+
+            tooltip
+                .style("left", left + "px")
+                .style("top",  top  + "px");
+        }
+
+        // 節點矩形外框
+        node.append("rect")
+            .attr("width",  d => d.depth === 0 ? 100 : rectW)
+            .attr("height", d => d.depth === 0 ? 44  : rectH)
+            .attr("x",      d => d.depth === 0 ? -50 : -(rectW / 2))
+            .attr("y",      d => d.depth === 0 ? -22 : -(rectH / 2))
+            .attr("rx", 6)
+            .attr("ry", 6);
+
+        // 節點文字
+        node.append("text")
+            .text(d => d.data.name);
+
+        // =========================================================
+        // 6. 與後端 PING 溝通，非同步更新節點狀態
+        // =========================================================
+        function updateNetworkTopology() {
+            fetch('3091.aspx/GetSystemStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const statusDict = data.d;
+                    const now = new Date();
+                    const pad = n => String(n).padStart(2, '0');
+                    const timeStr = `${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+                    document.getElementById('lblTime').innerText = timeStr;
+
+                    // 遍歷所有節點，直接使用 D3 切換 CSS Class
+                    root.descendants().forEach(d => {
+                        const sysId  = d.data.id.toUpperCase();
+                        const status = statusDict[sysId];
+                        d.data.status = status; // 存入 data 供 Tooltip 使用
+
+                        if (status) {
+                            const nodeEl = d3.select(`.node-${sysId}`);
+                            const linkEl = d3.select(`.link-${sysId}`);
+
+                            if (status === 'N') {
+                                nodeEl.classed("online",  true ).classed("offline", false);
+                                linkEl.classed("offline-link", false);
+                            } else {
+                                nodeEl.classed("online",  false).classed("offline", true);
+                                // 如果該節點斷線，連接線也會變為警示虛線
+                                linkEl.classed("offline-link", true);
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error("D3.js 拓撲更新失敗:", err));
+        }
+
+        // 載入後立即執行一次，之後每 10 秒自動刷新
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNetworkTopology();
+            setInterval(updateNetworkTopology, 10000);
+        });
+    </script>
 </body>
 </html>
