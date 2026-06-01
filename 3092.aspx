@@ -6,7 +6,7 @@
 <head runat="server">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>3092 HBM 網路拓撲監控</title>
+    <title>3092 HBM系統連線資訊</title>
 
     <!-- Bootstrap CSS（與 3101 等頁面一致） -->
     <link rel="stylesheet" href="libs/bootstrap.min.css" />
@@ -236,7 +236,7 @@
                 <!-- Card 標題列 -->
                 <div class="card-header-custom">
                     <span class="fs-5">
-                        🌐 3092 HBM 系統網路拓撲監控
+                        🌐 3092 HBM 系統網路監控
                     </span>
                     <span class="badge-time">
                         ⏱ 上次巡檢：<span id="lblTime">同步中...</span>
@@ -366,9 +366,15 @@
                     cssClass   = 'status-unknown';
                 }
 
+                // 組合 tooltip 內容，包含節點名稱、狀態、資料更新時間
+                const updatedAt = d.data.lastUpdated || '－';
                 tooltip
                     .attr("class", cssClass)
-                    .html(`<strong>${d.data.id}</strong><br/>狀態：${statusText}`)
+                    .html(
+                        `<strong>${d.data.id}</strong><br/>` +
+                        `狀態：${statusText}<br/>` +
+                        `<span style="font-size:11px;color:#94a3b8;">🕐 更新時間：${updatedAt}</span>`
+                    )
                     .style("opacity", 1);
 
                 positionTooltip(event);
@@ -442,6 +448,14 @@
                         const sysId  = d.data.id.toUpperCase();
                         const status = statusDict[sysId];
                         d.data.status = status;
+
+                        // 記錄本次查詢的時間戳記，供 Tooltip 顯示
+                        const timeStr =
+                            `${pad(now.getMonth()+1)}/${pad(now.getDate())} ` +
+                            `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+                        if (status) {
+                            d.data.lastUpdated = timeStr;   // 有回應才更新時間
+                        }
 
                         if (status) {
                             const nodeEl = d3.select(`.node-${sysId}`);
