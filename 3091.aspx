@@ -111,18 +111,25 @@
            D3 節點與連接線
         ===================================================== */
 
-        /* 連接線 - 正常 */
+        /* 連接線 - 預設（尚未取得狀態） */
         .link {
             fill: none;
-            stroke: #94a3b8;
+            stroke: #cbd5e1;
             stroke-width: 2px;
+        }
+        /* 連接線 - 正常連線（綠色流動虛線，代表資料正常傳輸） */
+        .link.online-link {
+            stroke: #10b981;
+            stroke-width: 2.5px;
+            stroke-dasharray: 10, 5;
+            animation: flow-green 1.2s linear infinite;
         }
         /* 連接線 - 斷線（紅色流動虛線） */
         .link.offline-link {
             stroke: #ef4444;
             stroke-width: 1.5px;
             stroke-dasharray: 6, 4;
-            animation: flow 1s linear infinite;
+            animation: flow-red 0.8s linear infinite;
         }
 
         /* 節點矩形外框 */
@@ -162,8 +169,14 @@
         }
         .node.offline text { fill: #b91c1c; }
 
-        /* 動畫 */
-        @keyframes flow {
+        /* 動畫定義 */
+        /* 正常連線：綠色往下流動（代表資料流向下層節點） */
+        @keyframes flow-green {
+            from { stroke-dashoffset: 15; }
+            to   { stroke-dashoffset: 0;  }
+        }
+        /* 斷線：紅色往上流動（代表反向警示） */
+        @keyframes flow-red {
             from { stroke-dashoffset: 10; }
             to   { stroke-dashoffset: 0;  }
         }
@@ -442,11 +455,12 @@
 
                             if (status === 'N') {
                                 nodeEl.classed("online",  true ).classed("offline", false);
-                                linkEl.classed("offline-link", false);
+                                // 正常：加上綠色流動動畫，移除斷線樣式
+                                linkEl.classed("online-link", true ).classed("offline-link", false);
                             } else {
                                 nodeEl.classed("online",  false).classed("offline", true);
-                                // 斷線節點的連接線也同步變為紅色虛線警示
-                                linkEl.classed("offline-link", true);
+                                // 斷線：加上紅色虛線動畫，移除正常樣式
+                                linkEl.classed("online-link", false).classed("offline-link", true);
                             }
                         }
                     });
