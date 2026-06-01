@@ -1,58 +1,123 @@
-﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3091.aspx.vb" Inherits="hPMISWEB._3091" %>
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3091.aspx.vb" Inherits="hPMISWEB._3091" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>3091 工業級網路拓撲監控</title>
+
+    <!-- Bootstrap CSS（與 3101 等頁面一致） -->
+    <link rel="stylesheet" href="libs/bootstrap.min.css" />
     <!-- D3.js v7 -->
     <script src="/libs/d3.min.js"></script>
-    <style>
+
+    <style type="text/css">
+
+        /* =====================================================
+           基礎版面（與 3101 等頁面保持一致）
+        ===================================================== */
         body {
-            background: #f1f5f9;
-            margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #f8f9fc;
+            padding-bottom: 20px;
         }
 
-        .header {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: #fff;
-            padding: 16px 28px;
+        .main-content {
+            clear: both !important;
+            display: block !important;
+            position: relative;
+            padding-top: 20px;
+        }
+
+        /* =====================================================
+           Card 設計（與 3101 完全一致）
+        ===================================================== */
+        .card-custom {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e3e6f0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: block !important;
+        }
+
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        .last-update {
-            font-size: 13px;
-            color: #94a3b8;
+            align-items: center;
         }
 
-        /* 拓撲圖容器 */
-        #topologyChart {
-            width: 100%;
-            height: calc(100vh - 100px);
-            background: #f8fafc;
-            /* 重要：position 需設為 relative，使 tooltip absolute 定位正確 */
+        .card-header-custom .badge-time {
+            font-size: 12px;
+            font-weight: 400;
+            color: #94a3b8;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* 拓撲圖卡片內容區 */
+        .topology-card-body {
+            padding: 0;
+            background-color: #f8fafc;
+            height: 580px;
             position: relative;
             overflow: hidden;
         }
 
-        /* 連接線 - 正常狀態 */
+        /* =====================================================
+           圖例說明列
+        ===================================================== */
+        .legend-bar {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 10px 20px;
+            background: #fff;
+            border-top: 1px solid #e3e6f0;
+            font-size: 13px;
+            color: #475569;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 2px solid;
+        }
+        .legend-dot.online  { border-color: #10b981; background: #f0fdf4; }
+        .legend-dot.offline { border-color: #ef4444; background: #fef2f2; }
+        .legend-dot.unknown { border-color: #94a3b8; background: #ffffff; }
+        .legend-line {
+            width: 30px;
+            height: 2px;
+        }
+        .legend-line.normal  { background: #94a3b8; }
+        .legend-line.broken  { background: #ef4444; border-top: 2px dashed #ef4444; height: 0; }
+
+        /* =====================================================
+           D3 節點與連接線
+        ===================================================== */
+
+        /* 連接線 - 正常 */
         .link {
             fill: none;
             stroke: #94a3b8;
             stroke-width: 2px;
         }
-        /* 連接線 - 斷線狀態（虛線紅色流動） */
+        /* 連接線 - 斷線（紅色流動虛線） */
         .link.offline-link {
             stroke: #ef4444;
             stroke-width: 1.5px;
@@ -60,93 +125,148 @@
             animation: flow 1s linear infinite;
         }
 
-        /* 節點樣式 */
+        /* 節點矩形外框 */
         .node rect {
             fill: #ffffff;
             stroke: #94a3b8;
             stroke-width: 2px;
-            transition: all 0.4s ease;
+            transition: all 0.35s ease;
         }
+        /* 節點文字 */
         .node text {
-            font-family: "Segoe UI", Arial, sans-serif;
-            font-size: 13px;
+            font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 12px;
             font-weight: 700;
             fill: #334155;
             text-anchor: middle;
             dominant-baseline: middle;
             pointer-events: none;
         }
+        /* 游標懸停樣式 */
+        .node:hover rect {
+            filter: brightness(0.95);
+            cursor: pointer;
+        }
 
-        /* 節點狀態：正常（綠色外框與發光） */
+        /* 狀態：正常（綠色外框與發光） */
         .node.online rect {
             stroke: #10b981;
             fill: #f0fdf4;
             filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
         }
-
-        /* 節點狀態：異常（紅色外框、紅字與呼吸吸附效果） */
+        /* 狀態：異常（紅色呼吸） */
         .node.offline rect {
             stroke: #ef4444;
             fill: #fef2f2;
-            animation: pulse-red 0.8s infinite alternate;
+            animation: pulse-red 0.9s infinite alternate;
         }
-        .node.offline text {
-            fill: #b91c1c;
-        }
+        .node.offline text { fill: #b91c1c; }
 
-        /* 動畫定義 */
+        /* 動畫 */
         @keyframes flow {
             from { stroke-dashoffset: 10; }
-            to   { stroke-dashoffset: 0; }
+            to   { stroke-dashoffset: 0;  }
         }
         @keyframes pulse-red {
-            0%   { filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5)); }
-            100% { filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.8)); }
+            0%   { filter: drop-shadow(0 0 2px  rgba(239, 68, 68, 0.5)); }
+            100% { filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.85)); }
         }
 
         /* =====================================================
-           Tooltip 樣式
+           Tooltip
            position: fixed → 以瀏覽器可視區為基準，
-           配合 event.clientX / event.clientY 計算位置，
-           完全不受父容器 transform / scroll 影響。
+           配合 event.clientX / clientY，完全不受任何容器影響
         ===================================================== */
-        #tooltip {
+        #topology-tooltip {
             position: fixed;
-            padding: 10px 14px;
+            padding: 10px 16px;
             font-size: 13px;
-            line-height: 1.6;
-            background: rgba(15, 23, 42, 0.92);
+            line-height: 1.7;
+            font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+            background: rgba(15, 23, 42, 0.93);
             color: #fff;
             border-radius: 6px;
-            pointer-events: none;   /* 滑鼠穿透，不影響操作 */
+            pointer-events: none;
             opacity: 0;
             transition: opacity 0.15s ease;
             z-index: 9999;
             white-space: nowrap;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+            border-left: 4px solid #10b981;
         }
+        #topology-tooltip.status-offline { border-left-color: #ef4444; }
+        #topology-tooltip.status-unknown { border-left-color: #94a3b8; }
+
     </style>
 </head>
 <body>
-    <!-- Tooltip 放在 body 最外層，避免被任何容器裁切 -->
-    <div id="tooltip"></div>
+
+    <!-- Tooltip 放在 body 最外層，避免被任何容器裁切或遮蓋 -->
+    <div id="topology-tooltip"></div>
 
     <form id="form1" runat="server">
+        <!-- PageHeader 元件（包含選單列，約 40~50px 高） -->
         <hPMISWEB:PageHeader ID="ph" runat="server" />
+        <a name="#Home"></a>
 
-        <div class="header">
-            <h1>3091 / 工業級網路拓撲監控 (D3.js 樹狀架構)</h1>
-            <div class="last-update">
-                上次巡檢時間：<span id="lblTime">同步中...</span>
-            </div>
-        </div>
+        <!-- 主要內容區（與 3101 相同的 container-fluid main-content） -->
+        <div class="container-fluid main-content px-4">
 
-        <div id="topologyChart"></div>
+            <!-- ================================================
+                 拓撲圖 Card（仿 3101 card-custom 設計）
+            ================================================ -->
+            <div class="card-custom mb-4 mt-2">
+
+                <!-- Card 標題列 -->
+                <div class="card-header-custom">
+                    <span class="fs-5">
+                        🌐 3091 工業級網路拓撲監控
+                    </span>
+                    <span class="badge-time">
+                        ⏱ 上次巡檢：<span id="lblTime">同步中...</span>
+                    </span>
+                </div>
+
+                <!-- 拓撲圖本體 -->
+                <div class="topology-card-body" id="topologyChart">
+                    <!-- D3.js SVG 會自動注入此 div -->
+                </div>
+
+                <!-- 圖例說明列 -->
+                <div class="legend-bar">
+                    <span style="font-weight:600; color:#2c3e50;">圖例說明：</span>
+                    <span class="legend-item">
+                        <span class="legend-dot online"></span> 正常 (Online)
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-dot offline"></span> 異常 (Offline)
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-dot unknown"></span> 未知
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-line normal"></span> 正常連線
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-line broken"></span> 斷線（虛線）
+                    </span>
+                    <span style="margin-left:auto; font-size:12px; color:#94a3b8;">
+                        💡 可使用滾輪縮放 / 拖曳平移
+                    </span>
+                </div>
+
+            </div><!-- /.card-custom -->
+
+        </div><!-- /.container-fluid -->
     </form>
+
+    <!-- Bootstrap JS（與 3101 一致） -->
+    <script src="libs/bootstrap.bundle.min.js"></script>
 
     <script>
         // =========================================================
-        // 1. 定義多層式樹狀結構（完全符合 HOST -> HPMIS -> 15個現場設備）
+        // 1. 定義多層式樹狀結構
+        //    HOST → HPMIS → 15 個現場系統節點
         // =========================================================
         const fieldNodes = [
             "CYMC", "FCE", "HRFSPC", "HRS", "MIL",
@@ -158,56 +278,51 @@
         const treeData = {
             id: "HOST",
             name: "HOST",
-            children: [
-                {
-                    id: "HPMIS",
-                    name: "HPMIS",
-                    children: fieldNodes.map(name => ({ id: name, name: name }))
-                }
-            ]
+            children: [{
+                id: "HPMIS",
+                name: "HPMIS",
+                children: fieldNodes.map(name => ({ id: name, name: name }))
+            }]
         };
 
         // =========================================================
-        // 2. 設定 D3 畫布與響應式 viewBox
-        //    加大 svgWidth 讓第三階層有足夠空間分散
+        // 2. 設定 D3 畫布尺寸
+        //    svgWidth 加大確保 15 個第三階層節點有足夠間距
         // =========================================================
-        const svgWidth  = 1600;   // 加大寬度，讓 15 個節點有空間分散
-        const svgHeight = 550;
-        const rectW = 82;
-        const rectH = 34;
-        const PADDING_X = 80;    // 左右邊界留白，避免節點被截切
-
-        const chartDiv = document.getElementById("topologyChart");
+        const svgWidth   = 1700;    // 加大，讓 15 節點充分分散
+        const svgHeight  = 520;
+        const rectW      = 82;
+        const rectH      = 34;
+        const PADDING_X  = 60;      // 左右邊界留白，避免節點被截切
 
         const svg = d3.select("#topologyChart")
             .append("svg")
             .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`)
             .attr("preserveAspectRatio", "xMidYMid meet")
-            .style("width", "100%")
+            .style("width",  "100%")
             .style("height", "100%");
 
-        // 支援滑鼠滾輪縮放與拖曳
+        // 支援滾輪縮放與拖曳
         const g = svg.append("g");
         const zoom = d3.zoom()
             .scaleExtent([0.4, 3])
             .on("zoom", (event) => g.attr("transform", event.transform));
         svg.call(zoom);
-        // 預設縮放位置微調（稍微向下平移，留出標題空間）
-        svg.call(zoom.transform, d3.zoomIdentity.translate(0, 30).scale(1));
+        // 預設平移（稍微向下，避免 HOST 節點緊貼頂部）
+        svg.call(zoom.transform, d3.zoomIdentity.translate(0, 35).scale(1));
 
         // =========================================================
         // 3. 建立樹狀佈局（Tree Layout）
-        //    留出 PADDING_X 讓最左/最右節點不被截切
         // =========================================================
-        const treeLayout = d3.tree().size([svgWidth - PADDING_X * 2, svgHeight - 140]);
+        const treeLayout = d3.tree().size([svgWidth - PADDING_X * 2, svgHeight - 130]);
         const root = d3.hierarchy(treeData);
         treeLayout(root);
 
-        // 將所有節點的 x 平移 PADDING_X，使左右對稱置中
+        // 全部節點的 x 座標平移 PADDING_X，讓畫面左右對稱
         root.descendants().forEach(d => { d.x += PADDING_X; });
 
         // =========================================================
-        // 4. 繪製連接線（Links），使用平滑貝茲曲線
+        // 4. 繪製連接線（Links）— 平滑貝茲曲線
         // =========================================================
         g.selectAll(".link")
             .data(root.links())
@@ -219,11 +334,11 @@
             );
 
         // =========================================================
-        // 5. 繪製節點（Nodes）
-        //    Tooltip 改用 event.clientX / clientY（相對視窗），
-        //    搭配 position: fixed，確保不受容器 scroll/transform 影響
+        // 5. 繪製節點（Nodes）與 Tooltip 互動
+        //    Tooltip 使用 position:fixed + event.clientX/clientY
+        //    確保位置精準跟隨滑鼠右方，不受容器 transform 影響
         // =========================================================
-        const tooltip = d3.select("#tooltip");
+        const tooltip = d3.select("#topology-tooltip");
 
         const node = g.selectAll(".node")
             .data(root.descendants())
@@ -231,52 +346,51 @@
             .attr("class", d => `node node-${d.data.id}`)
             .attr("transform", d => `translate(${d.x},${d.y})`)
             .on("mouseover", function(event, d) {
-                // 根據狀態碼組合顯示文字
-                let statusText;
+                let statusText, cssClass;
                 if (d.data.status === 'N') {
                     statusText = '✅ 正常 (Online)';
+                    cssClass   = 'status-online';
                 } else if (d.data.status === 'E') {
                     statusText = '❌ 異常 (Offline)';
+                    cssClass   = 'status-offline';
                 } else {
                     statusText = '⏳ 未知';
+                    cssClass   = 'status-unknown';
                 }
 
                 tooltip
+                    .attr("class", cssClass)   // 切換左框線顏色
                     .html(`<strong>${d.data.id}</strong><br/>狀態：${statusText}`)
                     .style("opacity", 1);
 
-                // 使用 clientX/clientY（相對於視窗），
-                // tooltip 使用 position:fixed，位置完全精準
                 positionTooltip(event);
             })
             .on("mousemove", function(event) {
-                // 滑鼠移動時持續更新位置，確保 tooltip 跟隨游標
+                // 持續更新位置，確保 tooltip 緊跟游標
                 positionTooltip(event);
             })
             .on("mouseout", function() {
                 tooltip.style("opacity", 0);
             });
 
-        // Tooltip 定位函式：顯示在滑鼠右方 15px
+        // Tooltip 定位：顯示在滑鼠右方 15px，超出視窗則自動反轉
         function positionTooltip(event) {
-            const offsetX = 15;  // 滑鼠右方偏移
-            const offsetY = -10; // 微微向上對齊游標中心
-
-            // 取得 tooltip 的實際寬高，避免超出視窗右側
-            const tipNode = document.getElementById("tooltip");
-            const tipW = tipNode.offsetWidth;
-            const tipH = tipNode.offsetHeight;
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
+            const offsetX = 15;
+            const offsetY = -8;
+            const tipEl   = document.getElementById("topology-tooltip");
+            const tipW    = tipEl.offsetWidth;
+            const tipH    = tipEl.offsetHeight;
+            const vw      = window.innerWidth;
+            const vh      = window.innerHeight;
 
             let left = event.clientX + offsetX;
             let top  = event.clientY + offsetY;
 
-            // 如果右側放不下，改顯示在滑鼠左方
+            // 右側超出視窗 → 改顯示在左方
             if (left + tipW > vw - 10) {
                 left = event.clientX - tipW - offsetX;
             }
-            // 如果底部放不下，向上調整
+            // 底部超出視窗 → 向上調整
             if (top + tipH > vh - 10) {
                 top = vh - tipH - 10;
             }
@@ -286,11 +400,11 @@
                 .style("top",  top  + "px");
         }
 
-        // 節點矩形外框
+        // 節點矩形外框（HOST 層稍大）
         node.append("rect")
-            .attr("width",  d => d.depth === 0 ? 100 : rectW)
+            .attr("width",  d => d.depth === 0 ? 104 : rectW)
             .attr("height", d => d.depth === 0 ? 44  : rectH)
-            .attr("x",      d => d.depth === 0 ? -50 : -(rectW / 2))
+            .attr("x",      d => d.depth === 0 ? -52 : -(rectW / 2))
             .attr("y",      d => d.depth === 0 ? -22 : -(rectH / 2))
             .attr("rx", 6)
             .attr("ry", 6);
@@ -300,7 +414,7 @@
             .text(d => d.data.name);
 
         // =========================================================
-        // 6. 與後端 PING 溝通，非同步更新節點狀態
+        // 6. 與後端 PING 服務溝通，非同步更新節點狀態
         // =========================================================
         function updateNetworkTopology() {
             fetch('3091.aspx/GetSystemStatus', {
@@ -312,14 +426,15 @@
                     const statusDict = data.d;
                     const now = new Date();
                     const pad = n => String(n).padStart(2, '0');
-                    const timeStr = `${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-                    document.getElementById('lblTime').innerText = timeStr;
+                    document.getElementById('lblTime').innerText =
+                        `${pad(now.getMonth()+1)}/${pad(now.getDate())} ` +
+                        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-                    // 遍歷所有節點，直接使用 D3 切換 CSS Class
+                    // 遍歷所有節點，動態切換 CSS Class
                     root.descendants().forEach(d => {
                         const sysId  = d.data.id.toUpperCase();
                         const status = statusDict[sysId];
-                        d.data.status = status; // 存入 data 供 Tooltip 使用
+                        d.data.status = status;   // 存入 data 供 Tooltip 讀取
 
                         if (status) {
                             const nodeEl = d3.select(`.node-${sysId}`);
@@ -330,7 +445,7 @@
                                 linkEl.classed("offline-link", false);
                             } else {
                                 nodeEl.classed("online",  false).classed("offline", true);
-                                // 如果該節點斷線，連接線也會變為警示虛線
+                                // 斷線節點的連接線也同步變為紅色虛線警示
                                 linkEl.classed("offline-link", true);
                             }
                         }
