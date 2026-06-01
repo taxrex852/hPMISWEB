@@ -1,144 +1,457 @@
-﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3092.aspx.vb" Inherits="hPMISWEB.HBMsys" %>
+﻿<%@ Page Language="vb" AutoEventWireup="false" CodeBehind="3092.aspx.vb" Inherits="hPMISWEB.HBMsys" ContentType="text/html" ResponseEncoding="UTF-8" %>
 <%@ Register TagPrefix="hPMISWEB" TagName="PageHeader" Src="~/include/header.ascx" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml" >
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title></title>
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
-    <link href="/css/diagram.css" media="all" rel="stylesheet" type="text/css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>3092 HBM 網路拓撲監控</title>
+
+    <!-- Bootstrap CSS（與 3101 等頁面一致） -->
+    <link rel="stylesheet" href="libs/bootstrap.min.css" />
+    <!-- D3.js v7 -->
+    <script src="/libs/d3.min.js"></script>
+
     <style type="text/css">
-        .auto-style30 {
-            left: 323px;
-            width: 254px;
-            position: absolute;
-            top: 549px;
-            z-index: 109;
-            height: 6px;
+
+        /* =====================================================
+           基礎版面（與 3101 等頁面保持一致）
+        ===================================================== */
+        body {
+            background-color: #f8f9fc;
+            padding-bottom: 20px;
         }
-        .auto-style31 {
-            left: 281px;
-            position: absolute;
-            top: 760px;
-            z-index: 121;
+
+        .main-content {
+            clear: both !important;
+            display: block !important;
+            position: relative;
+            padding-top: 20px;
         }
-        .auto-style32 {
-            left: 371px;
-            position: absolute;
-            top: 760px;
-            z-index: 122;
+
+        /* =====================================================
+           Card 設計（與 3101 完全一致）
+        ===================================================== */
+        .card-custom {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e3e6f0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            display: block !important;
         }
-        .auto-style33 {
-            left: 459px;
-            position: absolute;
-            top: 760px;
-            z-index: 123;
+
+        .card-header-custom {
+            background-color: #2c3e50 !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .auto-style34 {
-            z-index: 125;
-            left: 541px;
-            position: absolute;
-            top: 784px;
+
+        .card-header-custom .badge-time {
+            font-size: 12px;
+            font-weight: 400;
+            color: #94a3b8;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
         }
-        .auto-style35 {
-            left: 439px;
-            position: absolute;
-            top: 489px;
-            z-index: 126;
+
+        /* 拓撲圖卡片內容區 */
+        .topology-card-body {
+            padding: 0;
+            background-color: #f8fafc;
+            height: 520px;
+            position: relative;
+            overflow: hidden;
         }
+
+        /* =====================================================
+           圖例說明列
+        ===================================================== */
+        .legend-bar {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            padding: 10px 20px;
+            background: #fff;
+            border-top: 1px solid #e3e6f0;
+            font-size: 13px;
+            color: #475569;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 2px solid;
+            display: inline-block;
+        }
+        .legend-dot.online  { border-color: #10b981; background: #f0fdf4; }
+        .legend-dot.offline { border-color: #ef4444; background: #fef2f2; }
+        .legend-dot.unknown { border-color: #94a3b8; background: #ffffff; }
+        .legend-line {
+            width: 30px;
+            height: 2px;
+            display: inline-block;
+        }
+        .legend-line.normal { background: #94a3b8; }
+        .legend-line.broken { border-top: 2px dashed #ef4444; height: 0; }
+
+        /* =====================================================
+           D3 節點與連接線
+        ===================================================== */
+
+        /* 連接線 - 正常 */
+        .link {
+            fill: none;
+            stroke: #94a3b8;
+            stroke-width: 2px;
+        }
+        /* 連接線 - 斷線（紅色流動虛線） */
+        .link.offline-link {
+            stroke: #ef4444;
+            stroke-width: 1.5px;
+            stroke-dasharray: 6, 4;
+            animation: flow 1s linear infinite;
+        }
+
+        /* 節點矩形外框 */
+        .node rect {
+            fill: #ffffff;
+            stroke: #94a3b8;
+            stroke-width: 2px;
+            transition: all 0.35s ease;
+        }
+        /* 節點文字 */
+        .node text {
+            font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            fill: #334155;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+        }
+        /* 游標懸停 */
+        .node:hover rect {
+            filter: brightness(0.95);
+            cursor: pointer;
+        }
+
+        /* 狀態：正常（綠色外框與發光） */
+        .node.online rect {
+            stroke: #10b981;
+            fill: #f0fdf4;
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+        }
+        /* 狀態：異常（紅色呼吸動畫） */
+        .node.offline rect {
+            stroke: #ef4444;
+            fill: #fef2f2;
+            animation: pulse-red 0.9s infinite alternate;
+        }
+        .node.offline text { fill: #b91c1c; }
+
+        /* 動畫定義 */
+        @keyframes flow {
+            from { stroke-dashoffset: 10; }
+            to   { stroke-dashoffset: 0;  }
+        }
+        @keyframes pulse-red {
+            0%   { filter: drop-shadow(0 0 2px  rgba(239, 68, 68, 0.5)); }
+            100% { filter: drop-shadow(0 0 14px rgba(239, 68, 68, 0.85)); }
+        }
+
+        /* =====================================================
+           Tooltip
+           position: fixed → 以瀏覽器可視區為基準
+           配合 event.clientX / clientY，完全不受容器影響
+        ===================================================== */
+        #topology-tooltip {
+            position: fixed;
+            padding: 10px 16px;
+            font-size: 13px;
+            line-height: 1.7;
+            font-family: "Segoe UI", "Microsoft JhengHei", Arial, sans-serif;
+            background: rgba(15, 23, 42, 0.93);
+            color: #fff;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 9999;
+            white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+            border-left: 4px solid #10b981;
+        }
+        #topology-tooltip.status-offline { border-left-color: #ef4444; }
+        #topology-tooltip.status-unknown { border-left-color: #94a3b8; }
+
     </style>
 </head>
 <body>
+
+    <!-- Tooltip 放在 body 最外層，避免被任何容器裁切或遮蓋 -->
+    <div id="topology-tooltip"></div>
+
     <form id="form1" runat="server">
+        <!-- PageHeader 元件（包含選單列） -->
         <hPMISWEB:PageHeader ID="ph" runat="server" />
-        <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
-            <ContentTemplate>
-                &nbsp;
-                <asp:Label ID="lblHBMFCE_t" runat="server" Style="z-index: 125; left: 272px; position: absolute;
-                    top: 808px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblHBMMIL_t" runat="server" Style="z-index: 125; left: 360px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>
-                <asp:Label ID="lblHBMSPC_t" runat="server" Style="z-index: 125; left: 448px; position: absolute;
-                    top: 808px" Text="N/A"></asp:Label>
-<%--                <asp:Label ID="lblSqc_t" runat="server" Style="z-index: 125; left: 472px; position: absolute;
-                    top: 784px" Text="N/A"></asp:Label>--%>
-                <asp:Label ID="lblHBMCARAT_t" runat="server" Text="N/A" CssClass="auto-style34"></asp:Label>
+        <a name="#Home"></a>
 
-                &nbsp;
-                <asp:Image ID="imgHBMFCE" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 280px; position: absolute; top: 600px; z-index: 104;" Width="70px" />
-                <asp:Image ID="imgHBMMIL" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 368px; position: absolute; top: 600px; z-index: 105;" Width="70px" />   
-                <asp:Image ID="imgHBMSPC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 456px; position: absolute; top: 600px; z-index: 106;" Width="70px" />
-<%--                <asp:Image ID="imgSQC" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 464px; position: absolute; top: 600px; z-index: 107;" Width="70px" />--%>
-                <asp:Image ID="imgHBMCARAT" runat="server" BackColor="White" ImageUrl="~/images/pc_svr_normal.jpg"
-                    Style="left: 544px; position: absolute; top: 600px; z-index: 108;" Width="70px" />
-                <asp:Image ID="imgHBMPMIS" runat="server" Height="125px" ImageUrl="~/images/pc_pmis_normal.jpg"
-                    Style="left: 411px; position: absolute; top: 360px; z-index: 114;" />
-                <%--<asp:Image ID="imgsPMIS" runat="server" Height="125px" ImageUrl="~/images/pc_pmis_normal.jpg"
-                    Style="left: 681px; position: absolute; top: 361px; z-index: 115;" />--%>
-                <asp:Image ID="imgHOST" runat="server" Height="140px" ImageUrl="~/images/pc_host_normal.jpg"
-                    Style="left: 409px; position: absolute; top: 157px; z-index: 116;" />         &nbsp;
-                <asp:Label ID="lblHBMMIL" runat="server" Font-Bold="True" Text="HBMMIL" ForeColor="Blue" CssClass="auto-style32"></asp:Label>     
-                <asp:Label ID="lblHBMSPC" runat="server" Font-Bold="True" Text="HBMSPC" ForeColor="Blue" CssClass="auto-style33"></asp:Label>                 
-                <%--<asp:Label ID="lblSQC" runat="server" Font-Bold="True" Style="left: 472px;
-                    position: absolute; top: 760px; z-index: 124;" Text="SQC" ForeColor="Blue"></asp:Label>--%>
-                <asp:Label ID="lblHBMCARAT" runat="server" Font-Bold="True" Style="left: 544px;
-                    position: absolute; top: 760px; z-index: 120;" Text="HBMCARAT" ForeColor="Blue"></asp:Label>
-                <asp:Label ID="lblHBMFCE" runat="server" Font-Bold="True" Text="HBMFCE"  ForeColor="Blue" CssClass="auto-style31"></asp:Label>   
-                <asp:Label ID="lblHPMIS" runat="server" Font-Bold="True" Text="HBMPMIS" ForeColor="Blue" CssClass="auto-style35"></asp:Label>
-                <%--<asp:Label ID="lblsPMIS" runat="server" Font-Bold="True" Style="left: 722px; 
-                    position: absolute; top: 489px; z-index: 127;" Text="sPMIS" ForeColor="Blue"></asp:Label>--%>                   
-                <asp:Label ID="lblHOST" runat="server" Font-Bold="True" Style="left: 453px; 
-                    position: absolute; top: 298px; z-index: 129;" Text="HOST" ForeColor="Blue"></asp:Label>    
-           
+        <!-- 主要內容區（與 3101 相同的 container-fluid main-content） -->
+        <div class="container-fluid main-content px-4">
 
-                    
-            </ContentTemplate>
-        </asp:UpdatePanel>
-        <img src="images/status.jpg" style="left: 820px; position: absolute; top: 140px;
-            z-index: 114;" height="90" width="90" />
-        <table style="left: 760px; position: absolute; top: 160px; z-index: 115;">
-            <tr>
-                <td>
-                    Online:</td>
-            </tr>
-            <tr>
-                <td>
-                    <br/>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Offline:</td>
-            </tr>
-        </table>
-        <img src="images/line_vertical.jpg" style="left: 496px; position: absolute; top: 552px;
-            height: 50px; z-index: 117;" width="3" />
-        &nbsp;&nbsp;
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <img src="images/line_vertical.jpg" style="left: 320px; position: absolute; top: 552px;
-            height: 50px; z-index: 103;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 408px; position: absolute; top: 552px;
-            height: 50px; z-index: 104;" width="3" />
-        <img src="images/line_vertical.jpg" style="left: 576px; position: absolute; top: 550px;
-            height: 50px; z-index: 105;" width="3" />&nbsp;&nbsp;&nbsp;
-        <img src="images/line_horizontal.jpg" class="auto-style30" />
-        <img src="images/line_vertical.jpg" style="left: 470px; width: 3px; position: absolute;
-            top: 315px; height: 41px; z-index: 110;" id="IMG1" />
-<%--        <img src="images/line_horizontal.jpg" style="left: 536px; width: 144px; position: absolute;
-            top: 464px; z-index: 111;" height="3" />--%>
-        &nbsp;<img src="images/line_vertical.jpg" style="left: 473px; position: absolute; top: 512px;
-            height: 40px; z-index: 113;" width="3" />&nbsp; &nbsp;&nbsp; &nbsp;
-        </form>
+            <!-- ================================================
+                 拓撲圖 Card（仿 3101 card-custom 設計）
+            ================================================ -->
+            <div class="card-custom mb-4 mt-2">
+
+                <!-- Card 標題列 -->
+                <div class="card-header-custom">
+                    <span class="fs-5">
+                        🌐 3092 HBM 系統網路拓撲監控
+                    </span>
+                    <span class="badge-time">
+                        ⏱ 上次巡檢：<span id="lblTime">同步中...</span>
+                    </span>
+                </div>
+
+                <!-- 拓撲圖本體（D3.js SVG 自動注入） -->
+                <div class="topology-card-body" id="topologyChart"></div>
+
+                <!-- 圖例說明列 -->
+                <div class="legend-bar">
+                    <span style="font-weight:600; color:#2c3e50;">圖例說明：</span>
+                    <span class="legend-item">
+                        <span class="legend-dot online"></span> 正常 (Online)
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-dot offline"></span> 異常 (Offline)
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-dot unknown"></span> 未知
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-line normal"></span> 正常連線
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-line broken"></span> 斷線（虛線）
+                    </span>
+                    <span style="margin-left:auto; font-size:12px; color:#94a3b8;">
+                        💡 可使用滾輪縮放 / 拖曳平移
+                    </span>
+                </div>
+
+            </div><!-- /.card-custom -->
+
+        </div><!-- /.container-fluid -->
+    </form>
+
+    <!-- Bootstrap JS（與 3101 一致） -->
+    <script src="libs/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // =========================================================
+        // 1. 定義 HBM 系統多層式樹狀結構
+        //    HOST → HBMPMIS → HBMFCE、HBMMIL、HBMSPC、HBMCARAT
+        // =========================================================
+        const fieldNodes = ["HBMFCE", "HBMMIL", "HBMSPC", "HBMCARAT"];
+
+        const treeData = {
+            id: "HOST",
+            name: "HOST",
+            children: [{
+                id: "HBMPMIS",
+                name: "HBMPMIS",
+                children: fieldNodes.map(name => ({ id: name, name: name }))
+            }]
+        };
+
+        // =========================================================
+        // 2. 設定 D3 畫布尺寸
+        //    4 個第三階層節點，適中寬度即可
+        // =========================================================
+        const svgWidth   = 900;     // 4 個節點，不需過寬
+        const svgHeight  = 480;
+        const rectW      = 90;
+        const rectH      = 36;
+        const PADDING_X  = 100;     // 左右邊界留白
+
+        const svg = d3.select("#topologyChart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .style("width",  "100%")
+            .style("height", "100%");
+
+        // 支援滾輪縮放與拖曳
+        const g = svg.append("g");
+        const zoom = d3.zoom()
+            .scaleExtent([0.4, 3])
+            .on("zoom", (event) => g.attr("transform", event.transform));
+        svg.call(zoom);
+        // 預設平移（稍向下留出上方空間）
+        svg.call(zoom.transform, d3.zoomIdentity.translate(0, 40).scale(1));
+
+        // =========================================================
+        // 3. 建立樹狀佈局（Tree Layout）
+        // =========================================================
+        const treeLayout = d3.tree().size([svgWidth - PADDING_X * 2, svgHeight - 140]);
+        const root = d3.hierarchy(treeData);
+        treeLayout(root);
+
+        // 全部節點的 x 座標平移 PADDING_X
+        root.descendants().forEach(d => { d.x += PADDING_X; });
+
+        // =========================================================
+        // 4. 繪製連接線（Links）— 平滑貝茲曲線
+        // =========================================================
+        g.selectAll(".link")
+            .data(root.links())
+            .enter().append("path")
+            .attr("class", d => `link link-${d.target.data.id}`)
+            .attr("d", d3.linkVertical()
+                .x(d => d.x)
+                .y(d => d.y)
+            );
+
+        // =========================================================
+        // 5. 繪製節點（Nodes）與 Tooltip 互動
+        //    Tooltip 使用 position:fixed + event.clientX/clientY
+        // =========================================================
+        const tooltip = d3.select("#topology-tooltip");
+
+        const node = g.selectAll(".node")
+            .data(root.descendants())
+            .enter().append("g")
+            .attr("class", d => `node node-${d.data.id}`)
+            .attr("transform", d => `translate(${d.x},${d.y})`)
+            .on("mouseover", function(event, d) {
+                let statusText, cssClass;
+                if (d.data.status === 'N') {
+                    statusText = '✅ 正常 (Online)';
+                    cssClass   = 'status-online';
+                } else if (d.data.status === 'E') {
+                    statusText = '❌ 異常 (Offline)';
+                    cssClass   = 'status-offline';
+                } else {
+                    statusText = '⏳ 未知';
+                    cssClass   = 'status-unknown';
+                }
+
+                tooltip
+                    .attr("class", cssClass)
+                    .html(`<strong>${d.data.id}</strong><br/>狀態：${statusText}`)
+                    .style("opacity", 1);
+
+                positionTooltip(event);
+            })
+            .on("mousemove", function(event) {
+                positionTooltip(event);
+            })
+            .on("mouseout", function() {
+                tooltip.style("opacity", 0);
+            });
+
+        // Tooltip 定位：顯示在滑鼠右方 15px，超出視窗則自動反轉
+        function positionTooltip(event) {
+            const offsetX = 15;
+            const offsetY = -8;
+            const tipEl   = document.getElementById("topology-tooltip");
+            const tipW    = tipEl.offsetWidth;
+            const tipH    = tipEl.offsetHeight;
+            const vw      = window.innerWidth;
+            const vh      = window.innerHeight;
+
+            let left = event.clientX + offsetX;
+            let top  = event.clientY + offsetY;
+
+            // 右側超出視窗 → 改顯示在左方
+            if (left + tipW > vw - 10) {
+                left = event.clientX - tipW - offsetX;
+            }
+            // 底部超出視窗 → 向上調整
+            if (top + tipH > vh - 10) {
+                top = vh - tipH - 10;
+            }
+
+            tooltip
+                .style("left", left + "px")
+                .style("top",  top  + "px");
+        }
+
+        // 節點矩形外框（HOST 層稍大）
+        node.append("rect")
+            .attr("width",  d => d.depth === 0 ? 104 : (d.depth === 1 ? 98 : rectW))
+            .attr("height", d => d.depth === 0 ? 44  : rectH)
+            .attr("x",      d => d.depth === 0 ? -52 : (d.depth === 1 ? -49 : -(rectW / 2)))
+            .attr("y",      d => d.depth === 0 ? -22 : -(rectH / 2))
+            .attr("rx", 6)
+            .attr("ry", 6);
+
+        // 節點文字
+        node.append("text")
+            .text(d => d.data.name);
+
+        // =========================================================
+        // 6. 與後端 PING 服務溝通，非同步更新節點狀態
+        // =========================================================
+        function updateNetworkTopology() {
+            fetch('3092.aspx/GetSystemStatus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=utf-8' }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const statusDict = data.d;
+                    const now = new Date();
+                    const pad = n => String(n).padStart(2, '0');
+                    document.getElementById('lblTime').innerText =
+                        `${pad(now.getMonth()+1)}/${pad(now.getDate())} ` +
+                        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+                    // 遍歷所有節點，動態切換 CSS Class
+                    root.descendants().forEach(d => {
+                        const sysId  = d.data.id.toUpperCase();
+                        const status = statusDict[sysId];
+                        d.data.status = status;
+
+                        if (status) {
+                            const nodeEl = d3.select(`.node-${sysId}`);
+                            const linkEl = d3.select(`.link-${sysId}`);
+
+                            if (status === 'N') {
+                                nodeEl.classed("online",  true ).classed("offline", false);
+                                linkEl.classed("offline-link", false);
+                            } else {
+                                nodeEl.classed("online",  false).classed("offline", true);
+                                linkEl.classed("offline-link", true);
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.error("D3.js 拓撲更新失敗:", err));
+        }
+
+        // 載入後立即執行一次，之後每 10 秒自動刷新
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNetworkTopology();
+            setInterval(updateNetworkTopology, 10000);
+        });
+    </script>
 </body>
 </html>
