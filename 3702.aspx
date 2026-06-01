@@ -953,7 +953,7 @@
                     statusEl.style.color = '#f59e0b';
                 } else {
                     statusEl.textContent = '安全狀態';
-                    statusEl.style.color = '#38bdf8';
+                    statusEl.style.color = '#000000';
                 }
             }
         }
