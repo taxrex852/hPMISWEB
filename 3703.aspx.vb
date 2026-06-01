@@ -133,7 +133,8 @@ Partial Public Class _3703
                     ConS(1) = 0
                 Else
                     IT_01.BackColor = Drawing.Color.Lime
-                    V1.ForeColor = Drawing.Color.Lime
+                    IT_01.ForeColor = Drawing.Color.Black
+                    V1.ForeColor = Drawing.Color.Black
                     P_1GIA2001.BackColor = Drawing.Color.Lime
                     ConS(1) = 1
                 End If
@@ -146,7 +147,8 @@ Partial Public Class _3703
                     ConS(2) = 0
                 Else
                     IT_02.BackColor = Drawing.Color.Lime
-                    V2.ForeColor = Drawing.Color.Lime
+                    IT_02.ForeColor = Drawing.Color.Black
+                    V2.ForeColor = Drawing.Color.Black
                     P_1GIA2002.BackColor = Drawing.Color.Lime
                     ConS(2) = 1
                 End If
@@ -158,7 +160,8 @@ Partial Public Class _3703
                     ConS(3) = 0
                 Else
                     IT_03.BackColor = Drawing.Color.Lime
-                    V3.ForeColor = Drawing.Color.Lime
+                    IT_03.ForeColor = Drawing.Color.Black
+                    V3.ForeColor = Drawing.Color.Black
                     P_1GIA2101.BackColor = Drawing.Color.Lime
                     ConS(3) = 1
                 End If
@@ -170,7 +173,8 @@ Partial Public Class _3703
                     ConS(4) = 0
                 Else
                     IT_04.BackColor = Drawing.Color.Lime
-                    V4.ForeColor = Drawing.Color.Lime
+                    IT_04.ForeColor = Drawing.Color.Black
+                    V4.ForeColor = Drawing.Color.Black
                     P_1GIA2102.BackColor = Drawing.Color.Lime
                     ConS(4) = 1
                 End If
@@ -182,7 +186,8 @@ Partial Public Class _3703
                     ConS(5) = 0
                 Else
                     IT_05.BackColor = Drawing.Color.Lime
-                    V5.ForeColor = Drawing.Color.Lime
+                    IT_05.ForeColor = Drawing.Color.Black
+                    V5.ForeColor = Drawing.Color.Black
                     P_1GIA2103.BackColor = Drawing.Color.Lime
                     ConS(5) = 1
                 End If
@@ -194,7 +199,8 @@ Partial Public Class _3703
                     ConS(6) = 0
                 Else
                     IT_06.BackColor = Drawing.Color.Lime
-                    V6.ForeColor = Drawing.Color.Lime
+                    IT_06.ForeColor = Drawing.Color.Black
+                    V6.ForeColor = Drawing.Color.Black
                     P_1GIA2104.BackColor = Drawing.Color.Lime
                     ConS(6) = 1
                 End If
@@ -206,7 +212,8 @@ Partial Public Class _3703
                     ConS(7) = 0
                 Else
                     IT_07.BackColor = Drawing.Color.Lime
-                    V7.ForeColor = Drawing.Color.Lime
+                    IT_07.ForeColor = Drawing.Color.Black
+                    V7.ForeColor = Drawing.Color.Black
                     P_1GIA2105.BackColor = Drawing.Color.Lime
                     ConS(7) = 1
                 End If
@@ -218,7 +225,8 @@ Partial Public Class _3703
                     ConS(8) = 0
                 Else
                     IT_08.BackColor = Drawing.Color.Lime
-                    V8.ForeColor = Drawing.Color.Lime
+                    IT_08.ForeColor = Drawing.Color.Black
+                    V8.ForeColor = Drawing.Color.Black
                     P_1GIA2106.BackColor = Drawing.Color.Lime
                     ConS(8) = 1
                 End If
@@ -230,7 +238,8 @@ Partial Public Class _3703
                     ConS(9) = 0
                 Else
                     IT_09.BackColor = Drawing.Color.Lime
-                    V9.ForeColor = Drawing.Color.Lime
+                    IT_09.ForeColor = Drawing.Color.Black
+                    V9.ForeColor = Drawing.Color.Black
                     P_1GIA2107.BackColor = Drawing.Color.Lime
                     ConS(9) = 1
                 End If
@@ -242,7 +251,8 @@ Partial Public Class _3703
                     ConS(10) = 0
                 Else
                     IT_10.BackColor = Drawing.Color.Lime
-                    V10.ForeColor = Drawing.Color.Lime
+                    IT_10.ForeColor = Drawing.Color.Black
+                    V10.ForeColor = Drawing.Color.Black
                     P_1GIA2108.BackColor = Drawing.Color.Lime
                     ConS(10) = 1
                 End If
@@ -259,7 +269,8 @@ Partial Public Class _3703
                     ConS(11) = 0
                 Else
                     IT_11.BackColor = Drawing.Color.Lime
-                    V11.ForeColor = Drawing.Color.Lime
+                    IT_11.ForeColor = Drawing.Color.Black
+                    V11.ForeColor = Drawing.Color.Black
                     P_2GIA2001.BackColor = Drawing.Color.Lime
                     ConS(11) = 1
                 End If
@@ -271,7 +282,8 @@ Partial Public Class _3703
                     ConS(12) = 0
                 Else
                     IT_12.BackColor = Drawing.Color.Lime
-                    V12.ForeColor = Drawing.Color.Lime
+                    IT_12.ForeColor = Drawing.Color.Black
+                    V12.ForeColor = Drawing.Color.Black
                     P_2GIA2002.BackColor = Drawing.Color.Lime
                     ConS(12) = 1
                 End If
@@ -283,7 +295,8 @@ Partial Public Class _3703
                     ConS(13) = 0
                 Else
                     IT_13.BackColor = Drawing.Color.Lime
-                    V13.ForeColor = Drawing.Color.Lime
+                    IT_13.ForeColor = Drawing.Color.Black
+                    V13.ForeColor = Drawing.Color.Black
                     P_2GIA2101.BackColor = Drawing.Color.Lime
                     ConS(13) = 1
                 End If
@@ -295,7 +308,8 @@ Partial Public Class _3703
                     ConS(14) = 0
                 Else
                     IT_14.BackColor = Drawing.Color.Lime
-                    V14.ForeColor = Drawing.Color.Lime
+                    IT_14.ForeColor = Drawing.Color.Black
+                    V14.ForeColor = Drawing.Color.Black
                     P_2GIA2102.BackColor = Drawing.Color.Lime
                     ConS(14) = 1
                 End If
@@ -307,7 +321,8 @@ Partial Public Class _3703
                     ConS(15) = 0
                 Else
                     IT_15.BackColor = Drawing.Color.Lime
-                    V15.ForeColor = Drawing.Color.Lime
+                    IT_15.ForeColor = Drawing.Color.Black
+                    V15.ForeColor = Drawing.Color.Black
                     P_2GIA2103.BackColor = Drawing.Color.Lime
                     ConS(15) = 1
                 End If
@@ -319,7 +334,8 @@ Partial Public Class _3703
                     ConS(16) = 0
                 Else
                     IT_16.BackColor = Drawing.Color.Lime
-                    V16.ForeColor = Drawing.Color.Lime
+                    IT_16.ForeColor = Drawing.Color.Black
+                    V16.ForeColor = Drawing.Color.Black
                     P_2GIA2104.BackColor = Drawing.Color.Lime
                     ConS(16) = 1
                 End If
@@ -331,7 +347,8 @@ Partial Public Class _3703
                     ConS(17) = 0
                 Else
                     IT_17.BackColor = Drawing.Color.Lime
-                    V17.ForeColor = Drawing.Color.Lime
+                    IT_17.ForeColor = Drawing.Color.Black
+                    V17.ForeColor = Drawing.Color.Black
                     P_2GIA2105.BackColor = Drawing.Color.Lime
                     ConS(17) = 1
                 End If
@@ -343,7 +360,8 @@ Partial Public Class _3703
                     ConS(18) = 0
                 Else
                     IT_18.BackColor = Drawing.Color.Lime
-                    V18.ForeColor = Drawing.Color.Lime
+                    IT_18.ForeColor = Drawing.Color.Black
+                    V18.ForeColor = Drawing.Color.Black
                     P_2GIA2106.BackColor = Drawing.Color.Lime
                     ConS(18) = 1
                 End If
@@ -355,7 +373,8 @@ Partial Public Class _3703
                     ConS(19) = 0
                 Else
                     IT_19.BackColor = Drawing.Color.Lime
-                    V19.ForeColor = Drawing.Color.Lime
+                    IT_19.ForeColor = Drawing.Color.Black
+                    V19.ForeColor = Drawing.Color.Black
                     P_2GIA2107.BackColor = Drawing.Color.Lime
                     ConS(19) = 1
                 End If
@@ -368,7 +387,8 @@ Partial Public Class _3703
                     ConS(20) = 0
                 Else
                     IT_20.BackColor = Drawing.Color.Lime
-                    V20.ForeColor = Drawing.Color.Lime
+                    IT_20.ForeColor = Drawing.Color.Black
+                    V20.ForeColor = Drawing.Color.Black
                     P_2GIA2108.BackColor = Drawing.Color.Lime
                     ConS(20) = 1
                 End If
@@ -385,7 +405,8 @@ Partial Public Class _3703
                     ConS(21) = 0
                 Else
                     IT_21.BackColor = Drawing.Color.Lime
-                    V21.ForeColor = Drawing.Color.Lime
+                    IT_21.ForeColor = Drawing.Color.Black
+                    V21.ForeColor = Drawing.Color.Black
                     P_3GIA2001.BackColor = Drawing.Color.Lime
                     ConS(21) = 1
                 End If
@@ -397,7 +418,8 @@ Partial Public Class _3703
                     ConS(22) = 0
                 Else
                     IT_22.BackColor = Drawing.Color.Lime
-                    V22.ForeColor = Drawing.Color.Lime
+                    IT_22.ForeColor = Drawing.Color.Black
+                    V22.ForeColor = Drawing.Color.Black
                     P_3GIA2002.BackColor = Drawing.Color.Lime
                     ConS(22) = 1
                 End If
@@ -409,7 +431,8 @@ Partial Public Class _3703
                     ConS(23) = 0
                 Else
                     IT_23.BackColor = Drawing.Color.Lime
-                    V23.ForeColor = Drawing.Color.Lime
+                    IT_23.ForeColor = Drawing.Color.Black
+                    V23.ForeColor = Drawing.Color.Black
                     P_3GIA2101.BackColor = Drawing.Color.Lime
                     ConS(23) = 1
                 End If
@@ -421,7 +444,8 @@ Partial Public Class _3703
                     ConS(24) = 0
                 Else
                     IT_24.BackColor = Drawing.Color.Lime
-                    V24.ForeColor = Drawing.Color.Lime
+                    IT_24.ForeColor = Drawing.Color.Black
+                    V24.ForeColor = Drawing.Color.Black
                     P_3GIA2102.BackColor = Drawing.Color.Lime
                     ConS(24) = 1
                 End If
@@ -433,7 +457,8 @@ Partial Public Class _3703
                     ConS(25) = 0
                 Else
                     IT_25.BackColor = Drawing.Color.Lime
-                    V25.ForeColor = Drawing.Color.Lime
+                    IT_25.ForeColor = Drawing.Color.Black
+                    V25.ForeColor = Drawing.Color.Black
                     P_3GIA2103.BackColor = Drawing.Color.Lime
                     ConS(25) = 1
                 End If
@@ -445,7 +470,8 @@ Partial Public Class _3703
                     ConS(26) = 0
                 Else
                     IT_26.BackColor = Drawing.Color.Lime
-                    V26.ForeColor = Drawing.Color.Lime
+                    IT_26.ForeColor = Drawing.Color.Black
+                    V26.ForeColor = Drawing.Color.Black
                     P_3GIA2104.BackColor = Drawing.Color.Lime
                     ConS(26) = 1
                 End If
@@ -457,7 +483,8 @@ Partial Public Class _3703
                     ConS(27) = 0
                 Else
                     IT_27.BackColor = Drawing.Color.Lime
-                    V27.ForeColor = Drawing.Color.Lime
+                    IT_27.ForeColor = Drawing.Color.Black
+                    V27.ForeColor = Drawing.Color.Black
                     P_3GIA2105.BackColor = Drawing.Color.Lime
                     ConS(27) = 1
                 End If
@@ -469,7 +496,8 @@ Partial Public Class _3703
                     ConS(28) = 0
                 Else
                     IT_28.BackColor = Drawing.Color.Lime
-                    V28.ForeColor = Drawing.Color.Lime
+                    IT_28.ForeColor = Drawing.Color.Black
+                    V28.ForeColor = Drawing.Color.Black
                     P_3GIA2106.BackColor = Drawing.Color.Lime
                     ConS(28) = 1
                 End If
@@ -481,7 +509,8 @@ Partial Public Class _3703
                     ConS(29) = 0
                 Else
                     IT_29.BackColor = Drawing.Color.Lime
-                    V29.ForeColor = Drawing.Color.Lime
+                    IT_29.ForeColor = Drawing.Color.Black
+                    V29.ForeColor = Drawing.Color.Black
                     P_3GIA2107.BackColor = Drawing.Color.Lime
                     ConS(29) = 1
                 End If
@@ -493,7 +522,8 @@ Partial Public Class _3703
                     ConS(30) = 0
                 Else
                     IT_30.BackColor = Drawing.Color.Lime
-                    V30.ForeColor = Drawing.Color.Lime
+                    IT_30.ForeColor = Drawing.Color.Black
+                    V30.ForeColor = Drawing.Color.Black
                     P_3GIA2108.BackColor = Drawing.Color.Lime
                     ConS(30) = 1
                 End If
@@ -505,7 +535,8 @@ Partial Public Class _3703
                     ConS(31) = 0
                 Else
                     IT_31.BackColor = Drawing.Color.Lime
-                    V31.ForeColor = Drawing.Color.Lime
+                    IT_31.ForeColor = Drawing.Color.Black
+                    V31.ForeColor = Drawing.Color.Black
                     P_3GIA2003.BackColor = Drawing.Color.Lime
                     ConS(31) = 1
                 End If
@@ -517,7 +548,8 @@ Partial Public Class _3703
                     ConS(32) = 0
                 Else
                     IT_32.BackColor = Drawing.Color.Lime
-                    V32.ForeColor = Drawing.Color.Lime
+                    IT_32.ForeColor = Drawing.Color.Black
+                    V32.ForeColor = Drawing.Color.Black
                     P_3GIA2004.BackColor = Drawing.Color.Lime
                     ConS(32) = 1
                 End If
@@ -529,7 +561,8 @@ Partial Public Class _3703
                     ConS(33) = 0
                 Else
                     IT_33.BackColor = Drawing.Color.Lime
-                    V33.ForeColor = Drawing.Color.Lime
+                    IT_33.ForeColor = Drawing.Color.Black
+                    V33.ForeColor = Drawing.Color.Black
                     P_3GIA2005.BackColor = Drawing.Color.Lime
                     ConS(33) = 1
                 End If
@@ -600,7 +633,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_01.BackColor = Drawing.Color.Lime
-                    V1.ForeColor = Drawing.Color.Blue
+                    IT_01.ForeColor = Drawing.Color.Black
+                    V1.ForeColor = Drawing.Color.Black
                     P_1GIA2001.BackColor = Drawing.Color.Lime
 
                 Else
@@ -641,7 +675,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_02.BackColor = Drawing.Color.Lime
-                    V2.ForeColor = Drawing.Color.Blue
+                    IT_02.ForeColor = Drawing.Color.Black
+                    V2.ForeColor = Drawing.Color.Black
 
                     P_1GIA2002.BackColor = Drawing.Color.Lime
 
@@ -683,7 +718,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_03.BackColor = Drawing.Color.Lime
-                    V3.ForeColor = Drawing.Color.Blue
+                    IT_03.ForeColor = Drawing.Color.Black
+                    V3.ForeColor = Drawing.Color.Black
 
                     P_1GIA2101.BackColor = Drawing.Color.Lime
 
@@ -725,7 +761,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_04.BackColor = Drawing.Color.Lime
-                    V4.ForeColor = Drawing.Color.Blue
+                    IT_04.ForeColor = Drawing.Color.Black
+                    V4.ForeColor = Drawing.Color.Black
 
                     P_1GIA2102.BackColor = Drawing.Color.Lime
 
@@ -767,7 +804,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_05.BackColor = Drawing.Color.Lime
-                    V5.ForeColor = Drawing.Color.Blue
+                    IT_05.ForeColor = Drawing.Color.Black
+                    V5.ForeColor = Drawing.Color.Black
 
                     P_1GIA2103.BackColor = Drawing.Color.Lime
 
@@ -809,7 +847,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_06.BackColor = Drawing.Color.Lime
-                    V6.ForeColor = Drawing.Color.Blue
+                    IT_06.ForeColor = Drawing.Color.Black
+                    V6.ForeColor = Drawing.Color.Black
 
                     P_1GIA2104.BackColor = Drawing.Color.Lime
 
@@ -851,7 +890,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_07.BackColor = Drawing.Color.Lime
-                    V7.ForeColor = Drawing.Color.Blue
+                    IT_07.ForeColor = Drawing.Color.Black
+                    V7.ForeColor = Drawing.Color.Black
 
                     P_1GIA2105.BackColor = Drawing.Color.Lime
 
@@ -893,7 +933,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_08.BackColor = Drawing.Color.Lime
-                    V8.ForeColor = Drawing.Color.Blue
+                    IT_08.ForeColor = Drawing.Color.Black
+                    V8.ForeColor = Drawing.Color.Black
 
                     P_1GIA2106.BackColor = Drawing.Color.Lime
 
@@ -935,7 +976,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_09.BackColor = Drawing.Color.Lime
-                    V9.ForeColor = Drawing.Color.Blue
+                    IT_09.ForeColor = Drawing.Color.Black
+                    V9.ForeColor = Drawing.Color.Black
 
                     P_1GIA2107.BackColor = Drawing.Color.Lime
 
@@ -977,7 +1019,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_10.BackColor = Drawing.Color.Lime
-                    V10.ForeColor = Drawing.Color.Blue
+                    IT_10.ForeColor = Drawing.Color.Black
+                    V10.ForeColor = Drawing.Color.Black
 
                     P_1GIA2108.BackColor = Drawing.Color.Lime
 
@@ -1019,7 +1062,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_11.BackColor = Drawing.Color.Lime
-                    V11.ForeColor = Drawing.Color.Blue
+                    IT_11.ForeColor = Drawing.Color.Black
+                    V11.ForeColor = Drawing.Color.Black
 
                     P_2GIA2001.BackColor = Drawing.Color.Lime
 
@@ -1061,7 +1105,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_12.BackColor = Drawing.Color.Lime
-                    V12.ForeColor = Drawing.Color.Blue
+                    IT_12.ForeColor = Drawing.Color.Black
+                    V12.ForeColor = Drawing.Color.Black
 
                     P_2GIA2002.BackColor = Drawing.Color.Lime
 
@@ -1103,7 +1148,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_13.BackColor = Drawing.Color.Lime
-                    V13.ForeColor = Drawing.Color.Blue
+                    IT_13.ForeColor = Drawing.Color.Black
+                    V13.ForeColor = Drawing.Color.Black
 
                     P_2GIA2101.BackColor = Drawing.Color.Lime
 
@@ -1145,7 +1191,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_14.BackColor = Drawing.Color.Lime
-                    V14.ForeColor = Drawing.Color.Blue
+                    IT_14.ForeColor = Drawing.Color.Black
+                    V14.ForeColor = Drawing.Color.Black
 
                     P_2GIA2102.BackColor = Drawing.Color.Lime
 
@@ -1187,7 +1234,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_15.BackColor = Drawing.Color.Lime
-                    V15.ForeColor = Drawing.Color.Blue
+                    IT_15.ForeColor = Drawing.Color.Black
+                    V15.ForeColor = Drawing.Color.Black
 
                     P_2GIA2103.BackColor = Drawing.Color.Lime
 
@@ -1229,7 +1277,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_16.BackColor = Drawing.Color.Lime
-                    V16.ForeColor = Drawing.Color.Blue
+                    IT_16.ForeColor = Drawing.Color.Black
+                    V16.ForeColor = Drawing.Color.Black
 
                     P_2GIA2104.BackColor = Drawing.Color.Lime
 
@@ -1271,7 +1320,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_17.BackColor = Drawing.Color.Lime
-                    V17.ForeColor = Drawing.Color.Blue
+                    IT_17.ForeColor = Drawing.Color.Black
+                    V17.ForeColor = Drawing.Color.Black
 
                     P_2GIA2105.BackColor = Drawing.Color.Lime
 
@@ -1313,7 +1363,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_18.BackColor = Drawing.Color.Lime
-                    V18.ForeColor = Drawing.Color.Blue
+                    IT_18.ForeColor = Drawing.Color.Black
+                    V18.ForeColor = Drawing.Color.Black
 
                     P_2GIA2106.BackColor = Drawing.Color.Lime
 
@@ -1355,7 +1406,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_19.BackColor = Drawing.Color.Lime
-                    V19.ForeColor = Drawing.Color.Blue
+                    IT_19.ForeColor = Drawing.Color.Black
+                    V19.ForeColor = Drawing.Color.Black
 
                     P_2GIA2107.BackColor = Drawing.Color.Lime
 
@@ -1397,7 +1449,8 @@ Partial Public Class _3703
 
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_20.BackColor = Drawing.Color.Lime
-                    V20.ForeColor = Drawing.Color.Blue
+                    IT_20.ForeColor = Drawing.Color.Black
+                    V20.ForeColor = Drawing.Color.Black
 
                     P_2GIA2108.BackColor = Drawing.Color.Lime
 
@@ -1435,7 +1488,8 @@ Partial Public Class _3703
                     P_3GIA2001.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_21.BackColor = Drawing.Color.Lime
-                    V21.ForeColor = Drawing.Color.Blue
+                    IT_21.ForeColor = Drawing.Color.Black
+                    V21.ForeColor = Drawing.Color.Black
                     P_3GIA2001.BackColor = Drawing.Color.Lime
                 Else
                     IT_21.BackColor = Drawing.Color.Red
@@ -1468,7 +1522,8 @@ Partial Public Class _3703
                     P_3GIA2002.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_22.BackColor = Drawing.Color.Lime
-                    V22.ForeColor = Drawing.Color.Blue
+                    IT_22.ForeColor = Drawing.Color.Black
+                    V22.ForeColor = Drawing.Color.Black
                     P_3GIA2002.BackColor = Drawing.Color.Lime
                 Else
                     IT_22.BackColor = Drawing.Color.Red
@@ -1500,7 +1555,8 @@ Partial Public Class _3703
                     P_3GIA2101.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_23.BackColor = Drawing.Color.Lime
-                    V23.ForeColor = Drawing.Color.Blue
+                    IT_23.ForeColor = Drawing.Color.Black
+                    V23.ForeColor = Drawing.Color.Black
                     P_3GIA2101.BackColor = Drawing.Color.Lime
                 Else
                     IT_23.BackColor = Drawing.Color.Red
@@ -1532,7 +1588,8 @@ Partial Public Class _3703
                     P_3GIA2102.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_24.BackColor = Drawing.Color.Lime
-                    V24.ForeColor = Drawing.Color.Blue
+                    IT_24.ForeColor = Drawing.Color.Black
+                    V24.ForeColor = Drawing.Color.Black
                     P_3GIA2102.BackColor = Drawing.Color.Lime
                 Else
                     IT_24.BackColor = Drawing.Color.Red
@@ -1564,7 +1621,8 @@ Partial Public Class _3703
                     P_3GIA2103.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_25.BackColor = Drawing.Color.Lime
-                    V25.ForeColor = Drawing.Color.Blue
+                    IT_25.ForeColor = Drawing.Color.Black
+                    V25.ForeColor = Drawing.Color.Black
                     P_3GIA2103.BackColor = Drawing.Color.Lime
                 Else
                     IT_25.BackColor = Drawing.Color.Red
@@ -1596,7 +1654,8 @@ Partial Public Class _3703
                     P_3GIA2104.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_26.BackColor = Drawing.Color.Lime
-                    V26.ForeColor = Drawing.Color.Blue
+                    IT_26.ForeColor = Drawing.Color.Black
+                    V26.ForeColor = Drawing.Color.Black
                     P_3GIA2104.BackColor = Drawing.Color.Lime
                 Else
                     IT_26.BackColor = Drawing.Color.Red
@@ -1628,7 +1687,8 @@ Partial Public Class _3703
                     P_3GIA2105.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_27.BackColor = Drawing.Color.Lime
-                    V27.ForeColor = Drawing.Color.Blue
+                    IT_27.ForeColor = Drawing.Color.Black
+                    V27.ForeColor = Drawing.Color.Black
                     P_3GIA2105.BackColor = Drawing.Color.Lime
                 Else
                     IT_27.BackColor = Drawing.Color.Red
@@ -1660,7 +1720,8 @@ Partial Public Class _3703
                     P_3GIA2106.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_28.BackColor = Drawing.Color.Lime
-                    V28.ForeColor = Drawing.Color.Blue
+                    IT_28.ForeColor = Drawing.Color.Black
+                    V28.ForeColor = Drawing.Color.Black
                     P_3GIA2106.BackColor = Drawing.Color.Lime
                 Else
                     IT_28.BackColor = Drawing.Color.Red
@@ -1692,7 +1753,8 @@ Partial Public Class _3703
                     P_3GIA2107.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_29.BackColor = Drawing.Color.Lime
-                    V29.ForeColor = Drawing.Color.Blue
+                    IT_29.ForeColor = Drawing.Color.Black
+                    V29.ForeColor = Drawing.Color.Black
                     P_3GIA2107.BackColor = Drawing.Color.Lime
                 Else
                     IT_29.BackColor = Drawing.Color.Red
@@ -1724,7 +1786,8 @@ Partial Public Class _3703
                     P_3GIA2108.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_30.BackColor = Drawing.Color.Lime
-                    V30.ForeColor = Drawing.Color.Blue
+                    IT_30.ForeColor = Drawing.Color.Black
+                    V30.ForeColor = Drawing.Color.Black
                     P_3GIA2108.BackColor = Drawing.Color.Lime
                 Else
                     IT_30.BackColor = Drawing.Color.Red
@@ -1756,7 +1819,8 @@ Partial Public Class _3703
                     P_3GIA2003.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_31.BackColor = Drawing.Color.Lime
-                    V31.ForeColor = Drawing.Color.Blue
+                    IT_31.ForeColor = Drawing.Color.Black
+                    V31.ForeColor = Drawing.Color.Black
                     P_3GIA2003.BackColor = Drawing.Color.Lime
                 Else
                     IT_31.BackColor = Drawing.Color.Red
@@ -1788,7 +1852,8 @@ Partial Public Class _3703
                     P_3GIA2004.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_32.BackColor = Drawing.Color.Lime
-                    V32.ForeColor = Drawing.Color.Blue
+                    IT_32.ForeColor = Drawing.Color.Black
+                    V32.ForeColor = Drawing.Color.Black
                     P_3GIA2004.BackColor = Drawing.Color.Lime
                 Else
                     IT_32.BackColor = Drawing.Color.Red
@@ -1820,7 +1885,8 @@ Partial Public Class _3703
                     P_3GIA2005.BackColor = Drawing.Color.Yellow
                 ElseIf 35 > d_ppm And d_ppm >= 0 Then
                     IT_33.BackColor = Drawing.Color.Lime
-                    V33.ForeColor = Drawing.Color.Blue
+                    IT_33.ForeColor = Drawing.Color.Black
+                    V33.ForeColor = Drawing.Color.Black
                     P_3GIA2005.BackColor = Drawing.Color.Lime
                 Else
                     IT_33.BackColor = Drawing.Color.Red
