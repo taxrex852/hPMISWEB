@@ -224,28 +224,12 @@
 
         <!-- 主要內容區（與 3101 相同的 container-fluid main-content） -->
         <div class="container-fluid main-content px-4">
-
+           
             <!-- ================================================
                  拓撲圖 Card（仿 3101 card-custom 設計）
             ================================================ -->
             <div class="card-custom mb-4 mt-2">
-
-                <!-- Card 標題列 -->
-                <div class="card-header-custom">
-                    <span class="fs-5">
-                        🌐 3091 HSM 系統網路監控
-                    </span>
-                    <span class="badge-time">
-                        ⏱ 上次巡檢：<span id="lblTime">同步中...</span>
-                    </span>
-                </div>
-
-                <!-- 拓撲圖本體 -->
-                <div class="topology-card-body" id="topologyChart">
-                    <!-- D3.js SVG 會自動注入此 div -->
-                </div>
-
-                <!-- 圖例說明列 -->
+                  <!-- 圖例說明列 -->
                 <div class="legend-bar">
                     <span style="font-weight:600; color:#2c3e50;">圖例說明：</span>
                     <span class="legend-item">
@@ -267,6 +251,22 @@
                         💡 可使用滾輪縮放 / 拖曳平移
                     </span>
                 </div>
+                <!-- Card 標題列 -->
+                <div class="card-header-custom">
+                    <span class="fs-5">
+                        🌐 3091 HSM 系統網路監控
+                    </span>
+                    <span class="badge-time">
+                        ⏱ 上次巡檢：<span id="lblTime">同步中...</span>
+                    </span>
+                </div>
+
+                <!-- 拓撲圖本體 -->
+                <div class="topology-card-body" id="topologyChart">
+                    <!-- D3.js SVG 會自動注入此 div -->
+                </div>
+
+               
 
             </div><!-- /.card-custom -->
 
@@ -282,10 +282,10 @@
         //    HOST → HPMIS → 15 個現場系統節點
         // =========================================================
         const fieldNodes = [
-            "CYMC", "FCE", "HRFSPC", "HRS", "MIL",
-            "PYMC", "SPC", "SYMC", "TG",
-            "TNRL1", "TNRL2", "TNRL3", "TNRL4",
-            "DYMC", "HBMMIL"
+            "APFC", "SQC", "FCE", "MIL", "PYMC", "DYMC", "CYMC", "SYMC", "HRS", "TG", "W4MES", "HSMSPC", "HSMCARAT", "HRFSPC",
+
+            "TNRL1", "TNRL2", "TNRL3", "TNRL4"
+
         ];
 
         const treeData = {
@@ -371,13 +371,15 @@
                     cssClass   = 'status-unknown';
                 }
 
-                // 組合 tooltip 內容，包含節點名稱、狀態、資料更新時間
+                // 組合 tooltip 內容，包含節點名稱、狀態、IP位置、資料更新時間
+                const ipText = d.data.ip ? `IP 位置：${d.data.ip}<br/>` : '';
                 const updatedAt = d.data.lastUpdated || '－';
                 tooltip
                     .attr("class", cssClass)
                     .html(
                         `<strong>${d.data.id}</strong><br/>` +
                         `狀態：${statusText}<br/>` +
+                        ipText +
                         `<span style="font-size:11px;color:#94a3b8;">🕐 更新時間：${updatedAt}</span>`
                     )
                     .style("opacity", 1);
@@ -452,8 +454,22 @@
                     // 遍歷所有節點，動態切換 CSS Class
                     root.descendants().forEach(d => {
                         const sysId  = d.data.id.toUpperCase();
-                        const status = statusDict[sysId];
+                        const rawStatus = statusDict[sysId];
+                        
+                        let status = undefined;
+                        let ip = undefined;
+                        if (rawStatus) {
+                            if (rawStatus.indexOf('|') !== -1) {
+                                const parts = rawStatus.split('|');
+                                status = parts[0];
+                                ip = parts[1];
+                            } else {
+                                status = rawStatus;
+                            }
+                        }
+
                         d.data.status = status;   // 存入 data 供 Tooltip 讀取
+                        d.data.ip = ip;           // 存入 data 供 Tooltip 讀取
 
                         // 記錄本次查詢的時間戳記，供 Tooltip 顯示
                         const timeStr =

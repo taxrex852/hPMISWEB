@@ -20,6 +20,8 @@ Partial Public Class HBMsys
     ''' <summary>
     ''' HBM 系統 PING 狀態查詢 WebMethod
     ''' 拓撲結構：HOST → HBMPMIS → HBMFCE / HBMMIL / HBMSPC / HBMCARAT
+    ''' 回傳格式：Dictionary(Key=系統名稱, Value="狀態|IP位置")
+    ''' 例如：{"HOST" -> "N|10.109.2.1", "HBMFCE" -> "E|10.108.38.21"}
     ''' </summary>
     <WebMethod()>
     Public Shared Function GetSystemStatus() As Dictionary(Of String, String)
@@ -40,23 +42,24 @@ Partial Public Class HBMsys
         Parallel.ForEach(hostIpMap, Sub(kvp)
                                         Dim pcName As String = kvp.Key
                                         Dim ipAddress As String = kvp.Value
-                                        Dim status As String = "E"  ' 預設：斷線
+                                        Dim statusCode As String = "E"  ' 預設：斷線
 
                                         If Not String.IsNullOrEmpty(ipAddress) Then
                                             Try
                                                 Using p As New Ping()
                                                     Dim reply As PingReply = p.Send(ipAddress, 1000)
                                                     If reply IsNot Nothing AndAlso reply.Status = IPStatus.Success Then
-                                                        status = "N"  ' 正常
+                                                        statusCode = "N"  ' 正常
                                                     End If
                                                 End Using
                                             Catch
-                                                status = "E"
+                                                statusCode = "E"
                                             End Try
                                         End If
 
+                                        ' 回傳格式：「狀態碼|IP位置」，前端以 | 分隔解析
                                         SyncLock lockObj
-                                            statusDict(pcName) = status
+                                            statusDict(pcName) = $"{statusCode}|{ipAddress}"
                                         End SyncLock
                                     End Sub)
 
