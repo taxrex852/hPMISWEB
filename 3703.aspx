@@ -802,9 +802,11 @@
                 if (bg === 'rgb(255, 0, 0)') {
                     statusEl.textContent = '危險警報';
                     statusEl.style.color = '#ef4444';
+                    dot.style.color = '#fff';
                 } else {
                     statusEl.textContent = '安全狀態';
-                    statusEl.style.color = '#000000';
+                    statusEl.style.color = '#4ade80';
+                    dot.style.color = '#000';
                 }
             }
         }
